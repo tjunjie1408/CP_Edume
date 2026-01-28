@@ -1,0 +1,290 @@
+/* 全局设置：字体和颜色 */
+body {
+    background-color: #103bafd0; /* Light gray base to contrast white shapes */
+    overflow: hidden; /* Prevents scrollbars from moving shapes */
+    font-family: sans-serif;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* The Container for the background */
+#paper-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.paper-shape {
+    position: absolute;
+    background-color: #9fedff22;
+    box-shadow: 0 20px 50px rgba(3, 32, 87, 0.132); 
+    border-radius: 4px; 
+    opacity: 0.95;
+    
+    /* Animation settings */
+    animation-name: float;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+/* Keyframe Animation 
+   Move up/down and rotate slightly 
+*/
+@keyframes float {
+    0% {
+        transform: translate(0, 0) rotate(var(--rotation));
+    }
+    100% {
+        transform: translate(var(--moveX), var(--moveY)) rotate(calc(var(--rotation) + 5deg));
+    }
+}
+
+/* 返回主页链接 */
+.back-to-home {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    text-decoration: none;
+    color: #fff;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: 0.3s;
+    z-index: 10;
+}
+
+.back-to-home:hover {
+    font-size: 20px;
+}
+
+/* --- 玻璃拟态表单容器 --- */
+.form-box {
+    width: 380px;
+    height: 550px; /* 固定高度用于滑动动画 */
+    position: relative;
+    margin-top: 100px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px;
+    /* 核心玻璃效果 */
+    background: #fff;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    box-shadow: 0 0 30px rgba(97, 152, 224, 0.742);
+    overflow: hidden; /* 隐藏滑出去的表单 */
+}
+
+/* --- 顶部切换按钮区域 --- */
+.button-box {
+    width: 260px;
+    margin: 35px auto;
+    position: relative;
+    box-shadow: 0 0 10px rgba(114, 161, 222, 0.3);
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.797);
+    display: flex;
+}
+
+.toggle-btn {
+    padding: 12px 30px;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    outline: none;
+    position: relative;
+    flex: 1;
+    color: #000000;
+    font-weight: bold;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+/* 按钮激活状态文字颜色 */
+.toggle-btn.active {
+    color: #fff;
+}
+
+/* 滑动的高亮背景条 */
+#btn-highlight {
+    top: 0;
+    left: 0;
+    position: absolute;
+    width: 130px; /* 一半宽度 */
+    height: 100%;
+    /* 使用主页同款渐变 */
+    background: linear-gradient(to right, #6070fd, #00aaa7);
+    border-radius: 30px;
+    transition: 0.5s ease;
+}
+
+/* --- Logo 图片样式 --- */
+.logo-img {
+    width: 100%;
+    text-align: center; /* 让图片在容器里水平居中 */
+    margin: 20px 0 10px 0; /* 上下留出间距：上20px，下10px */
+}
+
+.logo-img img {
+    width: 80px;  /* 设置 Logo 大小，你可以根据需要改成 60px 或 100px */
+    height: auto; /* 保持图片比例 */
+    transition: 0.3s ease; /* 添加平滑过渡效果 */
+    
+    /* 核心效果：给 Logo 添加一点蓝色的发光投影，配合你的星空主题 */
+    filter: drop-shadow(0 0 5px rgba(114, 161, 222, 0.6));
+    
+    /* 可选：如果 Logo 是方形的想变圆，可以加下面这行 */
+    /* border-radius: 50%; */
+}
+
+/* 悬停交互效果 */
+.logo-img img:hover {
+    transform: scale(1.1); /* 鼠标放上去稍微放大 */
+    filter: drop-shadow(0 0 15px rgba(114, 161, 222, 1)); /* 发光变强 */
+}
+
+.material-symbols-outlined {
+    color: #000000;
+}
+
+.back-to-home .material-symbols-outlined {
+    color: #fff;
+}
+
+/* --- 表单组和输入框 --- */
+.input-group {
+    top: 220px;
+    position: absolute;
+    width: 280px;
+    transition: 0.5s ease-in-out;
+}
+
+/* 关键：定义两个表单的初始位置 */
+#login-form {
+    left: 50px; /* 初始在可视区域 */
+}
+
+#register-form {
+    left: 450px; /* 初始在右侧屏幕外 */
+}
+
+.input-field {
+    width: 100%;
+    padding: 10px 0;
+    margin: 5px 0;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    transition: 0.3s;
+}
+
+/* 输入框聚焦时底部线条变色 */
+.input-field:focus-within {
+    border-bottom: 2px solid #72a1de;
+}
+
+.input-field i {
+    flex: 1;
+    text-align: center;
+    color: #000000;
+    font-size: 18px;
+}
+
+.input-field input {
+    flex: 5;
+    background: none;
+    border: none;
+    outline: none;
+    width: 100%;
+    color: #000000;
+    font-size: 16px;
+    padding-left: 10px;
+}
+
+.input-field input::placeholder {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+/* --- 复选框和链接 --- */
+.check-box {
+    margin: 25px 0;
+    color: #000000;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+}
+
+.check-box input {
+    margin-right: 10px;
+    accent-color: #72a1de; /* 复选框颜色 */
+    cursor: pointer;
+}
+
+.registration-terms {
+    margin: 20px 0;
+}
+
+/* 提交按钮 */
+.submit-btn {
+    width: 100%;
+    padding: 12px;
+    cursor: pointer;
+    display: block;
+    margin-top: 20px;
+    background: linear-gradient(to right, #6070fd, #00aaa7);
+    border: 0;
+    outline: none;
+    border-radius: 30px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    transition: 0.3s;
+    box-shadow: 0 0 10px rgba(96, 112, 253, 0.5);
+}
+
+.submit-btn:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 20px rgba(96, 112, 253, 0.8);
+}
+
+/* 忘记密码链接 */
+.forgot-pass {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 14px;
+}
+
+.forgot-pass a {
+    text-decoration: none;
+    color: rgba(0, 0, 0, 0.7);
+    transition: 0.3s;
+}
+
+.forgot-pass a:hover {
+    color: #72a1de;
+}
+
+/* --- 响应式适配 --- */
+@media screen and (max-width: 480px) {
+    .form-box {
+        width: 90%;
+        height: 580px; /* 手机上稍微高一点 */
+    }
+    .input-group {
+        width: 85%;
+    }
+    #login-form { left: 7.5%; }
+    #register-form { left: 107.5%; }
+    
+    .back-to-home {
+        top: 20px;
+        left: 20px;
+        font-size: 14px;
+    }
+}

@@ -1,0 +1,1109 @@
+body{
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: lightgray;
+}
+
+html{
+    scroll-behavior: smooth;
+    scroll-padding-top: 70px;
+}
+
+.container{
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 100px;
+    background-color: #001f7c38;
+}
+
+.back-vid{
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    mix-blend-mode:overlay;
+}
+
+header{
+    display: flex;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    height: 70px;
+    background-color: rgba(255, 255, 255, 0.121);
+    backdrop-filter: blur(5px);
+    box-shadow: 0 0 15px #72a1dea2;
+    z-index: 999;
+}
+
+.left{
+    display: flex;
+    align-items: center;
+}
+
+.left img{
+    width: 40px;
+    margin: 0 15px;
+}
+
+/* --- Navbar Design --- */
+header ul {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    padding: 12px 40px;
+    margin: 0;
+   
+    /* 玻璃拟态背景 */
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+
+    /* 移除之前的固定宽度，让内容决定宽度 */
+    width: auto;
+
+}
+
+header ul li {
+    list-style: none;
+}
+
+/* 2. 链接样式 */
+header ul a {
+    text-decoration: none;
+    color: #fff;
+    font-weight: 600;
+    font-size: 16px;
+    position: relative;
+    transition: 0.3s ease;
+    padding-bottom: 5px;
+}
+
+
+
+/* 3. 悬停效果：文字发光 + 底部光条 */
+header ul a:hover {
+    color: #fff;
+    text-shadow: 0 0 12px rgba(114, 161, 222, 0.8);
+}
+
+header ul a::after {
+    content: '';
+    position: absolute;
+    width: 0%;
+    height: 2px;
+    bottom: 0;
+    left: 50%;
+    background-color: #72a1de;
+    transition: 0.3s ease;
+    box-shadow: 0 0 10px #72a1de;
+    transform: translateX(-50%);
+}
+
+header ul a:hover::after {
+    width: 100%;
+}
+
+.auth-buttons {
+    display: flex;
+    gap: 15px; /* 两个按钮之间的间距 */
+    align-items: center;
+}
+
+.btn {
+    text-decoration: none;
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 15px;
+    transition: 0.3s ease;
+    white-space: nowrap; /* 防止文字换行 */
+}
+
+/* Login 按钮 - 描边风格 */
+.btn-login {
+    color: #c0c0c0;
+    border: 1px solid rgba(114, 161, 222, 0.5);
+    background: transparent;
+}
+
+.btn-login:hover {
+    color: #fff;
+    border-color: #72a1de;
+    box-shadow: 0 0 10px rgba(114, 161, 222, 0.3);
+}
+
+/* Signup 按钮 - 渐变填充风格 */
+.btn-signup {
+    color: #fff;
+    background: linear-gradient(90deg, #6070fd, #00aaa7);
+    border: none;
+    box-shadow: 0 0 5px rgba(0, 170, 167, 0.5);
+}
+
+.btn-signup:hover {
+    background: linear-gradient(90deg, #00aaa7, #6070fd); /* 悬停反转渐变 */
+    box-shadow: 0 0 15px rgba(96, 112, 253, 0.8);
+    transform: scale(1.05); /* 微微放大 */
+}
+
+.blackhole-box{
+    position: absolute;
+    top: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    z-index: -1;
+    mix-blend-mode: lighten;
+}
+
+.blackhole-box video{
+    width: 100%;
+    margin-top: -23.5%;
+}
+
+.hero{
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.hero-info{
+    position: absolute;
+    left: 5%;
+}
+
+.hero-info .hero-info-tittle{
+    color: #72a1de;
+    padding: 8px 5px;
+    border-radius: 50px;
+    border: 1px solid #72a1de94;
+    width: 240px;
+    background-color: #2200493d;
+    box-shadow: 0 0 5px #72a1de84;
+    text-align: center;
+}
+
+.hero-info h1{
+    font-size: 60px;
+    max-width: 600px;
+    font-weight: 700;
+    line-height: 70px;
+    margin-top: 40px;
+    margin-bottom: 30px;
+}
+
+.hero-info p{
+    max-width: 550px;
+    line-height: 25px;
+    margin-bottom: 40px;
+    font-size: 20px;
+}
+
+.hero-info button{
+    color: white;
+    padding: 15px 35px;
+    border-radius: 10px;
+    border: 1px solid #72a1de81;
+    background-color: #2200493d;
+    box-shadow: 0 0 5px #72a1de81;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.hero-info button:hover{
+    box-shadow: 0 0 15px #72a1de81;
+}
+
+/* Gradient Animation */
+.gradient{
+    background: linear-gradient(to right,#00aaa7, #7e42a7, #6600c5, #6070fd,#2a46ff, #0099ff, #008ead);
+    background-size: 200%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: animate-gradient 2.5s linear infinite;
+}
+
+@keyframes animate-gradient {
+    to{
+        background-position: 200%;
+    }
+}
+
+.hero-vid-box{
+    position: absolute;
+    right: 3%;
+}
+
+.hero-vid-box video{
+    height: 900px;
+    mix-blend-mode:lighten;
+}
+
+.scroll-down {
+    height: 50px;
+    width: 30px;
+    border: 2px solid lightgray;
+    position: absolute;
+    left: 49%;
+    bottom: 8%;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.626);
+}
+.scroll-down::before,
+.scroll-down::after {
+    content: "";
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    height: 10px;
+    width: 10px;
+    transform: translate(-50%, -100%) rotate(45deg);
+    border: 2px solid lightgray;
+    border-top: transparent;
+    border-left: transparent;
+    animation: scroll-down 2s ease-in-out infinite;
+}
+.scroll-down::before {
+    top: 30%;
+    animation-delay: 0.5s;
+}
+
+@keyframes scroll-down {
+    0% {
+      opacity: 0;
+    }
+    30% {
+      opacity: 1;
+    }
+    60% {
+      opacity: 1;
+    }
+    100% {
+      top: 90%;
+      opacity: 0;
+    }
+}
+
+.VARK-section{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10%;
+    width: 80%;
+    position: relative;
+    height: 200vh;
+    margin-bottom: 400px;
+    margin-top: 10px;
+}
+
+.VARK-card{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 40%;
+    gap: 10%;
+}
+
+.VARK-vidbox{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50%;
+    position: relative;
+    cursor: pointer;
+    min-width: 400px;
+    transition: 0.5s;
+    mix-blend-mode: difference;
+}
+
+.VARK-vidbox video{
+    object-fit: cover;
+    width: 100%;
+    box-shadow: 0 0 10px lightgrey;
+    border-radius: 20px;
+    transition: 0.5s;
+}
+
+.VARK-vidbox:hover video{
+    transform: scale(1.05);
+    box-shadow: 0 0 20px lightgrey;
+}
+
+.VARK-info{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+    width: 50%;
+    padding-left: 10%;
+}
+
+.VARK-info h1{
+    width: 90%;
+    font-size: 25px;
+    font-weight: bold;
+    text-wrap: nowrap;
+    margin-top: 0;
+    margin-bottom: 10px;
+    max-width: 450px;
+    margin: 0 10px;
+}
+
+.VARK-info p{
+    width: 90%;
+    max-width: 400px;
+    min-width: 300px;
+    margin-bottom: 50px;
+    margin-top: 0;
+    margin: 0 10px;
+}
+
+.VARK-vidbox .hover-sign{
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30%;
+    height: 100px;
+}
+
+.hover-sign::before,
+.hover-sign::after {
+    content: "👆";
+    text-align: center;
+    position: absolute;
+    font-size: 50px;
+    top: 40%;
+    left: 20%;
+    border-radius: 40px;
+    animation: hoverAnimation 4s ease-in-out infinite;
+}
+
+@keyframes hoverAnimation {
+  0% {
+    /* top:20%; */
+    box-shadow: 0 0 5px rgb(255, 255, 255);
+    transform: translate(100%, 50%) rotate(30deg);
+  }
+  100% {
+    box-shadow: 0 0 5px rgb(255, 255, 255);
+    transform: translateX(80%, 50%) rotate(20deg);
+  }
+}
+
+.hover-sign.active{
+    display: none;
+}
+
+/*mission Section*/
+.mission-section{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.mission-box{
+    width: 100%;
+    height: 90vh;
+    position: relative;
+    display: flex;
+    align-items: start;
+    justify-content: center;
+    mix-blend-mode:lighten;
+    opacity: 0.7;
+}
+
+.mission-image{
+    width: 70%;
+    mix-blend-mode:difference;
+}
+
+.designer{
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    top: 25%;
+    left: 5%;
+    max-width: 300px;
+}
+
+.coder{
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    top: 25%;
+    right: 5%;
+    max-width: 300px;
+}
+
+.mission-box h1{
+    font-size: 50px;
+    display: flex;
+    align-items: center;
+}
+
+.mission-box p{
+    line-height: 23px;
+}
+
+/* Slider Section */
+.slider{
+    position: absolute;
+    bottom: -5%;
+    right: 20%;
+    width: 60%;
+    height: var(--height);
+    overflow: hidden;
+    mask-image: linear-gradient(
+        to right,
+        transparent,
+        #000 10% 90%,
+        transparent
+    );
+    mix-blend-mode:difference;
+    opacity: 0.7;
+}
+
+.slider .list{
+    display: flex;
+    width: 100%;
+    min-width: calc(var(--width) * var(--quantity));
+    position: relative;
+}
+
+.slider .list .item{
+    width: var(--width);
+    height: var(--height);
+    position: absolute;
+    left: 100%;
+    animation: autoRun 10s linear infinite;
+    transition: filter 0.5s;
+    animation-delay: calc( (10s / var(--quantity)) * (var(--position) - 1) - 10s)!important;
+}
+
+.slider .list .item img{
+    width: 100%;
+}
+
+@keyframes autoRun{
+    from{
+        left: 100%;
+    }to{
+        left: calc(var(--width) * -1);
+    }
+}
+
+.slider:hover .item{
+    animation-play-state: paused!important;
+    filter: grayscale(1);
+}
+
+.slider .item:hover{
+    filter: grayscale(0);
+}
+
+/* --- FAQ Section Styling --- */
+.faq-section {
+    width: 100%;
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 20px 0;
+}
+
+.section-title {
+    font-size: 40px;
+    margin-bottom: 20px;
+    color: white;
+    text-shadow: 0 0 10px #72a1de;
+}
+
+.faq-container {
+    width: 80%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.faq-item {
+    background-color: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(114, 161, 222, 0.3);
+    border-radius: 15px;
+    overflow: hidden;
+    transition: 0.3s ease;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.faq-item:hover {
+    border-color: #72a1de;
+    box-shadow: 0 0 15px rgba(114, 161, 222, 0.3);
+}
+
+.faq-question {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 20px 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    text-align: left;
+    color: lightgray;
+    font-size: 18px;
+    font-weight: bold;
+    font-family: inherit;
+    transition: 0.3s;
+}
+
+.faq-question:hover {
+    color: #fff;
+}
+
+.faq-question .icon {
+    font-size: 24px;
+    color: #72a1de;
+    transition: transform 0.3s ease;
+}
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.faq-answer p {
+    padding: 0 25px 25px 25px;
+    margin: 0;
+    line-height: 1.6;
+    color: #a0a0a0;
+    font-size: 16px;
+}
+
+/* --- Active State (JS控制) --- */
+.faq-item.active .faq-question {
+    color: #72a1de; /* 展开时标题变蓝 */
+}
+
+.faq-item.active .icon {
+    transform: rotate(45deg); /* 加号变成叉号 */
+    color: #ff4d4d;
+}
+
+.faq-item.active .faq-answer {
+    max-height: 200px; /* 足够展示文字的高度 */
+}
+
+/* --- Footer Styling --- */
+.footer {
+    width: 100%;
+    margin-top: -20px;
+    position: relative;
+    z-index: 10;
+}
+
+.footer-container {
+    background-color: rgba(0, 0, 30, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(114, 161, 222, 0.3);
+    box-shadow: 0 -5px 20px rgba(114, 161, 222, 0.1);
+    padding: 4rem 10% 2rem;
+    color: lightgray;
+}
+
+.footer-grid {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 40px;
+    margin-bottom: 3rem;
+}
+
+.footer-column {
+    flex: 1;
+    min-width: 200px;
+}
+
+.brand-column p {
+    margin-top: 15px;
+    line-height: 1.6;
+    max-width: 300px;
+    color: #a0a0a0;
+}
+
+.footer-column h3 {
+    color: #fff;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    position: relative;
+    display: inline-block;
+}
+
+.footer-column h3::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 30px;
+    height: 2px;
+    background-color: #72a1de;
+    transition: 0.3s;
+}
+
+.footer-column:hover h3::after {
+    width: 100%;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links li {
+    margin-bottom: 12px;
+}
+
+.footer-links a {
+    color: lightgray;
+    text-decoration: none;
+    transition: 0.3s;
+    display: inline-block;
+}
+
+.footer-links a:hover {
+    color: #72a1de;
+    transform: translateX(5px);
+    text-shadow: 0 0 10px #72a1de;
+}
+
+.footer-socials {
+    margin-top: 20px;
+    display: flex;
+    gap: 15px;
+}
+
+.footer-socials img {
+    width: 25px;
+    transition: 0.3s;
+    filter: invert(1) brightness(0.8);
+}
+
+.footer-socials a:hover img {
+    transform: scale(1.2);
+    filter: invert(1) drop-shadow(0 0 5px #72a1de);
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.9rem;
+    color: #888;
+}
+
+/* Blur Effect Animation */
+.autoBlur {
+    animation: autoBlurAnimation linear both;
+    animation-timeline: view();
+}
+
+@keyframes autoBlurAnimation {
+    0% {
+        filter: blur(40px);
+        opacity: 0;
+    }
+
+    35%,65% {
+        filter: blur(0);
+        opacity: 1;
+    }
+
+    100% {
+        filter: blur(40px);
+        opacity: 0;
+    }
+}
+
+/* Auto Display Animation */
+.autoDisplay {
+    animation: autoDisplayAnimation both;
+    animation-timeline: view();
+}
+
+@keyframes autoDisplayAnimation {
+    from {
+        filter: blur(10px);
+        transform: translateY(-200px) scale(0);
+        opacity: 0.2;
+    }
+
+    50% {
+        opacity: 1;
+        filter: blur(0);
+        transform: translateY(0);
+    }
+}
+
+/* Fade In Animation */
+.fadeInRight {
+    animation: fadeInAnimation both;
+    animation-timeline: view();
+}
+
+@keyframes fadeInAnimation {
+    0% {
+        opacity: 0;
+        transform: translateX(-500px) scale(0.2);
+        filter: blur(20px);
+    }
+    35%,65% {
+        opacity: 1;
+        transform: translateX(0px) scale(1);
+        filter: blur(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(500px) scale(0.2);
+        filter: blur(20px);
+    }
+}
+
+@media (max-aspect-ratio:16/9) {
+    .back-vid{
+        width: auto;
+        height: 100%;
+    }
+}
+
+@media (min-aspect-ratio:16/9) {
+    .back-vid{
+        width: 100%;
+        height: auto;
+    }
+}
+
+/* Tablet Responsive Design*/
+@media screen and (max-width: 1024px) {
+    .autoBlur,
+    .autoDisplay,
+    .fadeInRight {
+        /* 1. 彻底移除动画 */
+        animation: none !important;
+        animation-timeline: auto !important;
+
+        /* 2. 强制回归到“最终可见”的状态 */
+        opacity: 1 !important;
+        filter: blur(0) !important;
+        transform: translate(0, 0) scale(1) !important;
+    }
+
+    /* 1. Header 调整 */
+    header {
+        padding: 0 20px;
+    }
+
+    header ul {
+        gap: 20px;
+        padding: 10px 25px;
+    }
+
+    .navbar a {
+        font-size: 12px;
+    }
+
+    /* 2. Hero 区域压缩 */
+    .hero-info h1 {
+        font-size: 45px;
+        line-height: 55px;
+    }
+
+    .hero-vid-box video {
+        height: 600px; /* 减小视频高度 */
+    }
+
+    /* 3. 项目展示区调整 */
+    .VARK-card {
+        gap: 5%;
+        height: auto; /* 移除固定高度 */
+        margin-bottom: 50px;
+    }
+
+    .VARK-info {
+        padding-left: 0;
+    }
+
+    .VARK-vidbox {
+        min-width: 300px; /* 允许视频框变小 */
+    }
+
+    /* 4. 技能区域调整 */
+    .mission-box h1 {
+        font-size: 40px;
+        margin-top: -20px;
+    }
+
+    .slider {
+        bottom: -20px;
+    }
+}
+
+/*- Mobile Responsive Design*/
+@media screen and (max-width: 768px) {
+    /* --- 全局设置 --- */
+    body {
+        overflow-x: hidden; /* 防止任何横向滚动条 */
+    }
+
+    .section-title {
+        font-size: 32px;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .left {
+        margin: 10px 0;
+    }
+
+    .left h1 {
+        font-size: 16px;
+    }
+
+    .left img {
+        width: 30px;
+        margin: 0 10px;
+    }
+
+    .blackhole-box {
+        display: none; /* 手机屏幕有限，隐藏背景黑洞视频 */
+    }
+    
+    .hero-vid-box video {
+        display: none;
+    }
+
+    header {
+        position: fixed;
+        flex-direction: row;
+        height: auto;
+        padding: 10px 0;
+        gap: 15px;
+        background-color: rgba(0, 0, 30, 0.9);
+    }
+
+    .navbar {
+        display: none;
+    }
+
+    .auth-buttons {
+        width: 45%;
+        justify-content: center;
+        gap: 5px;
+        margin-right: 10px;
+    }
+
+    .btn {
+        width: 100%;
+        font-size: 10px;
+        text-align: center;
+        padding: 10px 0;
+    }
+
+    /* --- Hero Section (核心重构) --- */
+    .hero {
+        flex-direction: column-reverse; /* 视频在下，文字在上 */
+        height: auto;
+        padding-top: 200px;
+        padding-bottom: 50px;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .hero-info {
+        position: relative; /* 取消绝对定位 */
+        left: 0;
+        width: 90%;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 2;
+    }
+
+    .hero-info .hero-info-tittle {
+        margin: 0 auto;
+    }
+
+    .hero-info h1 {
+        font-size: 36px;
+        line-height: 1.2;
+        margin-top: 20px;
+        max-width: 100%;
+    }
+
+    .hero-info p {
+        font-size: 16px;
+        margin-bottom: 30px;
+    }
+
+    .hero-vid-box {
+        position: relative; /* 取消绝对定位 */
+        right: 0;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-top: -50px; /* 稍微向上重叠一点，制造层次感 */
+        opacity: 0.6; /* 稍微变淡，不要抢文字视觉 */
+    }
+
+    .hero-vid-box video {
+        height: auto;
+        width: 80%;
+        max-height: 400px;
+    }
+
+    .scroll-down {
+        display: none; /* 手机屏幕高度宝贵，隐藏此元素 */
+    }
+
+    /* --- VARKs Section (垂直卡片) --- */
+    .VARK-section {
+        height: auto;
+        width: 90%;
+        margin: 50px auto;
+        gap: 60px;
+    }
+
+    .VARK-card {
+        flex-direction: column; /* 上下排列 */
+        gap: 20px;
+    }
+
+    .VARK-vidbox {
+        width: 100%;
+        min-width: 0; /* 强制覆盖之前的 min-width */
+    }
+
+    .VARK-info {
+        width: 100%;
+        align-items: center; /* 文字居中 */
+        text-align: center;
+        padding: 0;
+    }
+
+    .VARK-info h1 {
+        font-size: 22px;
+        text-wrap: balance; /* 更好的换行效果 */
+        width: 100%;
+        max-width: none;
+    }
+
+    .VARK-info p {
+        width: 100%;
+        font-size: 14px;
+        color: #cccccc;
+        margin-bottom: 10px;
+    }
+
+    /* --- mission Section (布局重构) --- */
+    .mission-box {
+        height: auto;
+        flex-direction: column;
+        padding-bottom: 100px; /* 为 Slider 留位置 */
+    }
+
+    .mission-image {
+        display: none;
+    }
+
+    .designer, .coder {
+        position: relative;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 90%;
+        max-width: none;
+        margin: 20px auto;
+        text-align: center;
+        align-items: center;
+        background: rgba(0,0,0,0.3); /* 增加背景增加可读性 */
+        padding: 20px;
+        border-radius: 15px;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(114, 161, 222, 0.2);
+    }
+
+    .mission-box h1 {
+        justify-content: center;
+        font-size: 28px;
+        margin-bottom: 10px;
+    }
+
+    .slider {
+        width: 100%;
+        right: 0;
+        bottom: 20px;
+    }
+
+    /* --- FAQ Section --- */
+    .faq-container {
+        width: 90%;
+    }
+
+    .faq-question span {
+        font-size: 15px;
+    }
+
+    /* --- Footer --- */
+    .footer-container {
+        padding: 3rem 5% 2rem;
+    }
+
+    .footer-grid {
+        flex-direction: column;
+        gap: 30px;
+        text-align: center;
+    }
+
+    .brand-column p {
+        margin: 15px auto;
+    }
+
+    .footer-column h3::after {
+        left: 50%;
+        transform: translateX(-50%); /* 标题下划线居中 */
+    }
+
+    .footer-socials {
+        justify-content: center;
+    }
+}

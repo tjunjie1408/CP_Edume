@@ -26,6 +26,7 @@
                 <img src="image/miladicode.png" alt="logo-img">
             </div>
 
+            <!-- Login Form -->
             <form id="login-form" class="input-group">
                 <div class="input-field">
                     <span class="material-symbols-outlined">mail</span>
@@ -38,9 +39,10 @@
                 </div>
                 
                 <button type="submit" class="submit-btn">Log In</button>
-                <p class="forgot-pass"><a href="#">Forgot Password?</a></p>
+                <p class="forgot-pass"><a href="#" onclick="forgotPassword(event)">Forgot Password?</a></p>
             </form>
 
+            <!-- Register Form -->
             <form id="register-form" class="input-group">
                 <div class="input-field">
                     <span class="material-symbols-outlined">person</span>
@@ -60,6 +62,52 @@
                 </div>
                 <button type="submit" class="submit-btn">Sign Up</button>
             </form>
+
+            <!-- Forgot Password - Step 1: Email Verification Form -->
+            <form id="forgot-password-email-form" class="input-group">
+                <h3 class="forgot-title">Forgot Password</h3>
+                <p class="forgot-subtitle">Enter your email to reset your password</p>
+                
+                <div class="input-field">
+                    <span class="material-symbols-outlined">mail</span>
+                    <input type="email" id="forgot-email" placeholder="Email Id" required>
+                </div>
+
+                <button type="submit" class="submit-btn">Verify Email</button>
+                <p class="back-to-login"><a href="#" onclick="backToLogin(event)">Back to Log In</a></p>
+            </form>
+
+            <!-- Forgot Password - Step 2: New Password Form -->
+            <form id="forgot-password-reset-form" class="input-group">
+                <h3 class="forgot-title">Reset Password</h3>
+                <p class="forgot-subtitle" id="email-display"></p>
+                
+                <div class="input-field">
+                    <span class="material-symbols-outlined">password</span>
+                    <input type="password" id="new-password" placeholder="New Password" required>
+                </div>
+
+                <div class="input-field">
+                    <span class="material-symbols-outlined">password</span>
+                    <input type="password" id="confirm-password" placeholder="Confirm Password" required>
+                </div>
+
+                <button type="submit" class="submit-btn">Reset Password</button>
+                <p class="back-to-login"><a href="#" onclick="backToLogin(event)">Back to Log In</a></p>
+            </form>
+        </div>
+
+        <!-- Modal for notifications -->
+        <div id="notification-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+                <div class="modal-icon-container">
+                    <span class="modal-icon material-symbols-outlined" id="modal-icon">info</span>
+                </div>
+                <h2 id="modal-title">Message</h2>
+                <p id="modal-message">Message</p>
+                <button class="modal-btn" onclick="closeModal()">OK</button>
+            </div>
         </div>
     </div>
 

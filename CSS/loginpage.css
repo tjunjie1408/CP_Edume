@@ -106,185 +106,488 @@ body {
     transition: 0.3s;
 }
 
-/* 按钮激活状态文字颜色 */
 .toggle-btn.active {
-    color: #fff;
+    color: #6189e0;
 }
 
-/* 滑动的高亮背景条 */
 #btn-highlight {
     top: 0;
     left: 0;
-    position: absolute;
-    width: 130px; /* 一半宽度 */
     height: 100%;
-    /* 使用主页同款渐变 */
-    background: linear-gradient(to right, #6070fd, #00aaa7);
+    width: 130px;
+    background: #e0efff;
+    position: absolute;
     border-radius: 30px;
-    transition: 0.5s ease;
+    transition: 0.5s;
 }
 
-/* --- Logo 图片样式 --- */
+/* 隐藏 button-box 在忘记密码流程中 */
+.form-box.forgot-password-mode .button-box {
+    display: none;
+}
+
 .logo-img {
     width: 100%;
-    text-align: center; /* 让图片在容器里水平居中 */
-    margin: 20px 0 10px 0; /* 上下留出间距：上20px，下10px */
+    text-align: center;
+    margin: 20px 0;
 }
 
 .logo-img img {
-    width: 80px;  /* 设置 Logo 大小，你可以根据需要改成 60px 或 100px */
-    height: auto; /* 保持图片比例 */
-    transition: 0.3s ease; /* 添加平滑过渡效果 */
-    
-    /* 核心效果：给 Logo 添加一点蓝色的发光投影，配合你的星空主题 */
-    filter: drop-shadow(0 0 5px rgba(114, 161, 222, 0.6));
-    
-    /* 可选：如果 Logo 是方形的想变圆，可以加下面这行 */
-    /* border-radius: 50%; */
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
 }
 
-/* 悬停交互效果 */
-.logo-img img:hover {
-    transform: scale(1.1); /* 鼠标放上去稍微放大 */
-    filter: drop-shadow(0 0 15px rgba(114, 161, 222, 1)); /* 发光变强 */
-}
-
-.material-symbols-outlined {
-    color: #000000;
-}
-
-.back-to-home .material-symbols-outlined {
-    color: #fff;
-}
-
-/* --- 表单组和输入框 --- */
+/* --- 表单输入组 --- */
 .input-group {
-    top: 220px;
     position: absolute;
     width: 280px;
-    transition: 0.5s ease-in-out;
+    transition: 0.5s;
+    top: 150px;
+    left: 50px;
 }
 
-/* 关键：定义两个表单的初始位置 */
 #login-form {
-    left: 50px; /* 初始在可视区域 */
+    left: 50px;
+    margin-top: 80px;
 }
 
 #register-form {
-    left: 450px; /* 初始在右侧屏幕外 */
+    left: 450px;
+    margin-top: 80px;
+}
+
+#forgot-password-email-form {
+    left: 450px;
+}
+
+#forgot-password-reset-form {
+    left: 450px;
 }
 
 .input-field {
     width: 100%;
-    padding: 10px 0;
-    margin: 5px 0;
-    border-bottom: 2px solid rgba(0, 0, 0, 0.3);
+    margin: 20px 0;
+    position: relative;
+    border-bottom: 1px solid rgba(114, 161, 222, 0.5);
+    padding-bottom: 10px;
     display: flex;
     align-items: center;
-    transition: 0.3s;
 }
 
-/* 输入框聚焦时底部线条变色 */
-.input-field:focus-within {
-    border-bottom: 2px solid #72a1de;
-}
-
-.input-field i {
-    flex: 1;
-    text-align: center;
-    color: #000000;
-    font-size: 18px;
+.input-field span {
+    color: #6189e0;
+    font-size: 20px;
+    margin-right: 10px;
 }
 
 .input-field input {
-    flex: 5;
-    background: none;
-    border: none;
-    outline: none;
     width: 100%;
-    color: #000000;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    color: #555;
     font-size: 16px;
-    padding-left: 10px;
+    font-weight: 500;
 }
 
 .input-field input::placeholder {
-    color: rgba(0, 0, 0, 0.6);
+    color: rgba(85, 85, 85, 0.7);
 }
 
-/* --- 复选框和链接 --- */
+.submit-btn {
+    width: 100%;
+    background: linear-gradient(to right, #6189e0, #3b5bdb);
+    border: 0;
+    outline: 0;
+    padding: 12px;
+    border-radius: 25px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: 0.3s;
+}
+
+.submit-btn:hover {
+    background: linear-gradient(to right, #3b5bdb, #2a4a9f);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(97, 137, 224, 0.4);
+}
+
+.forgot-pass {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 13px;
+    color: #555;
+}
+
+.forgot-pass a,
+.back-to-login a {
+    color: #6189e0;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.forgot-pass a:hover,
+.back-to-login a:hover {
+    color: #3b5bdb;
+    text-decoration: underline;
+}
+
+.back-to-login {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 13px;
+    color: #555;
+}
+
+/* --- Forgot Password Form Styles --- */
+.forgot-title {
+    text-align: center;
+    color: #333;
+    font-size: 20px;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.forgot-subtitle {
+    text-align: center;
+    color: #777;
+    font-size: 12px;
+    margin-bottom: 20px;
+}
+
+/* --- Check Box --- */
 .check-box {
-    margin: 25px 0;
-    color: #000000;
-    font-size: 14px;
+    margin: 20px 0;
+    color: #555;
+    font-size: 12px;
+}
+
+.check-box input {
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    margin-right: 8px;
+}
+
+.registration-terms {
     display: flex;
     align-items: center;
 }
 
-.check-box input {
-    margin-right: 10px;
-    accent-color: #72a1de; /* 复选框颜色 */
-    cursor: pointer;
-}
-
-.registration-terms {
-    margin: 20px 0;
-}
-
-/* 提交按钮 */
-.submit-btn {
+/* --- Modal Styles --- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
     width: 100%;
-    padding: 12px;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 30px;
+    border: 1px solid #888;
+    border-radius: 15px;
+    width: 80%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.3s ease-in;
+    text-align: center;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.close-btn {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
     cursor: pointer;
-    display: block;
-    margin-top: 20px;
-    background: linear-gradient(to right, #6070fd, #00aaa7);
+    transition: 0.3s;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: #000;
+}
+
+.modal-icon-container {
+    margin-bottom: 20px;
+}
+
+.modal-icon {
+    font-size: 50px;
+    color: #6189e0;
+}
+
+.modal-icon.success {
+    color: #4caf50;
+}
+
+.modal-icon.error {
+    color: #f44336;
+}
+
+.modal-icon.warning {
+    color: #ff9800;
+}
+
+#modal-title {
+    margin: 15px 0;
+    color: #333;
+    font-size: 20px;
+}
+
+#modal-message {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.modal-btn {
+    background: linear-gradient(to right, #6189e0, #3b5bdb);
+    color: white;
+    padding: 10px 30px;
     border: 0;
-    outline: none;
-    border-radius: 30px;
-    color: #fff;
-    font-size: 18px;
+    border-radius: 20px;
+    cursor: pointer;
     font-weight: bold;
     transition: 0.3s;
-    box-shadow: 0 0 10px rgba(96, 112, 253, 0.5);
 }
 
-.submit-btn:hover {
-    transform: scale(1.03);
-    box-shadow: 0 0 20px rgba(96, 112, 253, 0.8);
+.modal-btn:hover {
+    background: linear-gradient(to right, #3b5bdb, #2a4a9f);
+    transform: translateY(-2px);
 }
 
-/* 忘记密码链接 */
-.forgot-pass {
-    text-align: center;
-    margin-top: 25px;
-    font-size: 14px;
+/* --- Loading state --- */
+.submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
-.forgot-pass a {
-    text-decoration: none;
-    color: rgba(0, 0, 0, 0.7);
-    transition: 0.3s;
-}
+/* --- Responsive Design for Tablets (768px and up) --- */
+@media (min-width: 768px) {
+    body {
+        overflow: hidden;
+    }
 
-.forgot-pass a:hover {
-    color: #72a1de;
-}
+    .container {
+        padding: 0;
+    }
 
-/* --- 响应式适配 --- */
-@media screen and (max-width: 480px) {
     .form-box {
-        width: 90%;
-        height: 580px; /* 手机上稍微高一点 */
+        width: 380px;
+        height: 550px;
+        padding: 10px;
     }
-    .input-group {
-        width: 85%;
-    }
-    #login-form { left: 7.5%; }
-    #register-form { left: 107.5%; }
-    
+
     .back-to-home {
-        top: 20px;
-        left: 20px;
+        font-size: 16px;
+    }
+
+    .back-to-home:hover {
+        font-size: 20px;
+    }
+
+    .button-box {
+        width: 260px;
+        margin: 35px auto;
+    }
+
+    .toggle-btn {
+        padding: 12px 30px;
+        font-size: 16px;
+    }
+
+    #btn-highlight {
+        width: 130px;
+    }
+
+    .logo-img img {
+        width: 80px;
+        height: 80px;
+    }
+
+    .input-group {
+        width: 280px;
+        top: 150px;
+        left: 50px;
+    }
+
+    #login-form {
+        left: 50px;
+    }
+
+    #register-form {
+        left: 450px;
+    }
+
+    #forgot-password-email-form {
+        left: 450px;
+    }
+
+    #forgot-password-reset-form {
+        left: 450px;
+    }
+
+    .input-field {
+        margin: 20px 0;
+        padding-bottom: 10px;
+        font-size: 16px;
+    }
+
+    .input-field span {
+        font-size: 20px;
+    }
+
+    .input-field input {
+        font-size: 16px;
+    }
+
+    .submit-btn {
+        padding: 12px;
+        font-size: 16px;
+        margin-top: 20px;
+    }
+
+    .forgot-pass,
+    .back-to-login {
+        font-size: 13px;
+        margin-top: 20px;
+    }
+
+    .forgot-title {
+        font-size: 20px;
+    }
+
+    .forgot-subtitle {
+        font-size: 12px;
+        margin-bottom: 20px;
+    }
+
+    .check-box {
+        font-size: 12px;
+        margin: 20px 0;
+    }
+
+    .modal-content {
+        margin: 10% auto;
+        padding: 30px;
+        max-width: 400px;
+    }
+
+    .modal-icon {
+        font-size: 50px;
+    }
+
+    #modal-title {
+        font-size: 20px;
+        margin: 15px 0;
+    }
+
+    #modal-message {
         font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    .modal-btn {
+        padding: 10px 30px;
+    }
+}
+
+/* --- Responsive Design for Mobile Landscape (max-height) --- */
+@media (max-height: 600px) {
+    .form-box {
+        min-height: auto;
+        height: auto;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .button-box {
+        margin: 15px auto 15px;
+    }
+
+    .logo-img {
+        margin: 10px 0;
+    }
+
+    .input-group {
+        top: 120px;
+    }
+
+    .input-field {
+        margin: 10px 0;
+        padding-bottom: 5px;
+    }
+
+    .submit-btn {
+        margin-top: 10px;
+        padding: 10px;
+    }
+}
+
+/* --- Extra small devices (320px and up) --- */
+@media (max-width: 360px) {
+    .back-to-home {
+        font-size: 12px;
+        gap: 5px;
+    }
+
+    .form-box {
+        padding: 15px;
+    }
+
+    .toggle-btn {
+        padding: 8px 15px;
+        font-size: 12px;
+    }
+
+    .logo-img img {
+        width: 60px;
+        height: 60px;
+    }
+
+    .input-field span {
+        font-size: 16px;
+    }
+
+    .forgot-title {
+        font-size: 16px;
+    }
+
+    .forgot-subtitle {
+        font-size: 10px;
     }
 }

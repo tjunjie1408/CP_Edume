@@ -1,7 +1,13 @@
 var loginForm = document.getElementById("login-form");
 var registerForm = document.getElementById("register-form");
+var forgotPasswordEmailForm = document.getElementById("forgot-password-email-form");
+var forgotPasswordResetForm = document.getElementById("forgot-password-reset-form");
 var indicator = document.getElementById("btn-highlight");
 var toggleBtns = document.querySelectorAll('.toggle-btn');
+var formBox = document.querySelector('.form-box');
+
+// Store the email for forgot password flow
+var forgotPasswordEmail = '';
 
 // 切换到注册的函数
 function register() {
@@ -15,6 +21,9 @@ function register() {
     // 3. 切换按钮文字激活状态
     toggleBtns[0].classList.remove('active');
     toggleBtns[1].classList.add('active');
+    
+    // Remove forgot password mode
+    formBox.classList.remove('forgot-password-mode');
 }
 
 // 切换到登录的函数
@@ -29,6 +38,200 @@ function login() {
     // 3. 切换按钮文字激活状态
     toggleBtns[1].classList.remove('active');
     toggleBtns[0].classList.add('active');
+    
+    // Reset forgot password forms
+    forgotPasswordEmailForm.style.left = "450px";
+    forgotPasswordResetForm.style.left = "450px";
+    
+    // Remove forgot password mode
+    formBox.classList.remove('forgot-password-mode');
+}
+
+// Forgot Password Flow
+function forgotPassword(event) {
+    event.preventDefault();
+    
+    // Hide button-box and show forgot password email form
+    formBox.classList.add('forgot-password-mode');
+    
+    // Move login form out
+    loginForm.style.left = "-400px";
+    
+    // Show forgot password email form
+    forgotPasswordEmailForm.style.left = "50px";
+    forgotPasswordResetForm.style.left = "450px";
+}
+
+function backToLogin(event) {
+    event.preventDefault();
+    
+    // Reset form
+    forgotPasswordEmailForm.reset();
+    forgotPasswordResetForm.reset();
+    forgotPasswordEmail = '';
+    
+    // Show login form
+    login();
+}
+
+// Handle forgot password email form submission
+document.getElementById('forgot-password-email-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    
+    var email = document.getElementById('forgot-email').value.trim();
+    
+    // Validate email format
+    if (!isValidEmail(email)) {
+        showNotification('Invalid Email', 'Please enter a valid email address.', 'error');
+        return;
+    }
+    
+    // Store email for next step
+    forgotPasswordEmail = email;
+    
+    // Simulate backend API call to verify email
+    // In real implementation, this would call your backend API
+    verifyEmailWithBackend(email);
+});
+
+function verifyEmailWithBackend(email) {
+    // Disable submit button during verification
+    var submitBtn = document.getElementById('forgot-password-email-form').querySelector('.submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Verifying...';
+    
+    // Simulate API call with timeout
+    setTimeout(function() {
+        // For demo purposes, we'll accept any email
+        // In real implementation, the backend would verify the email exists
+        
+        // Mock: Check if email exists (you would replace this with actual backend call)
+        // Example: If email is empty or fake format, show error
+        if (email.includes('test') && email.includes('fake')) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Verify Email';
+            showNotification(
+                'Email Not Found',
+                'This email hasn\'t signed in. Please sign up first.',
+                'error'
+            );
+        } else {
+            // Email verified successfully
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Verify Email';
+            
+            // Move to reset password form
+            document.getElementById('forgot-password-email-form').style.left = "-400px";
+            document.getElementById('forgot-password-reset-form').style.left = "50px";
+            
+            // Display email in reset form
+            document.getElementById('email-display').textContent = 'Reset password for: ' + email;
+        }
+    }, 1500);
+}
+
+// Handle forgot password reset form submission
+document.getElementById('forgot-password-reset-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    
+    var newPassword = document.getElementById('new-password').value;
+    var confirmPassword = document.getElementById('confirm-password').value;
+    
+    // Validate passwords
+    if (newPassword.length < 6) {
+        showNotification('Weak Password', 'Password must be at least 6 characters long.', 'error');
+        return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+        showNotification('Password Mismatch', 'Passwords do not match. Please try again.', 'error');
+        return;
+    }
+    
+    // Disable submit button during reset
+    var submitBtn = document.getElementById('forgot-password-reset-form').querySelector('.submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Resetting...';
+    
+    // Simulate backend API call to reset password
+    setTimeout(function() {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Reset Password';
+        
+        // Show success message
+        showNotification(
+            'Password Reset Successfully',
+            'Your password has been reset. Please log in with your new password.',
+            'success',
+            function() {
+                // Return to login form after confirmation
+                backToLogin({preventDefault: function(){}});
+            }
+        );
+    }, 1500);
+});
+
+// Modal notification functions
+function showNotification(title, message, type = 'info', onClose = null) {
+    var modal = document.getElementById('notification-modal');
+    var modalTitle = document.getElementById('modal-title');
+    var modalMessage = document.getElementById('modal-message');
+    var modalIcon = document.getElementById('modal-icon');
+    
+    // Remove all type classes
+    modalIcon.classList.remove('success', 'error', 'warning');
+    
+    // Set icon based on type
+    switch(type) {
+        case 'success':
+            modalIcon.textContent = 'check_circle';
+            modalIcon.classList.add('success');
+            break;
+        case 'error':
+            modalIcon.textContent = 'error';
+            modalIcon.classList.add('error');
+            break;
+        case 'warning':
+            modalIcon.textContent = 'warning';
+            modalIcon.classList.add('warning');
+            break;
+        default:
+            modalIcon.textContent = 'info';
+    }
+    
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    modal.style.display = 'block';
+    
+    // Store callback for when modal closes
+    if (onClose) {
+        modal.closeCallback = onClose;
+    }
+}
+
+function closeModal() {
+    var modal = document.getElementById('notification-modal');
+    modal.style.display = 'none';
+    
+    // Call callback if it exists
+    if (modal.closeCallback) {
+        modal.closeCallback();
+        modal.closeCallback = null;
+    }
+}
+
+// Close modal when clicking outside of it
+window.addEventListener('click', function(event) {
+    var modal = document.getElementById('notification-modal');
+    if (event.target == modal) {
+        closeModal();
+    }
+});
+
+// Utility function to validate email format
+function isValidEmail(email) {
+    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
 }
 
 // 响应式修正 (确保在手机上也能正确对齐)
@@ -47,7 +250,7 @@ function responsiveAdjust() {
     }
 }
 
-// 监听窗口大小变化 (可选，为了更完美的体验)
+// 监听窗口大小变化 (可选，为了更完美的体��)
 window.addEventListener('resize', responsiveAdjust);
 
 // 把这段加在 login-app.js 的最后面
@@ -74,36 +277,29 @@ function createShape(container) {
     shape.classList.add('paper-shape');
 
     // Random Size (between 200px and 500px)
-    // We make them large to mimic the "sheets of paper" look
     const size = Math.random() * 300 + 200; 
     shape.style.width = `${size}px`;
     shape.style.height = `${size}px`;
 
     // Random Position
-    // We allow them to go slightly off-screen (-10% to 100%)
-    const left = Math.random() * 110 - 10;
-    const top = Math.random() * 110 - 10;
-    shape.style.left = `${left}%`;
-    shape.style.top = `${top}%`;
+    const x = Math.random() * 100;
+    const y = Math.random() * 100;
+    shape.style.left = `${x}%`;
+    shape.style.top = `${y}%`;
 
-    // Random CSS Variables for the Animation
-    // --rotation: initial angle
-    // --moveX / --moveY: how far it drifts
-    const rotation = Math.random() * 360;
-    const moveX = Math.random() * 50 - 25; // Drift between -25px and 25px
-    const moveY = Math.random() * 50 - 25;
-    
-    shape.style.setProperty('--rotation', `${rotation}deg`);
+    // Random Animation Duration
+    const duration = Math.random() * 10 + 5;
+    shape.style.animationDuration = `${duration}s`;
+
+    // Random Movement
+    const moveX = (Math.random() - 0.5) * 100;
+    const moveY = (Math.random() - 0.5) * 100;
     shape.style.setProperty('--moveX', `${moveX}px`);
     shape.style.setProperty('--moveY', `${moveY}px`);
 
-    // Random Animation Duration (Slow float: 10s to 20s)
-    const duration = Math.random() * 10 + 10;
-    shape.style.animationDuration = `${duration}s`;
-
-    // Random Delay so they don't all start at once
-    const delay = Math.random() * 5;
-    shape.style.animationDelay = `-${delay}s`; // Negative delay starts animation immediately
+    // Random Rotation
+    const rotation = Math.random() * 360;
+    shape.style.setProperty('--rotation', `${rotation}deg`);
 
     container.appendChild(shape);
 }

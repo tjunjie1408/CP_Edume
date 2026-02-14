@@ -10,78 +10,71 @@ const optionsList = document.getElementById('options-list');
 const progressBar = document.getElementById('progress');
 
 let currentQuestionIndex = 0;
-let scores = { V: 0, A: 0, R: 0, K: 0 };
+// Updated scores object to combine V and A into 'VA'
+let scores = { VA: 0, R: 0, K: 0 };
 
-// 8 Questions related to Programming Habits adapted from VARK
+// 8 Questions adapted for VA (Visual-Audio), R (Read/Write), K (Kinesthetic)
 const questions = [
     {
-        question: "1. You are debugging a complex error in your code. You would prefer to:",
+        question: "1. You are debugging a complex error. You prefer to:",
         options: [
-            { text: "Draw a diagram of the data flow to see where it breaks.", type: "V" },
-            { text: "Explain the code logic out loud to a colleague (or rubber duck).", type: "A" },
-            { text: "Read the error logs and stack trace lines carefully.", type: "R" },
-            { text: "Comment out code blocks and run it repeatedly to test changes.", type: "K" }
+            { text: "Draw a diagram while talking through the logic with a colleague.", type: "VA" },
+            { text: "Read the error logs, stack trace, and documentation.", type: "R" },
+            { text: "Comment out code blocks and run the program repeatedly.", type: "K" }
         ]
     },
     {
-        question: "2. You want to learn a new web framework (e.g., React or Vue). You would:",
+        question: "2. You want to learn a new web framework (e.g., React). You would:",
         options: [
-            { text: "Look at architecture diagrams and component trees.", type: "V" },
-            { text: "Listen to a podcast or watch a lecture explaining the concepts.", type: "A" },
+            { text: "Watch a video tutorial or live coding stream explaining the architecture.", type: "VA" },
             { text: "Read the official documentation and API references.", type: "R" },
-            { text: "Download a starter project and start coding immediately.", type: "K" }
+            { text: "Download a starter project and start experimenting immediately.", type: "K" }
         ]
     },
     {
-        question: "3. You are buying a new mechanical keyboard for coding. What influences you most?",
+        question: "3. You are buying a new keyboard. What convinces you to buy?",
         options: [
-            { text: "It looks cool and has great RGB lighting.", type: "V" },
-            { text: "The sound of the switches (clicky vs silent).", type: "A" },
-            { text: "Reading the technical specs and reviews online.", type: "R" },
-            { text: "Testing how the keys feel under your fingers.", type: "K" }
+            { text: "Watching a video review to hear the sound and see the lighting effects.", type: "VA" },
+            { text: "Reading the technical specifications and written reviews.", type: "R" },
+            { text: "Testing how the keys feel under your fingers in a store.", type: "K" }
         ]
     },
     {
-        question: "4. A senior developer is explaining a new system feature to you. You prefer if they:",
+        question: "4. A senior developer is explaining a feature. You prefer if they:",
         options: [
-            { text: "Show you a whiteboard sketch or graph.", type: "V" },
-            { text: "Talk through the logic and answer your questions.", type: "A" },
-            { text: "Send you a written specification or wiki page.", type: "R" },
-            { text: "Let you play with the prototype or demo.", type: "K" }
+            { text: "Use a whiteboard to sketch the flow while explaining it verbally.", type: "VA" },
+            { text: "Send you a written specification or a detailed wiki page.", type: "R" },
+            { text: "Let you play with the prototype or demo while they watch.", type: "K" }
         ]
     },
     {
         question: "5. You need to remember a complex Git command. You usually:",
         options: [
-            { text: "Visualize where it is in your Git GUI client.", type: "V" },
-            { text: "Repeat the command name in your head.", type: "A" },
-            { text: "Look it up in your personal cheat sheet/notes.", type: "R" },
-            { text: "Type it from muscle memory without thinking.", type: "K" }
+            { text: "Visualize the command's effect or say the command name aloud.", type: "VA" },
+            { text: "Look it up in your personal notes or cheat sheet.", type: "R" },
+            { text: "Type it from muscle memory without consciously thinking.", type: "K" }
         ]
     },
     {
-        question: "6. You are reviewing a friend's code. Your feedback usually focuses on:",
+        question: "6. You are reviewing a friend's code. You prefer:",
         options: [
-            { text: "Indentation, formatting, and how the code looks.", type: "V" },
-            { text: "Discussing why they chose that approach.", type: "A" },
+            { text: "Getting on a call to discuss the logic while looking at the screen.", type: "VA" },
             { text: "Writing detailed comments on their Pull Request.", type: "R" },
-            { text: "Pulling their branch and running it to see how it behaves.", type: "K" }
+            { text: "Pulling their branch to your machine and running it.", type: "K" }
         ]
     },
     {
         question: "7. You encounter a new API. To understand it, you first:",
         options: [
-            { text: "Look for a sequence diagram or visual flowchart.", type: "V" },
-            { text: "Ask a teammate who has used it before.", type: "A" },
+            { text: "Ask a teammate to demonstrate it or look for a diagram.", type: "VA" },
             { text: "Read the README file and text descriptions.", type: "R" },
-            { text: "Use Postman or Curl to send requests and see what happens.", type: "K" }
+            { text: "Use Postman or Curl to send requests and see the response.", type: "K" }
         ]
     },
     {
-        question: "8. You are planning the database structure for a project. You start by:",
+        question: "8. You are planning a database structure. You start by:",
         options: [
-            { text: "Drawing an ERD (Entity Relationship Diagram).", type: "V" },
-            { text: "Discussing the data relationships with your team.", type: "A" },
+            { text: "Brainstorming with the team using a whiteboard or chart.", type: "VA" },
             { text: "Writing out the SQL schemas or list of tables.", type: "R" },
             { text: "Creating tables in the database admin tool directly.", type: "K" }
         ]
@@ -93,7 +86,7 @@ startBtn.addEventListener('click', () => {
     startScreen.classList.add('hide');
     questionScreen.classList.remove('hide');
     currentQuestionIndex = 0;
-    scores = { V: 0, A: 0, R: 0, K: 0 };
+    scores = { VA: 0, R: 0, K: 0 };
     loadQuestion();
 });
 
@@ -113,6 +106,7 @@ function loadQuestion() {
         const button = document.createElement('button');
         button.innerText = option.text;
         button.classList.add('option-btn');
+        // Pass the new type (VA, R, or K)
         button.addEventListener('click', () => selectOption(option.type));
         optionsList.appendChild(button);
     });
@@ -136,31 +130,27 @@ function showResults() {
     resultScreen.classList.remove('hide');
 
     // Calculate Winner
-    // Sort keys by value descending
     const sortedScores = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
     const winnerType = sortedScores[0];
     
-    // Update UI text
+    // Update UI text for 3 types
     const titles = {
-        'V': 'Visual (Graphics)',
-        'A': 'Aural (Audio)',
-        'R': 'Read/Write (Text)',
+        'VA': 'Visual-Audio',
+        'R': 'Read/Write (Text based)',
         'K': 'Kinesthetic (Hands-on)'
     };
 
     const descriptions = {
-        'V': 'You learn code best by seeing flowcharts, diagrams, and color-coded syntax.',
-        'A': 'You learn code best by listening to lectures, podcasts, and discussing logic with peers.',
-        'R': 'You learn code best by reading documentation, tutorials, and writing your own notes.',
-        'K': 'You learn code best by doing—writing code, breaking it, and fixing it manually.'
+        'VA': 'You learn best by combining sight and sound—watching video tutorials, looking at diagrams while listening to explanations, and discussing code logic with others.',
+        'R': 'You learn code best by reading documentation, tutorials, books, and writing your own detailed notes.',
+        'K': 'You learn code best by doing—writing code immediately, breaking it, debugging it, and learning through trial and error.'
     };
 
     document.getElementById('result-title').innerText = titles[winnerType];
     document.getElementById('result-desc').innerText = descriptions[winnerType];
 
-    // Show breakdown numbers
-    document.getElementById('score-v').innerText = scores['V'];
-    document.getElementById('score-a').innerText = scores['A'];
+    // Show breakdown numbers (Updated IDs)
+    document.getElementById('score-VA').innerText = scores['VA'];
     document.getElementById('score-r').innerText = scores['R'];
     document.getElementById('score-k').innerText = scores['K'];
     

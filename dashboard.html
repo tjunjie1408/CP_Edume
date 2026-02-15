@@ -5,417 +5,238 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Student Dashboard - EduMe Learning System</title>
   <link rel="stylesheet" href="CSS/dashboard.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-  <!-- Navigation Bar -->
-  <nav class="navbar">
-    <div class="nav-container">
-      <div class="logo">
-        <i class="fas fa-book-reader"></i> EduMe
-      </div>
-      <ul class="nav-menu">
-        <li><a href="#dashboard" class="active">Dashboard</a></li>
-        <li><a href="#courses">Courses</a></li>
-        <li><a href="#learning-style">Learning Style</a></li>
-        <li><a href="#profile" class="user-profile">
-          <i class="fas fa-user-circle"></i> Profile
-        </a></li>
-        <li><a href="#logout" class="btn-logout">Logout</a></li>
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <!-- Sidebar Header -->
+    <nav class="sidebar-header">
+      <a href="dashboard.html" class="header-logo">
+        <img src="image/Edume.png" alt="EduMe Logo" class="logo-image">
+        <span class="logo-text">EduMe</span>
+      </a>
+      <button class="sidebar-toggler">
+        <span class="material-symbols-rounded">chevron_left</span>
+      </button>
+    </nav>
+
+    <!-- Sidebar Navigation Menu -->
+    <nav class="sidebar-nav">
+      <!-- Primary Navigation -->
+      <ul class="nav-list primary-nav">
+        <li class="nav-item">
+          <a href="#dashboard" class="nav-link active">
+            <span class="material-symbols-rounded">dashboard</span>
+            <span class="nav-label">Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#courses" class="nav-link">
+            <span class="material-symbols-rounded">school</span>
+            <span class="nav-label">Courses</span>
+          </a>
+        </li>
       </ul>
+
+      <!-- Secondary Navigation -->
+      <ul class="nav-list secondary-nav">
+        <li class="nav-item">
+          <a href="#logout" class="nav-link">
+            <span class="material-symbols-rounded">logout</span>
+            <span class="nav-label">Logout</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Header/Top Navigation Bar -->
+  <header class="top-header">
+    <!-- Mobile Sidebar Menu Button -->
+    <button class="sidebar-menu-button">
+      <span class="material-symbols-rounded">menu</span>
+    </button>
+
+    <div class="header-left">
+      <h1>Welcome Back!</h1>
     </div>
-  </nav>
-
-  <div class="dashboard-container">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <h3>Quick Links</h3>
+    <div class="header-right">
+      <div class="user-info" id="username">
+        <p class="hello">Hello, <span id="user-name">John Doe</span></p>
       </div>
-      <ul class="sidebar-menu">
-        <li><a href="#" onclick="scrollToSection('welcome')"><i class="fas fa-home"></i> Welcome</a></li>
-        <li><a href="#" onclick="scrollToSection('smart-feed')"><i class="fas fa-fire"></i> Smart Feed</a></li>
-        <li><a href="#" onclick="scrollToSection('progress')"><i class="fas fa-chart-line"></i> Progress</a></li>
-        <li><a href="#" onclick="scrollToSection('recent-activity')"><i class="fas fa-history"></i> Recent Activity</a></li>
-        <li><a href="#" onclick="scrollToSection('tailored')"><i class="fas fa-star"></i> Tailored For You</a></li>
-      </ul>
-    </aside>
+      <a href="#profile" class="user-avatar-link">
+        <img src="https://via.placeholder.com/50" alt="User Avatar" class="user-avatar" id="userAvatar">
+      </a>
+    </div>
+  </header>
 
-    <!-- Main Content -->
-    <main class="main-content">
-      <!-- Welcome Banner Section -->
-      <section id="welcome" class="section welcome-banner">
-        <div class="banner-content">
-          <h1>Welcome Back, <span id="user-name">John Doe</span>! 👋</h1>
-          <p>Continue your learning journey and unlock your potential</p>
-          <div class="banner-stats">
-            <div class="stat-box">
-              <span class="stat-number">12</span>
-              <span class="stat-label">Courses Active</span>
-            </div>
-            <div class="stat-box">
-              <span class="stat-number">85%</span>
-              <span class="stat-label">Progress Overall</span>
-            </div>
-            <div class="stat-box">
-              <span class="stat-number">24</span>
-              <span class="stat-label">Days Streak</span>
-            </div>
-            <div class="stat-box">
-              <span class="stat-number">340</span>
-              <span class="stat-label">Points Earned</span>
-            </div>
+  <!-- Main Dashboard Content -->
+  <main class="dashboard-content">
+    <!-- Welcome Banner Section -->
+    <section class="section welcome-banner">
+      <div class="banner-content">
+        <h2>Welcome Back, <span id="banner-user-name">John Doe</span>! 👋</h2>
+        <p>Continue your learning journey and unlock your potential</p>
+        <div class="banner-stats">
+          <div class="stat-box">
+            <span class="stat-number">12</span>
+            <span class="stat-label">Courses Active</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-number">85%</span>
+            <span class="stat-label">Progress Overall</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-number">24</span>
+            <span class="stat-label">Days Streak</span>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- Smart Feed Section -->
-      <section id="smart-feed" class="section">
-        <div class="section-header">
-          <h2><i class="fas fa-feed"></i> Smart Feed</h2>
-          <p>Personalized content based on your learning style and progress</p>
-        </div>
-        <div class="smart-feed-container">
-          <div class="feed-item">
-            <div class="feed-header">
-              <span class="feed-course-badge">Web Development</span>
-              <span class="feed-time">2 hours ago</span>
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+      <!-- Left Column -->
+      <div class="dashboard-column-left">
+        <!-- Smart Feed Section -->
+        <section class="card">
+          <div class="section-header">
+            <h3>Smart Feed</h3>
+          </div>
+          <div class="card-content">
+            <div class="feed-item">
+              <h4>Latest Course Update</h4>
+              <p>New lessons available in "Advanced Web Development"</p>
+              <small>2 hours ago</small>
             </div>
-            <h3>You completed "JavaScript Basics" module</h3>
-            <p>Great job! You've mastered the fundamentals. Ready for advanced topics?</p>
-            <div class="feed-action">
-              <button class="btn btn-primary">Resume Learning</button>
-              <button class="btn btn-secondary">View Certificate</button>
+            <div class="feed-item">
+              <h4>Achievement Unlocked!</h4>
+              <p>You've completed 50% of "React Fundamentals"</p>
+              <small>1 day ago</small>
+            </div>
+            <div class="feed-item">
+              <h4>Streak Milestone!</h4>
+              <p>You've maintained a 7-day learning streak</p>
+              <small>3 days ago</small>
             </div>
           </div>
+        </section>
 
-          <div class="feed-item">
-            <div class="feed-header">
-              <span class="feed-course-badge">Data Science</span>
-              <span class="feed-time">5 hours ago</span>
-            </div>
-            <h3>New course available: "Machine Learning Fundamentals"</h3>
-            <p>Based on your interest in Data Science and your learning style preferences.</p>
-            <div class="feed-action">
-              <button class="btn btn-primary">Explore Course</button>
-            </div>
+        <!-- Progress Section -->
+        <section class="card">
+          <div class="section-header">
+            <h3>Your Progress</h3>
           </div>
-
-          <div class="feed-item">
-            <div class="feed-header">
-              <span class="feed-course-badge">Soft Skills</span>
-              <span class="feed-time">1 day ago</span>
-            </div>
-            <h3>Your study streak is on fire! 🔥</h3>
-            <p>You've maintained a 24-day study streak. Keep it up!</p>
-            <div class="feed-action">
-              <button class="btn btn-secondary">View Achievement</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Progress Tracker Section -->
-      <section id="progress" class="section">
-        <div class="section-header">
-          <h2><i class="fas fa-chart-line"></i> Progress Tracker</h2>
-          <p>Monitor your learning progress across all courses</p>
-        </div>
-        <div class="progress-container">
-          <div class="progress-item">
-            <div class="progress-info">
-              <h3>Web Development Fundamentals</h3>
-              <p>9 of 12 modules completed</p>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" style="width: 75%;"></div>
-            </div>
-            <span class="progress-percentage">75%</span>
-          </div>
-
-          <div class="progress-item">
-            <div class="progress-info">
-              <h3>Python for Data Science</h3>
-              <p>5 of 10 modules completed</p>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" style="width: 50%;"></div>
-            </div>
-            <span class="progress-percentage">50%</span>
-          </div>
-
-          <div class="progress-item">
-            <div class="progress-info">
-              <h3>UI/UX Design Principles</h3>
-              <p>8 of 8 modules completed</p>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" style="width: 100%;"></div>
-            </div>
-            <span class="progress-percentage">100% <i class="fas fa-check-circle"></i></span>
-          </div>
-
-          <div class="progress-item">
-            <div class="progress-info">
-              <h3>Advanced JavaScript</h3>
-              <p>3 of 8 modules completed</p>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" style="width: 37.5%;"></div>
-            </div>
-            <span class="progress-percentage">37.5%</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- Recent Activity Section -->
-      <section id="recent-activity" class="section">
-        <div class="section-header">
-          <h2><i class="fas fa-history"></i> Recent Activity</h2>
-          <p>Your latest learning activities and milestones</p>
-        </div>
-        <div class="activity-container">
-          <div class="activity-item">
-            <div class="activity-icon completed">
-              <i class="fas fa-check"></i>
-            </div>
-            <div class="activity-content">
-              <h4>Completed Quiz: "JavaScript Scope & Closure"</h4>
-              <p>Score: 92/100 | Web Development</p>
-              <span class="activity-time">Today, 2:30 PM</span>
-            </div>
-          </div>
-
-          <div class="activity-item">
-            <div class="activity-icon in-progress">
-              <i class="fas fa-play"></i>
-            </div>
-            <div class="activity-content">
-              <h4>Started Lesson: "Async Programming"</h4>
-              <p>Web Development</p>
-              <span class="activity-time">Today, 1:15 PM</span>
-            </div>
-          </div>
-
-          <div class="activity-item">
-            <div class="activity-icon achieved">
-              <i class="fas fa-trophy"></i>
-            </div>
-            <div class="activity-content">
-              <h4>Achievement Unlocked: "Week Warrior"</h4>
-              <p>Completed 7 consecutive days of learning</p>
-              <span class="activity-time">Yesterday, 11:45 PM</span>
-            </div>
-          </div>
-
-          <div class="activity-item">
-            <div class="activity-icon completed">
-              <i class="fas fa-check"></i>
-            </div>
-            <div class="activity-content">
-              <h4>Completed Module: "ES6 Fundamentals"</h4>
-              <p>Web Development</p>
-              <span class="activity-time">2 days ago, 3:20 PM</span>
-            </div>
-          </div>
-
-          <div class="activity-item">
-            <div class="activity-icon in-progress">
-              <i class="fas fa-pencil"></i>
-            </div>
-            <div class="activity-content">
-              <h4>Submitted Assignment: "Build a Todo App"</h4>
-              <p>Web Development | Waiting for feedback</p>
-              <span class="activity-time">3 days ago, 5:00 PM</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Popular Picks Section -->
-      <section id="popular-picks" class="section">
-        <div class="section-header">
-          <h2><i class="fas fa-fire"></i> Popular Picks</h2>
-          <p>Trending courses trending in the community</p>
-        </div>
-        <div class="courses-grid">
-          <div class="course-card">
-            <div class="course-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
-            <div class="course-content">
-              <span class="course-category">Web Development</span>
-              <h3>React Advanced Patterns</h3>
-              <p>Learn advanced React patterns and best practices</p>
-              <div class="course-meta">
-                <span><i class="fas fa-star"></i> 4.8 (2.5K reviews)</span>
-                <span><i class="fas fa-users"></i> 45K students</span>
+          <div class="card-content">
+            <div class="progress-item">
+              <div class="progress-header">
+                <span class="course-name">React Fundamentals</span>
+                <span class="percentage">65%</span>
               </div>
-              <button class="btn btn-primary">Enroll Now</button>
-            </div>
-          </div>
-
-          <div class="course-card">
-            <div class="course-image" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
-            <div class="course-content">
-              <span class="course-category">Data Science</span>
-              <h3>Machine Learning Basics</h3>
-              <p>Introduction to ML algorithms and applications</p>
-              <div class="course-meta">
-                <span><i class="fas fa-star"></i> 4.9 (3.2K reviews)</span>
-                <span><i class="fas fa-users"></i> 62K students</span>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 65%"></div>
               </div>
-              <button class="btn btn-primary">Enroll Now</button>
             </div>
-          </div>
-
-          <div class="course-card">
-            <div class="course-image" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
-            <div class="course-content">
-              <span class="course-category">UI/UX Design</span>
-              <h3>Figma Masterclass</h3>
-              <p>Master Figma for professional UI/UX design</p>
-              <div class="course-meta">
-                <span><i class="fas fa-star"></i> 4.7 (1.8K reviews)</span>
-                <span><i class="fas fa-users"></i> 32K students</span>
+            <div class="progress-item">
+              <div class="progress-header">
+                <span class="course-name">JavaScript Mastery</span>
+                <span class="percentage">82%</span>
               </div>
-              <button class="btn btn-primary">Enroll Now</button>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 82%"></div>
+              </div>
             </div>
-          </div>
-
-          <div class="course-card">
-            <div class="course-image" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);"></div>
-            <div class="course-content">
-              <span class="course-category">Backend Development</span>
-              <h3>Node.js & Express Complete</h3>
-              <p>Build scalable backend applications with Node.js</p>
-              <div class="course-meta">
-                <span><i class="fas fa-star"></i> 4.8 (2.9K reviews)</span>
-                <span><i class="fas fa-users"></i> 58K students</span>
+            <div class="progress-item">
+              <div class="progress-header">
+                <span class="course-name">Web Design Basics</span>
+                <span class="percentage">45%</span>
               </div>
-              <button class="btn btn-primary">Enroll Now</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Tailored For You Section -->
-      <section id="tailored" class="section">
-        <div class="section-header">
-          <h2><i class="fas fa-sparkles"></i> Tailored For You</h2>
-          <p>Personalized recommendations based on your learning style (VARK: {learningStyle})</p>
-        </div>
-        <div class="tailored-container">
-          <div class="tailored-category">
-            <h3>🎥 Visual Learning</h3>
-            <div class="tailored-items">
-              <div class="tailored-item">
-                <span class="tag">Video Course</span>
-                <h4>Complete Web Design with Animations</h4>
-                <p>Perfect for visual learners - lots of diagrams and demonstrations</p>
-              </div>
-              <div class="tailored-item">
-                <span class="tag">Video Course</span>
-                <h4>Infographic Design Principles</h4>
-                <p>Create stunning visual content</p>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 45%"></div>
               </div>
             </div>
           </div>
+        </section>
+      </div>
 
-          <div class="tailored-category">
-            <h3>👂 Auditory Learning</h3>
-            <div class="tailored-items">
-              <div class="tailored-item">
-                <span class="tag">Podcast Series</span>
-                <h4>Tech Talk Daily Podcast</h4>
-                <p>Daily discussions about latest tech trends</p>
+      <!-- Right Column -->
+      <div class="dashboard-column-right">
+        <!-- Continue Learning Section -->
+        <section class="card">
+          <div class="section-header">
+            <h3>Continue Learning</h3>
+          </div>
+          <div class="card-content">
+            <div class="resume-course-card">
+              <h4>Advanced React Hooks</h4>
+              <p class="course-meta">Module 5 of 12</p>
+              <p class="last-accessed">Last accessed: Yesterday</p>
+              <button class="btn-primary">Resume Course</button>
+            </div>
+            <div class="resume-course-card">
+              <h4>JavaScript ES6 Features</h4>
+              <p class="course-meta">Module 3 of 8</p>
+              <p class="last-accessed">Last accessed: 3 days ago</p>
+              <button class="btn-primary">Resume Course</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Recommended Courses Section -->
+        <section class="card">
+          <div class="section-header">
+            <h3>Tailored For You</h3>
+          </div>
+          <div class="card-content">
+            <div class="course-card">
+              <h4>Vue.js for Beginners</h4>
+              <p class="course-description">Learn Vue.js from scratch and build dynamic web applications.</p>
+              <div class="course-footer">
+                <span class="course-level">Beginner</span>
+                <button class="btn-secondary">Enroll</button>
               </div>
-              <div class="tailored-item">
-                <span class="tag">Audio Lecture</span>
-                <h4>Programming Concepts Explained</h4>
-                <p>In-depth audio lectures with examples</p>
+            </div>
+            <div class="course-card">
+              <h4>Python Data Science</h4>
+              <p class="course-description">Master data analysis and visualization with Python.</p>
+              <div class="course-footer">
+                <span class="course-level">Intermediate</span>
+                <button class="btn-secondary">Enroll</button>
               </div>
             </div>
           </div>
+        </section>
 
-          <div class="tailored-category">
-            <h3>✍️ Reading/Writing Learning</h3>
-            <div class="tailored-items">
-              <div class="tailored-item">
-                <span class="tag">E-Book</span>
-                <h4>Advanced JavaScript Concepts</h4>
-                <p>Comprehensive written guide with code examples</p>
-              </div>
-              <div class="tailored-item">
-                <span class="tag">Blog Series</span>
-                <h4>Web Development Best Practices</h4>
-                <p>In-depth articles on coding practices</p>
-              </div>
-            </div>
+        <!-- Recent Activity Section -->
+        <section class="card">
+          <div class="section-header">
+            <h3>Recent Activity</h3>
           </div>
-
-          <div class="tailored-category">
-            <h3>🧩 Kinesthetic Learning</h3>
-            <div class="tailored-items">
-              <div class="tailored-item">
-                <span class="tag">Interactive Lab</span>
-                <h4>Build Real Projects: E-commerce Platform</h4>
-                <p>Hands-on project-based learning</p>
-              </div>
-              <div class="tailored-item">
-                <span class="tag">Code Challenge</span>
-                <h4>50 JavaScript Challenges</h4>
-                <p>Learn by solving real coding problems</p>
-              </div>
-            </div>
+          <div class="card-content">
+            <ul class="activity-list">
+              <li class="activity-item">
+                <span class="activity-icon">✓</span>
+                <span class="activity-text">Completed "State Management" quiz</span>
+                <small>Today</small>
+              </li>
+              <li class="activity-item">
+                <span class="activity-icon">▶</span>
+                <span class="activity-text">Started "Component Lifecycle" lesson</span>
+                <small>Yesterday</small>
+              </li>
+              <li class="activity-item">
+                <span class="activity-icon">⭐</span>
+                <span class="activity-text">Earned badge "Quick Learner"</span>
+                <small>2 days ago</small>
+              </li>
+            </ul>
           </div>
-        </div>
-      </section>
-
-      <!-- Continue Learning Section -->
-      <section class="section continue-learning">
-        <div class="section-header">
-          <h2><i class="fas fa-bookmark"></i> Continue Learning</h2>
-          <p>Resume your ongoing courses</p>
-        </div>
-        <div class="resume-courses">
-          <div class="resume-course-card">
-            <div class="course-thumbnail">
-              <img src="https://via.placeholder.com/150" alt="Course">
-              <span class="play-button"><i class="fas fa-play"></i></span>
-            </div>
-            <div class="course-info">
-              <h4>Web Development Fundamentals</h4>
-              <p>Current Lesson: "Building Responsive Layouts"</p>
-              <button class="btn btn-primary">Continue</button>
-            </div>
-          </div>
-
-          <div class="resume-course-card">
-            <div class="course-thumbnail">
-              <img src="https://via.placeholder.com/150" alt="Course">
-              <span class="play-button"><i class="fas fa-play"></i></span>
-            </div>
-            <div class="course-info">
-              <h4>Python for Data Science</h4>
-              <p>Current Lesson: "Pandas and Data Manipulation"</p>
-              <button class="btn btn-primary">Continue</button>
-            </div>
-          </div>
-
-          <div class="resume-course-card">
-            <div class="course-thumbnail">
-              <img src="https://via.placeholder.com/150" alt="Course">
-              <span class="play-button"><i class="fas fa-play"></i></span>
-            </div>
-            <div class="course-info">
-              <h4>UI/UX Design Principles</h4>
-              <p>Completed - View Certificate</p>
-              <button class="btn btn-secondary">View Certificate</button>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
+        </section>
+      </div>
+    </div>
+  </main>
 
   <script src="JS/dashboard.js"></script>
 </body>

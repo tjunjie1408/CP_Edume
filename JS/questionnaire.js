@@ -156,6 +156,16 @@ function showResults() {
     
     // Fill progress bar to 100%
     progressBar.style.width = '100%';
+
+    sendAjax("PHP/save_learning_style.php", {
+        learnerType: winnerType
+    }, function(response){
+        if (response.status === 200){
+            console.log("Learning style saved successfully");
+        } else {
+            console.error("Error saving learning style:", response.message);
+        }
+    });
 }
 
 // Restart questionnaire
@@ -163,3 +173,18 @@ restartBtn.addEventListener('click', () => {
     resultScreen.classList.add('hide');
     startScreen.classList.remove('hide');
 });
+
+function sendAjax(url,data,callback){
+    var xhr=new XMLHttpRequest();
+    xhr.open("POST",url,true);
+    xhr.setRequestHeader("Content-Type","application/json");
+    xhr.onreadystatechange=function(){
+        if(xhr.readyState===4){
+            console.log(xhr.responseText);
+            callback(JSON.parse(xhr.responseText));
+        }
+    };
+    xhr.send(JSON.stringify(data));
+}
+
+

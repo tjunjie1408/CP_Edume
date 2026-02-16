@@ -340,6 +340,7 @@ function sendAjax(url,data,callback){
     xhr.setRequestHeader("Content-Type","application/json");
     xhr.onreadystatechange=function(){
         if(xhr.readyState===4){
+            console.log(xhr.responseText);
             callback(JSON.parse(xhr.responseText));
         }
     };

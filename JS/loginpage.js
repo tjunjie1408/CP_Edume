@@ -91,7 +91,16 @@ document.getElementById('forgot-password-email-form').addEventListener('submit',
     
     // Simulate backend API call to verify email
     // In real implementation, this would call your backend API
-    verifyEmailWithBackend(email);
+    // verifyEmailWithBackend(email);
+    sendAjax("PHP/check_email.php",{email:email},function(response){
+        if(response.status===200){
+            forgotPasswordEmailForm.style.left ="-400px";
+            forgotPasswordResetForm.style.left ="50px";
+            document.getElementById('email-display').textContent = 'Reset password for: ' + email;
+        }else{
+            showNotification("Error",response.message,"error");
+        }
+    })
 });
 
 function verifyEmailWithBackend(email) {
@@ -154,12 +163,12 @@ document.getElementById('forgot-password-reset-form').addEventListener('submit',
     submitBtn.textContent = 'Resetting...';
     
     // Simulate backend API call to reset password
-    setTimeout(function() {
+    /**setTimeout(function() {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Reset Password';
+        submitBtn.textContent = 'Reset Password';**/
         
         // Show success message
-        showNotification(
+        /**showNotification(
             'Password Reset Successfully',
             'Your password has been reset. Please log in with your new password.',
             'success',
@@ -168,7 +177,27 @@ document.getElementById('forgot-password-reset-form').addEventListener('submit',
                 backToLogin({preventDefault: function(){}});
             }
         );
-    }, 1500);
+    }, 1500);**/
+    sendAjax("PHP/reset_password.php",{
+        email:forgotPasswordEmail,
+        newPassword:newPassword
+    },function(response){
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Reset Password';
+        if(response.status===200){
+            showNotification(
+                'Password Reset Successfully',
+                response.message,
+                'success',
+                function() {
+                    // Return to login form after confirmation
+                    backToLogin({preventDefault: function(){}});
+                }
+            );
+        }else{
+            showNotification('Error',response.message,'error');
+        }
+    })
 });
 
 // Modal notification functions
@@ -303,3 +332,58 @@ function createShape(container) {
 
     container.appendChild(shape);
 }
+
+// AJAX helper function 
+function sendAjax(url,data,callback){
+    var xhr=new XMLHttpRequest();
+    xhr.open("POST",url,true);
+    xhr.setRequestHeader("Content-Type","application/json");
+    xhr.onreadystatechange=function(){
+        if(xhr.readyState===4){
+            callback(JSON.parse(xhr.responseText));
+        }
+    };
+    xhr.send(JSON.stringify(data));
+}
+
+//SignUp
+registerForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+    sendAjax("PHP/signup.php", {
+        name: document.getElementById("registerName").value,
+        email: document.getElementById("registerEmail").value,
+        password: document.getElementById("registerPassword").value
+    },function(response){
+        if(response.status===201){
+            showNotification("Success",response.message,"success",function(){
+                registerForm.reset();
+                login();
+            });
+        }else{
+            showNotification("Error",response.message,"error");
+        }
+    });
+});
+
+//Login
+loginForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+    sendAjax("PHP/login.php", {
+        email: document.getElementById("loginEmail").value,
+        password: document.getElementById("loginPassword").value
+    },function(response){
+        if(response.status===200){
+            showNotification("Success",response.message,"success",function(){
+                if (response.role===1){//Admin
+                    window.location.href="admin_dashboard.html";
+                }else{
+                    window.location.href="questionnaire.html";
+                }
+            });
+        }else{
+            showNotification("Error",response.message,"error");
+        }
+    });
+});
+
+

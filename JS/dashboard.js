@@ -1,13 +1,18 @@
-// Initialize Dashboard
+// Initialize Shared Layout & Dashboard
 document.addEventListener('DOMContentLoaded', function() {
   loadUserData();
-  setupEventListeners();
-  animateProgressBars();
+  setupSharedEventListeners();
+  
+  // Only run if progress bars exist (Dashboard only)
+  if (document.querySelector('.progress-fill')) {
+    animateProgressBars();
+  }
+  
   setupSidebarToggle();
   setupMobileMenu();
 });
 
-// Load User Data
+// Load User Data (Safe for both pages)
 function loadUserData() {
   const userData = {
     name: 'John Doe',
@@ -16,15 +21,19 @@ function loadUserData() {
     profilePicture: 'https://via.placeholder.com/50'
   };
 
-  document.getElementById('user-name').textContent = userData.name;
-  document.getElementById('banner-user-name').textContent = userData.name;
+  const userNameEl = document.getElementById('user-name');
+  const bannerUserNameEl = document.getElementById('banner-user-name');
+
+  // Only update if the elements exist on the current HTML page
+  if (userNameEl) userNameEl.textContent = userData.name;
+  if (bannerUserNameEl) bannerUserNameEl.textContent = userData.name;
   
   sessionStorage.setItem('userData', JSON.stringify(userData));
 }
 
-// Setup Event Listeners
-function setupEventListeners() {
-  // Navigation Links
+// Setup Shared Event Listeners
+function setupSharedEventListeners() {
+  // Navigation Links (Shared)
   document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', function(e) {
       if (this.getAttribute('href') === '#logout') {
@@ -34,15 +43,17 @@ function setupEventListeners() {
     });
   });
 
-  // Course Enrollment Buttons
+  // Course Enrollment Buttons (Dashboard only)
   document.querySelectorAll('.btn-secondary').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const courseName = this.closest('.course-card').querySelector('h4').textContent;
-      enrollCourse(courseName);
-    });
+    if (btn.closest('.course-card')) {
+      btn.addEventListener('click', function() {
+        const courseName = this.closest('.course-card').querySelector('h4').textContent;
+        enrollCourse(courseName);
+      });
+    }
   });
 
-  // Continue Learning Buttons
+  // Continue Learning Buttons (Dashboard only)
   document.querySelectorAll('.resume-course-card .btn-primary').forEach(btn => {
     btn.addEventListener('click', function() {
       const courseName = this.closest('.resume-course-card').querySelector('h4').textContent;
@@ -51,14 +62,13 @@ function setupEventListeners() {
   });
 }
 
-// Sidebar Toggle Functionality - Desktop Only
+// Sidebar Toggle Functionality (Fixed 768px Breakpoint)
 function setupSidebarToggle() {
   const sidebar = document.querySelector('.sidebar');
   const toggleBtn = document.querySelector('.sidebar-toggler');
   
   if (toggleBtn) {
     toggleBtn.addEventListener('click', function() {
-      // Only toggle collapse on desktop (width > 768px)
       if (window.innerWidth > 768) {
         sidebar.classList.toggle('collapsed');
         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
@@ -66,13 +76,12 @@ function setupSidebarToggle() {
     });
   }
 
-  // Restore sidebar state on desktop only
   if (window.innerWidth > 768 && localStorage.getItem('sidebarCollapsed') === 'true') {
     sidebar.classList.add('collapsed');
   }
 }
 
-// Mobile Menu Setup
+// Mobile Menu Setup (Fixed 768px Breakpoint)
 function setupMobileMenu() {
   const menuBtn = document.querySelector('.sidebar-menu-button');
   const sidebar = document.querySelector('.sidebar');
@@ -83,7 +92,6 @@ function setupMobileMenu() {
       sidebar.classList.toggle('active');
     });
 
-    // Close sidebar when clicking on a link
     document.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', function() {
         if (window.innerWidth <= 768) {
@@ -93,7 +101,6 @@ function setupMobileMenu() {
     });
   }
 
-  // Close sidebar when clicking outside (mobile only)
   document.addEventListener('click', function(e) {
     const isClickOnSidebar = e.target.closest('.sidebar');
     const isClickOnMenuBtn = e.target.closest('.sidebar-menu-button');
@@ -147,7 +154,7 @@ function handleLogout() {
   }
 }
 
-// Notification System
+// Notification System (Shared)
 function showNotification(message, type = 'info') {
   const notification = document.createElement('div');
   notification.className = `notification notification-${type}`;
@@ -156,13 +163,14 @@ function showNotification(message, type = 'info') {
     position: fixed;
     top: 80px;
     right: 20px;
-    background: ${type === 'success' ? '#48dbfb' : '#667eea'};
+    background: ${type === 'success' ? '#48dbfb' : type === 'error' ? '#ff6b6b' : '#667eea'};
     color: white;
     padding: 1rem 1.5rem;
     border-radius: 8px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     animation: slideIn 0.3s ease-in-out;
+    max-width: 90%;
   `;
 
   document.body.appendChild(notification);
@@ -173,38 +181,21 @@ function showNotification(message, type = 'info') {
   }, 3000);
 }
 
-// Add animation styles
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes slideIn {
-    from {
-      transform: translateX(400px);
-      opacity: 0;
+// Add animation styles for notifications
+if (!document.getElementById('notification-styles')) {
+  const style = document.createElement('style');
+  style.id = 'notification-styles';
+  style.textContent = `
+    @keyframes slideIn {
+      from { transform: translateX(400px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
-    to {
-      transform: translateX(0);
-      opacity: 1;
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(400px); opacity: 0; }
     }
-  }
-
-  @keyframes slideOut {
-    from {
-      transform: translateX(0);
-      opacity: 1;
-    }
-    to {
-      transform: translateX(400px);
-      opacity: 0;
-    }
-  }
-`;
-document.head.appendChild(style);
-
-// Real-time Updates
-function setupRealtimeUpdates() {
-  setInterval(() => {
-    console.log('Checking for updates...');
-  }, 30000);
+  `;
+  document.head.appendChild(style);
 }
 
 // Search Functionality
@@ -223,19 +214,12 @@ function searchCourses(query) {
 // Handle window resize for responsive behavior
 window.addEventListener('resize', function() {
   const sidebar = document.querySelector('.sidebar');
-  
-  // On desktop (> 768px)
   if (window.innerWidth > 768) {
-    // Remove mobile active state
     sidebar.classList.remove('active');
-    // Restore collapsed state if it was saved
     if (localStorage.getItem('sidebarCollapsed') === 'true') {
       sidebar.classList.add('collapsed');
     }
-  } 
-  // On mobile (≤ 768px)
-  else {
-    // Remove collapsed state on mobile
+  } else {
     sidebar.classList.remove('collapsed');
   }
 });
@@ -243,15 +227,11 @@ window.addEventListener('resize', function() {
 // Initial check on page load
 window.addEventListener('load', function() {
   const sidebar = document.querySelector('.sidebar');
-  
-  // On desktop
   if (window.innerWidth > 768) {
     if (localStorage.getItem('sidebarCollapsed') === 'true') {
       sidebar.classList.add('collapsed');
     }
-  } 
-  // On mobile
-  else {
+  } else {
     sidebar.classList.remove('collapsed', 'active');
   }
 });

@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
   loadProfileData();
   setupProfileEventListeners();
   setupTabNavigation();
+  setupAvatarUpload();
 });
 
 // Load Profile Data
@@ -116,6 +117,153 @@ function setupTabNavigation() {
   });
 }
 
+// ============================================
+// AVATAR UPLOAD FEATURE
+// ============================================
+
+// Setup Avatar Upload
+function setupAvatarUpload() {
+  const avatarEditBtn = document.getElementById('avatar-edit-btn');
+  const avatarFileInput = document.getElementById('avatar-file-input');
+
+  if (avatarEditBtn) {
+    avatarEditBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      avatarFileInput.click();
+    });
+  }
+
+  if (avatarFileInput) {
+    avatarFileInput.addEventListener('change', handleAvatarChange);
+  }
+}
+
+// Handle Avatar File Change
+function handleAvatarChange(event) {
+  const file = event.target.files[0];
+
+  if (!file) return;
+
+  // Validate file type
+  if (!file.type.startsWith('image/')) {
+    showNotification('Please select an image file', 'error');
+    return;
+  }
+
+  // Validate file size (max 5MB)
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  if (file.size > maxSize) {
+    showNotification('File size must be less than 5MB', 'error');
+    return;
+  }
+
+  // Read file and convert to base64
+  const reader = new FileReader();
+  
+  reader.onload = function(e) {
+    const base64Image = e.target.result;
+
+    // Update avatar in profile
+    updateAvatar(base64Image);
+
+    // Save to localStorage
+    saveAvatarToStorage(base64Image);
+
+    // Show success message
+    showNotification('Avatar updated successfully!', 'success');
+  };
+
+  reader.onerror = function() {
+    showNotification('Error reading file', 'error');
+  };
+
+  reader.readAsDataURL(file);
+
+  // Reset file input
+  event.target.value = '';
+}
+
+// Update Avatar Display
+function updateAvatar(imageData) {
+  const profileAvatar = document.getElementById('profileAvatar');
+  const userAvatar = document.getElementById('userAvatar');
+
+  if (profileAvatar) {
+    profileAvatar.src = imageData;
+  }
+
+  if (userAvatar) {
+    userAvatar.src = imageData;
+  }
+}
+
+// Save Avatar to Storage
+function saveAvatarToStorage(imageData) {
+  const savedData = localStorage.getItem('profileData');
+  const profileData = savedData ? JSON.parse(savedData) : {};
+
+  profileData.avatar = imageData;
+
+  localStorage.setItem('profileData', JSON.stringify(profileData));
+}
+
+// Show Notification
+function showNotification(message, type = 'info') {
+  // Add animation styles if not already present
+  if (!document.getElementById('notification-animations')) {
+    const style = document.createElement('style');
+    style.id = 'notification-animations';
+    style.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(400px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(400px); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  const notification = document.createElement('div');
+  notification.className = `notification notification-${type}`;
+  notification.textContent = message;
+  
+  // Determine background color based on type
+  let bgColor = '#667eea'; // info
+  if (type === 'success') bgColor = '#48dbfb';
+  if (type === 'error') bgColor = '#ff6b6b';
+  if (type === 'warning') bgColor = '#ffa502';
+
+  notification.style.cssText = `
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: ${bgColor};
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    animation: slideIn 0.3s ease-in-out;
+    max-width: 90%;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+  `;
+
+  document.body.appendChild(notification);
+
+  setTimeout(() => {
+    notification.style.animation = 'slideOut 0.3s ease-in-out';
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
+}
+
+// ============================================
+// PROFILE EDITING FUNCTIONS
+// ============================================
+
 // Switch to Edit Mode - Personal Information
 function switchToEdit() {
   const viewMode = document.getElementById("viewMode");
@@ -186,12 +334,12 @@ function saveChanges() {
   const experience = document.getElementById("e-experience").value;
 
   if (!username || !email || !learningStyle || !experience) {
-    alert('Please fill in all fields');
+    showNotification('Please fill in all fields', 'warning');
     return;
   }
 
   if (!isValidEmail(email)) {
-    alert('Please enter a valid email address');
+    showNotification('Please enter a valid email address', 'error');
     return;
   }
 
@@ -213,7 +361,7 @@ function saveChanges() {
   if (viewMode) viewMode.classList.remove("hidden");
   if (editMode) editMode.classList.add("hidden");
 
-  alert('Profile updated successfully!');
+  showNotification('Profile updated successfully!', 'success');
 }
 
 // Save Skills
@@ -221,14 +369,14 @@ function saveSkills() {
   const skillsInput = document.getElementById("e-skills").value.trim();
 
   if (!skillsInput) {
-    alert('Please enter at least one skill');
+    showNotification('Please enter at least one skill', 'warning');
     return;
   }
 
   const skills = skillsInput.split(',').map(skill => skill.trim()).filter(skill => skill);
 
   if (skills.length === 0) {
-    alert('Please enter at least one valid skill');
+    showNotification('Please enter at least one valid skill', 'warning');
     return;
   }
 
@@ -247,7 +395,7 @@ function saveSkills() {
   if (viewMode) viewMode.classList.remove("hidden");
   if (editMode) editMode.classList.add("hidden");
 
-  alert('Skills updated successfully!');
+  showNotification('Skills updated successfully!', 'success');
 }
 
 // Save Bio
@@ -255,12 +403,12 @@ function saveBio() {
   const bio = document.getElementById("e-bio").value.trim();
 
   if (!bio) {
-    alert('Please enter your bio');
+    showNotification('Please enter your bio', 'warning');
     return;
   }
 
   if (bio.length > 500) {
-    alert('Bio must be 500 characters or less');
+    showNotification('Bio must be 500 characters or less', 'error');
     return;
   }
 
@@ -279,7 +427,7 @@ function saveBio() {
   if (viewMode) viewMode.classList.remove("hidden");
   if (editMode) editMode.classList.add("hidden");
 
-  alert('Bio updated successfully!');
+  showNotification('Bio updated successfully!', 'success');
 }
 
 // Email Validation

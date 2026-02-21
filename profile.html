@@ -81,7 +81,14 @@
       <div class="profile-header">
         <div class="profile-header-background"></div>
         <div class="profile-header-content">
-          <img src="https://via.placeholder.com/120" alt="Profile Avatar" class="profile-avatar" id="profileAvatar">
+          <!-- In the profile-header-content section, modify the avatar part -->
+          <div class="profile-avatar-wrapper">
+            <img src="https://via.placeholder.com/120" alt="Profile Avatar" class="profile-avatar" id="profileAvatar">
+            <button class="avatar-edit-btn" id="avatar-edit-btn" title="Change Avatar">
+              <span class="material-symbols-rounded">edit</span>
+            </button>
+            <input type="file" id="avatar-file-input" accept="image/*" style="display: none;">
+          </div>
           <div class="profile-info-header">
             <h2 id="profile-username">John Doe</h2>
             <p id="profile-email" class="profile-email">john@example.com</p>

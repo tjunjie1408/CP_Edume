@@ -176,22 +176,82 @@
 
           <!-- Skills Section -->
           <div class="profile-section">
-            <h3>My Skills</h3>
-            <div class="skills-container">
-              <div class="skill-badge">React</div>
-              <div class="skill-badge">JavaScript</div>
-              <div class="skill-badge">CSS</div>
-              <div class="skill-badge">HTML5</div>
-              <div class="skill-badge">Node.js</div>
-              <div class="skill-badge">Web Design</div>
+            <div class="section-header">
+              <h3>My Skills</h3>
+              <button class="edit-profile-btn" id="edit-skills-btn">
+                <span class="material-symbols-rounded">edit</span>
+                Edit
+              </button>
+            </div>
+            
+            <!-- Skills View Mode -->
+            <div id="skillsViewMode">
+              <div class="skills-container" id="skillsView">
+                <div class="skill-badge">React</div>
+                <div class="skill-badge">JavaScript</div>
+                <div class="skill-badge">CSS</div>
+                <div class="skill-badge">HTML5</div>
+                <div class="skill-badge">Node.js</div>
+                <div class="skill-badge">Web Design</div>
+              </div>
+            </div>
+
+            <!-- Skills Edit Mode -->
+            <div id="skillsEditMode" class="edit-mode hidden">
+              <form class="edit-form">
+                <div class="form-group">
+                  <label for="e-skills">My Skills</label>
+                  <textarea id="e-skills" placeholder="Enter skills separated by comma&#10;Example: React, JavaScript, CSS" rows="4"></textarea>
+                </div>
+                <div class="form-actions">
+                  <button type="button" class="btn-save" onclick="saveSkills()">
+                    <span class="material-symbols-rounded">check</span>
+                    Save Skills
+                  </button>
+                  <button type="button" class="btn-cancel" onclick="cancelEditSkills()">
+                    <span class="material-symbols-rounded">close</span>
+                    Cancel
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
 
           <!-- Bio Section -->
           <div class="profile-section">
-            <h3>About Me</h3>
-            <div class="bio-content">
-              <p id="profile-bio">I'm a passionate learner interested in web development and programming. Always looking to improve my skills and stay updated with the latest technologies.</p>
+            <div class="section-header">
+              <h3>About Me</h3>
+              <button class="edit-profile-btn" id="edit-bio-btn">
+                <span class="material-symbols-rounded">edit</span>
+                Edit
+              </button>
+            </div>
+            
+            <!-- Bio View Mode -->
+            <div id="bioViewMode">
+              <div class="bio-content">
+                <p id="profile-bio">I'm a passionate learner interested in web development and programming. Always looking to improve my skills and stay updated with the latest technologies.</p>
+              </div>
+            </div>
+
+            <!-- Bio Edit Mode -->
+            <div id="bioEditMode" class="edit-mode hidden">
+              <form class="edit-form">
+                <div class="form-group">
+                  <label for="e-bio">About Me</label>
+                  <textarea id="e-bio" placeholder="Tell us about yourself..." rows="5"></textarea>
+                </div>
+                <div class="form-actions">
+                  <button type="button" class="btn-save" onclick="saveBio()">
+                    <span class="material-symbols-rounded">check</span>
+                    Save Bio
+                  </button>
+                  <button type="button" class="btn-cancel" onclick="cancelEditBio()">
+                    <span class="material-symbols-rounded">close</span>
+                    Cancel
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
@@ -257,6 +317,7 @@
             </div>
           </div>
         </div>
+      </div>
     </div>
   </main>
 

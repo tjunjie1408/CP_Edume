@@ -49,7 +49,6 @@ body {
   background: linear-gradient(135deg, #F1F3FF 0%, #cbd4ff8a 100%);
   color: var(--text-dark);
   line-height: 1.6;
-  min-height: 100vh;
 }
 
 /* ============================================

@@ -34,22 +34,38 @@ function setupCourseEventListeners() {
   });
 }
 
+// Course page mapping
+const coursePageMap = {
+  'Python': 'python.html',
+  'PHP': 'php.html',
+  'JavaScript': 'javascript.html',
+  'Docker': 'docker.html',
+  'C++': 'cpp.html',
+  'CSS': 'css.html',
+  'Rust': 'rust.html',
+  'Golang': 'golang.html',
+  'HTML': 'html.html',
+  'TailWind': 'tailwind.html',
+  'NextJS': 'nextjs.html',
+  'Networking': 'networking.html'
+};
+
 // Enroll Course Function
 function enrollCourse(courseName) {
   // Get enrolled courses from localStorage
   const enrolledCourses = JSON.parse(localStorage.getItem('enrolledCourses')) || [];
 
   // Check if already enrolled
-  if (enrolledCourses.includes(courseName)) {
-    alert(`You are already enrolled in ${courseName}!`);
-    return;
+  const isAlreadyEnrolled = enrolledCourses.includes(courseName);
+  
+  if (!isAlreadyEnrolled) {
+    // Add to enrolled courses only if not already enrolled
+    enrolledCourses.push(courseName);
+    localStorage.setItem('enrolledCourses', JSON.stringify(enrolledCourses));
+    console.log('Enrolled courses:', enrolledCourses);
   }
 
-  // Add to enrolled courses
-  enrolledCourses.push(courseName);
-  localStorage.setItem('enrolledCourses', JSON.stringify(enrolledCourses));
-
-  // Optional: Add visual feedback
+  // Add visual feedback
   const card = document.querySelector(`[data-language="${courseName}"]`);
   if (card) {
     card.style.animation = 'pulse 0.6s ease';
@@ -58,7 +74,10 @@ function enrollCourse(courseName) {
     }, 600);
   }
 
-  console.log('Enrolled courses:', enrolledCourses);
+  // Navigate to course page
+  if (coursePageMap[courseName]) {
+    window.location.href = coursePageMap[courseName];
+  }
 }
 
 // Get enrolled courses

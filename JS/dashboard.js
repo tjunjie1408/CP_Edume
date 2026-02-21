@@ -1,6 +1,7 @@
 // Initialize Shared Layout & Dashboard
 document.addEventListener('DOMContentLoaded', function() {
   loadUserData();
+  setActiveNav();
   setupSharedEventListeners();
   
   // Only run if progress bars exist (Dashboard only)
@@ -11,6 +12,23 @@ document.addEventListener('DOMContentLoaded', function() {
   setupSidebarToggle();
   setupMobileMenu();
 });
+
+// Set Active Navigation Link
+function setActiveNav() {
+  const currentPage = window.location.pathname.split('/').pop();
+  const navLinks = document.querySelectorAll('.nav-link');
+  
+  navLinks.forEach(link => {
+    const navItem = link.closest('.nav-item');
+    const href = link.getAttribute('href');
+    
+    if (href === currentPage) {
+      navItem.classList.add('active');
+    } else {
+      navItem.classList.remove('active');
+    }
+  });
+}
 
 // Load User Data (Safe for both pages)
 function loadUserData() {

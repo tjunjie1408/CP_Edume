@@ -1,3 +1,7 @@
+// ============================================
+// PYTHON COURSE - MAIN SCRIPT WITH REPORT
+// ============================================
+
 // Python Course Data - Three Chapters: Intro, Syntax, Output
 
 const courseChapters = {
@@ -27,7 +31,6 @@ const courseChapters = {
       <h4>Getting Started</h4>
       <p>Python is available for Windows, Mac, and Linux. You can download it from python.org and install it on your computer. Once installed, you can run Python scripts from the command line or use an Integrated Development Environment (IDE) like PyCharm or VS Code.</p>
     `,
-    // Learning Style Resources
     resources: {
       VA: [
         {
@@ -175,26 +178,22 @@ name = "John"
 print("Hello " + name)</code></pre>
       
       <h4>String Formatting</h4>
-      <p>Python provides several ways to format strings.</p>
-      <pre><code># Using f-strings (Python 3.6+)
-name = "John"
+      <p>Use f-strings for modern Python 3.6+ to format strings easily.</p>
+      <pre><code>name = "John"
 age = 25
-print(f"My name is {name} and I am {age} years old")
-
-# Using format()
-print("My name is {} and I am {} years old".format("John", 25))</code></pre>
+print(f"My name is {name} and I am {age} years old")</code></pre>
       
       <h4>Escape Characters</h4>
-      <p>Escape characters allow you to include special characters in strings.</p>
-      <pre><code>print("Line 1\\nLine 2")    # Newline
-print("Tab\\there")        # Tab
-print("Quote: \\"Hello\\"")   # Quote</code></pre>
+      <p>Use escape characters to include special characters in strings.</p>
+      <pre><code>print("Hello\\nWorld")  # New line
+print("Hello\\tWorld")  # Tab
+print("Hello\\"World")  # Quote</code></pre>
     `,
     resources: {
       VA: [
         {
-          title: "Python print() Function",
-          description: "Learn how to output data using the print() function",
+          title: "Python Output & Print Function",
+          description: "Learn various ways to output data in Python",
           url: "https://www.youtube.com/embed/EL0v8CvJjzs",
           duration: "15 minutes",
           type: "video"
@@ -238,25 +237,32 @@ let exerciseAnswers = [];
 let quizStarted = false;
 let correctAnswersCount = 0;
 let answerReviewed = false;
-let userLearningStyle = 'V'; // Default to Visual, will be loaded from sessionStorage
+let userLearningStyle = 'V';
 let chapterProgress = {
   1: { completed: false, score: 0 },
   2: { completed: false, score: 0 },
   3: { completed: false, score: 0 }
 };
 
-// Initialize
+// ============================================
+// INITIALIZATION
+// ============================================
+
 document.addEventListener('DOMContentLoaded', () => {
   console.log('DOM loaded');
   loadUserLearningStyle();
   console.log('User learning style:', userLearningStyle);
   setupPythonPageEventListeners();
+  setupReportForm();
   loadChapter(1);
   loadStoredProgress();
 });
 
+// ============================================
+// PYTHON COURSE FUNCTIONS
+// ============================================
+
 function loadUserLearningStyle() {
-  // Try to get learning style from sessionStorage (set by VARK test)
   const userData = sessionStorage.getItem('userData');
   console.log('userData from sessionStorage:', userData);
   
@@ -270,8 +276,7 @@ function loadUserLearningStyle() {
       userLearningStyle = 'V';
     }
   } else {
-    // For testing - change this to test different learning styles
-    userLearningStyle = 'V'; // Change to 'A', 'R', or 'K' to test
+    userLearningStyle = 'V';
     console.log('No userData found, using default:', userLearningStyle);
   }
   
@@ -281,7 +286,6 @@ function loadUserLearningStyle() {
 function setupPythonPageEventListeners() {
   console.log('Setting up event listeners');
   
-  // Chapter selection
   document.querySelectorAll('.subject-item').forEach(item => {
     item.addEventListener('click', function() {
       const chapterId = parseInt(this.dataset.subject);
@@ -290,7 +294,6 @@ function setupPythonPageEventListeners() {
     });
   });
 
-  // Quiz controls
   const startQuizBtn = document.getElementById('startQuizBtn');
   if (startQuizBtn) {
     startQuizBtn.addEventListener('click', () => {
@@ -310,7 +313,6 @@ function setupPythonPageEventListeners() {
 function selectChapter(chapterId) {
   console.log('Selecting chapter:', chapterId);
   
-  // Update active state
   document.querySelectorAll('.subject-item').forEach(item => {
     item.classList.remove('active');
   });
@@ -330,28 +332,28 @@ function loadChapter(chapterId) {
 
   currentChapter = chapterId;
 
-  // Update content
   document.getElementById('contentTitle').textContent = chapter.title;
   document.querySelector('.level-badge').textContent = chapter.level;
   document.getElementById('contentOverview').textContent = chapter.overview;
 
-  // Update objectives
   const objectivesList = document.getElementById('learningObjectives');
   objectivesList.innerHTML = chapter.objectives.map(obj => `<li>${obj}</li>`).join('');
 
-  // Update lesson content
   document.getElementById('lessonContent').innerHTML = chapter.content;
 
-  // Setup resources based on learning style
   console.log('Setting up resources section');
   setupResourcesSection(chapter);
 
-  // Reset quiz
   resetQuiz();
   
-  // Hide quiz section
   document.getElementById('quizWrapper').style.display = 'none';
   document.getElementById('startQuizSection').style.display = 'block';
+
+  // Update report location
+  const reportLocation = document.getElementById('reportLocation');
+  if (reportLocation) {
+    reportLocation.value = chapter.title;
+  }
 }
 
 function setupResourcesSection(chapter) {
@@ -371,14 +373,11 @@ function setupResourcesSection(chapter) {
     return;
   }
 
-  // Clear previous content
   resourcesContainer.innerHTML = '';
 
   console.log('Resources data:', chapter.resources);
 
-  // Determine which resources to show based on learning style
   if (userLearningStyle === 'V' || userLearningStyle === 'A') {
-    // Visual and Aural learners: Show videos
     console.log('Showing video resources');
     const videoResources = chapter.resources.VA || [];
     console.log('Video resources:', videoResources);
@@ -394,14 +393,12 @@ function setupResourcesSection(chapter) {
     }
   } 
   else if (userLearningStyle === 'R') {
-    // Reading/Writing learners: Hide resources section
     console.log('Hiding resources for R learner');
     if (learningResourcesSection) {
       learningResourcesSection.style.display = 'none';
     }
   } 
   else if (userLearningStyle === 'K') {
-    // Kinesthetic learners: Show interactive button
     console.log('Showing kinesthetic resources');
     const kinestheticResource = chapter.resources.K;
     console.log('Kinesthetic resource:', kinestheticResource);
@@ -483,7 +480,6 @@ function startExercises(chapterId) {
   answerReviewed = false;
   exerciseAnswers = new Array(chapter.exercises.length).fill(null);
 
-  // Show quiz wrapper
   document.getElementById('quizWrapper').style.display = 'block';
   document.getElementById('startQuizSection').style.display = 'none';
 
@@ -495,7 +491,6 @@ function startExercises(chapterId) {
 
   loadQuestion(0, chapter);
 
-  // Scroll to quiz
   document.getElementById('quizWrapper').scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -505,23 +500,18 @@ function loadQuestion(questionIndex, chapter) {
   document.getElementById('quizQuestion').textContent = exercise.question;
   document.getElementById('questionNumber').textContent = `Question ${questionIndex + 1} of ${chapter.exercises.length}`;
 
-  // Update progress bar
   const progressPercent = ((questionIndex + 1) / chapter.exercises.length) * 100;
   document.getElementById('quizProgressFill').style.width = progressPercent + '%';
 
-  // Clear options
   const optionsContainer = document.getElementById('quizOptions');
   optionsContainer.innerHTML = '';
 
-  // Clear feedback
   const feedbackElement = document.getElementById('quizFeedback');
   feedbackElement.classList.remove('show', 'correct', 'incorrect');
   feedbackElement.textContent = '';
 
-  // Reset answer review flag
   answerReviewed = false;
 
-  // Load options
   exercise.options.forEach((option, index) => {
     const div = document.createElement('div');
     div.className = 'quiz-option';
@@ -546,7 +536,6 @@ function loadQuestion(questionIndex, chapter) {
     optionsContainer.appendChild(div);
   });
 
-  // Update button states
   document.getElementById('prevBtn').disabled = questionIndex === 0;
   updateNextButtonState();
 }
@@ -590,7 +579,6 @@ function updateNextButtonState() {
     submitBtn.style.opacity = '1';
     nextBtn.title = '';
 
-    // Show submit button on last question
     if (currentQuestion === chapter.exercises.length - 1) {
       nextBtn.style.display = 'none';
       submitBtn.style.display = 'inline-block';
@@ -604,7 +592,6 @@ function updateNextButtonState() {
 function nextQuestion() {
   const chapter = courseChapters[currentChapter];
   
-  // Check if answer is selected
   if (exerciseAnswers[currentQuestion] === null) {
     alert('Please answer the question before moving to the next one.');
     return;
@@ -627,13 +614,11 @@ function previousQuestion() {
 function submitExercises() {
   const chapter = courseChapters[currentChapter];
   
-  // Check if all questions are answered
   if (exerciseAnswers.includes(null)) {
     alert('Please answer all questions before submitting.');
     return;
   }
 
-  // Calculate correct answers
   let correctCount = 0;
   chapter.exercises.forEach((exercise, index) => {
     if (exerciseAnswers[index] === exercise.correct) {
@@ -643,26 +628,20 @@ function submitExercises() {
 
   const percentage = Math.round((correctCount / chapter.exercises.length) * 100);
 
-  // Update progress
   chapterProgress[currentChapter] = {
     completed: true,
     score: percentage
   };
 
-  // Save progress
   saveProgress();
-  
-  // Update UI
   updateChapterProgress(currentChapter, percentage);
 
-  // Show results
   document.querySelector('.quiz-content').style.display = 'none';
   document.querySelector('.quiz-results').style.display = 'block';
 
   document.getElementById('finalScore').textContent = `${correctCount} / ${chapter.exercises.length}`;
   document.getElementById('scorePercentage').textContent = `${percentage}%`;
 
-  // Update results breakdown
   const incorrectCount = chapter.exercises.length - correctCount;
   const correctItem = document.querySelector('.result-item.correct');
   const incorrectItem = document.querySelector('.result-item.incorrect');
@@ -677,7 +656,6 @@ function submitExercises() {
     <span class="result-text">${incorrectCount} Incorrect Answer${incorrectCount !== 1 ? 's' : ''}</span>
   `;
 
-  // Set performance message
   setPerformanceMessage(percentage);
 }
 
@@ -700,15 +678,12 @@ function updateChapterProgress(chapterId, score) {
   const subjectItem = document.querySelector(`[data-subject="${chapterId}"]`);
   if (!subjectItem) return;
 
-  // Update progress bar
   const progressFill = subjectItem.querySelector('.progress-fill');
   progressFill.style.width = score + '%';
 
-  // Update progress text
   const progressText = subjectItem.querySelector('.progress-text');
   progressText.textContent = score + '%';
 
-  // Update status badge
   const statusBadge = subjectItem.querySelector('.status-badge');
   if (score === 100) {
     statusBadge.className = 'status-badge completed';
@@ -743,32 +718,160 @@ function resetQuiz() {
   quizStarted = false;
 }
 
-function scrollToQuiz() {
-  document.getElementById('startQuizBtn').click();
-}
-
-// Save progress to localStorage
 function saveProgress() {
   localStorage.setItem('pythonProgress', JSON.stringify(chapterProgress));
+  console.log('Progress saved:', chapterProgress);
 }
 
-// Load stored progress
 function loadStoredProgress() {
-  const savedProgress = localStorage.getItem('pythonProgress');
-  if (savedProgress) {
-    chapterProgress = JSON.parse(savedProgress);
-    
-    // Update UI with saved progress
-    Object.keys(chapterProgress).forEach(chapterId => {
-      if (chapterProgress[chapterId].completed) {
-        updateChapterProgress(parseInt(chapterId), chapterProgress[chapterId].score);
-      }
+  const stored = localStorage.getItem('pythonProgress');
+  if (stored) {
+    chapterProgress = JSON.parse(stored);
+    Object.keys(chapterProgress).forEach(key => {
+      const score = chapterProgress[key].score;
+      updateChapterProgress(parseInt(key), score);
     });
   }
 }
 
-// Auto-load first chapter
-window.addEventListener('load', () => {
-  console.log('Window load event');
-  loadChapter(1);
-});
+// ============================================
+// REPORT FORM FUNCTIONS
+// ============================================
+
+function setupReportForm() {
+  const reportForm = document.getElementById('reportForm');
+  const reportContent = document.getElementById('reportContent');
+  const charCount = document.getElementById('charCount');
+  const reportLocation = document.getElementById('reportLocation');
+
+  if (!reportForm) return;
+
+  // Set initial chapter
+  const contentTitle = document.getElementById('contentTitle');
+  if (contentTitle && !reportLocation.value) {
+    reportLocation.value = contentTitle.textContent;
+  }
+
+  // Character counter
+  if (reportContent) {
+    reportContent.addEventListener('input', function() {
+      charCount.textContent = this.value.length;
+      
+      if (this.value.length > 300) {
+        this.value = this.value.substring(0, 300);
+        charCount.textContent = '300';
+      }
+    });
+  }
+
+  // Form submission
+  reportForm.addEventListener('submit', handleReportSubmit);
+}
+
+async function handleReportSubmit(e) {
+  e.preventDefault();
+
+  const reportType = document.getElementById('reportType').value;
+  const reportContent = document.getElementById('reportContent').value.trim();
+  const reportLocation = document.getElementById('reportLocation').value.trim();
+  const courseName = document.getElementById('contentTitle')?.textContent || 'Python Course';
+  
+  if (!reportType) {
+    showReportStatus('Please select a report type', 'error');
+    return;
+  }
+
+  if (!reportContent || reportContent.length < 5) {
+    showReportStatus('Please provide at least 5 characters', 'error');
+    return;
+  }
+
+  try {
+    const submitBtn = e.target.querySelector('.btn-report-submit');
+    const originalHTML = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="material-symbols-rounded" style="animation: spin 1s linear infinite;">hourglass_empty</span>Submitting...';
+
+    const userData = JSON.parse(sessionStorage.getItem('userData') || '{}');
+
+    const reportData = {
+      id: Date.now(),
+      userName: userData.name || 'Anonymous User',
+      userEmail: userData.email || 'user@example.com',
+      course: courseName,
+      reportType: reportType,
+      content: reportContent,
+      location: reportLocation,
+      submitDate: new Date().toISOString(),
+      status: 'pending',
+      notes: ''
+    };
+
+    saveReportToStorage(reportData);
+
+    showReportStatus('✓ Report submitted successfully!', 'success');
+
+    document.getElementById('reportForm').reset();
+    document.getElementById('charCount').textContent = '0';
+
+    setTimeout(() => {
+      submitBtn.innerHTML = originalHTML;
+      submitBtn.disabled = false;
+      hideReportStatus();
+    }, 2000);
+
+    console.log('Report submitted:', reportData);
+
+  } catch (error) {
+    console.error('Error submitting report:', error);
+    showReportStatus('Failed to submit report', 'error');
+    
+    const submitBtn = e.target.querySelector('.btn-report-submit');
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<span class="material-symbols-rounded">send</span>Submit';
+  }
+}
+
+function showReportStatus(message, type) {
+  const statusElement = document.getElementById('reportStatus');
+  
+  statusElement.innerHTML = message;
+  statusElement.className = `report-status ${type}`;
+  statusElement.style.display = 'flex';
+
+  if (type === 'success') {
+    setTimeout(() => {
+      hideReportStatus();
+    }, 3000);
+  }
+}
+
+function hideReportStatus() {
+  const statusElement = document.getElementById('reportStatus');
+  statusElement.style.display = 'none';
+}
+
+function saveReportToStorage(reportData) {
+  try {
+    let reports = JSON.parse(localStorage.getItem('userReports') || '[]');
+    reports.push(reportData);
+    localStorage.setItem('userReports', JSON.stringify(reports));
+    console.log('Report saved to localStorage:', reports);
+  } catch (error) {
+    console.error('Error saving report to storage:', error);
+  }
+}
+
+// Add spinning animation
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+document.head.appendChild(style);

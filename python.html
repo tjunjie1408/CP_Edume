@@ -72,61 +72,108 @@
   <main class="python-content">
     <div class="python-container">
       
-      <!-- Left Sidebar - Subject List -->
-      <aside class="subjects-sidebar">
-        <div class="subjects-header">
-          <h2>Python Topics</h2>
-          <span class="topic-count" id="topicCount">3 Topics</span>
+      <!-- Left Sidebar -->
+      <aside class="left-sidebar">
+        <!-- Subject List -->
+        <div class="subjects-sidebar">
+          <div class="subjects-header">
+            <h2>Python Topics</h2>
+            <span class="topic-count" id="topicCount">3 Topics</span>
+          </div>
+
+          <div class="subjects-list" id="subjectsList">
+            <div class="subject-item active" data-subject="1">
+              <div class="subject-info">
+                <h3>Intro to Python</h3>
+                <p class="subject-level">Beginner</p>
+              </div>
+              <div class="progress-container">
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: 0%;"></div>
+                </div>
+                <span class="progress-text">0%</span>
+              </div>
+              <div class="quiz-status">
+                <span class="status-badge not-started">○ Not Started</span>
+              </div>
+            </div>
+
+            <div class="subject-item" data-subject="2">
+              <div class="subject-info">
+                <h3>Python Syntax</h3>
+                <p class="subject-level">Beginner</p>
+              </div>
+              <div class="progress-container">
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: 0%;"></div>
+                </div>
+                <span class="progress-text">0%</span>
+              </div>
+              <div class="quiz-status">
+                <span class="status-badge not-started">○ Not Started</span>
+              </div>
+            </div>
+
+            <div class="subject-item" data-subject="3">
+              <div class="subject-info">
+                <h3>Python Output</h3>
+                <p class="subject-level">Beginner</p>
+              </div>
+              <div class="progress-container">
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: 0%;"></div>
+                </div>
+                <span class="progress-text">0%</span>
+              </div>
+              <div class="quiz-status">
+                <span class="status-badge not-started">○ Not Started</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="subjects-list" id="subjectsList">
-          <div class="subject-item active" data-subject="1">
-            <div class="subject-info">
-              <h3>Intro to Python</h3>
-              <p class="subject-level">Beginner</p>
-            </div>
-            <div class="progress-container">
-              <div class="progress-bar">
-                <div class="progress-fill" style="width: 0%;"></div>
-              </div>
-              <span class="progress-text">0%</span>
-            </div>
-            <div class="quiz-status">
-              <span class="status-badge not-started">○ Not Started</span>
+        <!-- Report Section Container -->
+        <div class="report-container">
+          <div class="report-header">
+            <div class="report-title-group">
+              <span class="material-symbols-rounded">flag</span>
+              <h3>Report Issue</h3>
             </div>
           </div>
 
-          <div class="subject-item" data-subject="2">
-            <div class="subject-info">
-              <h3>Python Syntax</h3>
-              <p class="subject-level">Beginner</p>
+          <form id="reportForm" class="report-form">
+            <div class="form-group">
+              <label for="reportType" class="form-label">Report Type</label>
+              <select id="reportType" class="form-select" required>
+                <option value="">Select Type</option>
+                <option value="typo">Typo Error</option>
+                <option value="content-error">Content Error</option>
+                <option value="video-issue">Video Issue</option>
+                <option value="code-error">Code Error</option>
+                <option value="quiz-issue">Quiz Issue</option>
+                <option value="feedback">Feedback</option>
+              </select>
             </div>
-            <div class="progress-container">
-              <div class="progress-bar">
-                <div class="progress-fill" style="width: 0%;"></div>
-              </div>
-              <span class="progress-text">0%</span>
-            </div>
-            <div class="quiz-status">
-              <span class="status-badge not-started">○ Not Started</span>
-            </div>
-          </div>
 
-          <div class="subject-item" data-subject="3">
-            <div class="subject-info">
-              <h3>Python Output</h3>
-              <p class="subject-level">Beginner</p>
+            <div class="form-group">
+              <label for="reportContent" class="form-label">Description</label>
+              <textarea 
+                id="reportContent" 
+                class="form-textarea" 
+                placeholder="Describe the issue..." 
+                rows="3" 
+                required>
+              </textarea>
+              <span class="char-count"><span id="charCount">0</span>/300</span>
             </div>
-            <div class="progress-container">
-              <div class="progress-bar">
-                <div class="progress-fill" style="width: 0%;"></div>
-              </div>
-              <span class="progress-text">0%</span>
-            </div>
-            <div class="quiz-status">
-              <span class="status-badge not-started">○ Not Started</span>
-            </div>
-          </div>
+
+            <div id="reportStatus" class="report-status" style="display: none;"></div>
+
+            <button type="submit" class="btn-report-submit">
+              <span class="material-symbols-rounded">send</span>
+              Submit
+            </button>
+          </form>
         </div>
       </aside>
 
@@ -163,10 +210,10 @@
               </div>
             </div>
 
-            <!-- Learning Resources Section - Customized per Learning Style -->
+            <!-- Learning Resources Section -->
             <div class="content-section learning-resources-section" id="learningResourcesSection">
-            <h3>Learning Resources</h3>
-            <div class="resources-grid" id="resourcesContainer"></div>
+              <h3>Learning Resources</h3>
+              <div class="resources-grid" id="resourcesContainer"></div>
             </div>
 
             <!-- Start Quiz Button -->
@@ -174,7 +221,7 @@
               <button class="btn-start-quiz" id="startQuizBtn">Start Exercises</button>
             </div>
 
-            <!-- Quiz Section at Bottom -->
+            <!-- Quiz Section -->
             <div class="content-section quiz-wrapper" id="quizWrapper" style="display: none;">
               <div class="quiz-header">
                 <h3 id="quizTitle">Exercises: Intro to Python</h3>
@@ -190,30 +237,37 @@
                 </div>
 
                 <div class="quiz-question">
-                  <h4 id="quizQuestion">Sample Question</h4>
+                  <h4 id="quizQuestion">Question text goes here</h4>
+                  <div class="quiz-feedback" id="quizFeedback"></div>
                 </div>
 
                 <div class="quiz-options" id="quizOptions"></div>
 
-                <div class="quiz-feedback" id="quizFeedback"></div>
-
-                <div class="quiz-actions">
-                  <button class="btn-secondary" id="prevBtn" disabled>Previous</button>
-                  <button class="btn-primary" id="nextBtn" disabled>Next</button>
-                  <button class="btn-success" id="submitBtn" style="display: none;" disabled>Submit Exercises</button>
+                <div class="quiz-navigation">
+                  <button id="prevBtn" class="btn-nav btn-prev">
+                    <span class="material-symbols-rounded">arrow_back</span>
+                    Previous
+                  </button>
+                  <button id="nextBtn" class="btn-nav btn-next" style="display: none;">
+                    Next
+                    <span class="material-symbols-rounded">arrow_forward</span>
+                  </button>
+                  <button id="submitBtn" class="btn-nav btn-submit" style="display: none;">
+                    <span class="material-symbols-rounded">check_circle</span>
+                    Submit
+                  </button>
                 </div>
               </div>
 
-              <div class="quiz-results" id="quizResults" style="display: none;">
+              <div class="quiz-results" style="display: none;">
                 <div class="results-header">
-                  <h3>🎉 Quiz Results</h3>
-                  <div class="final-score">
-                    <span id="finalScore">0 / 3</span>
-                  </div>
-                  <div class="score-percentage-circle">
-                    <div class="score-circle">
-                      <span id="scorePercentage">0%</span>
-                    </div>
+                  <h3>Exercises Complete!</h3>
+                  <p id="scorePercentage">0%</p>
+                </div>
+
+                <div class="final-score">
+                  <div class="score-circle">
+                    <span id="finalScore">0/0</span>
                   </div>
                 </div>
 

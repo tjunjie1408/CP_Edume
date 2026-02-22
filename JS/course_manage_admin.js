@@ -170,12 +170,20 @@ function saveCourseChanges() {
   const subject = getSubject(currentCourseId, currentSubjectId);
   if (!subject) return;
 
-  // Get updated values
-  subject.overview = document.getElementById('overviewInput').value;
-  subject.content = document.getElementById('contentInput').value;
+  // Get updated values from display (if they're in edit mode)
+  const overviewInput = document.getElementById('overviewInput');
+  const contentInput = document.getElementById('contentInput');
+  
+  if (overviewInput.classList.contains('active')) {
+    subject.overview = overviewInput.value;
+  }
+  
+  if (contentInput.classList.contains('active')) {
+    subject.content = contentInput.value;
+  }
   
   if (saveToStorage()) {
-    alert('✓ Changes saved successfully!');
+    alert('✓ All changes saved successfully!');
     changesMode = false;
     // Refresh display
     displaySubjectEditor(subject);
@@ -314,7 +322,7 @@ function setupEventListeners() {
 
   // Edit Toggles
   document.getElementById('btnEditOverview')?.addEventListener('click', () => toggleEditMode('overview'));
-  document.getElementById('btnEditObjectives')?.addEventListener('click', () => toggleEditMode('objectives'));
+  document.getElementById('btnEditObjectives')?.addEventListener('click', handleObjectivesEdit);
   document.getElementById('btnEditContent')?.addEventListener('click', () => toggleEditMode('content'));
 
   // Resources & Quiz
@@ -360,27 +368,41 @@ function displayCoursesList() {
     return;
   }
 
-  coursesGrid.innerHTML = courses.map(course => `
-    <div class="course-card-admin">
-      <div class="course-card-image">
-        ${course.image ? `<img src="${course.image}" alt="${course.name}">` : '<span class="material-symbols-rounded">image</span>'}
-      </div>
-      <div class="course-card-content">
-        <h3>${course.name}</h3>
-        <p class="course-card-meta">${course.language} • ${course.subjects.length} subjects</p>
-        <div class="course-card-actions">
-          <button class="btn-edit-course" onclick="editCourse(${course.id})">
-            <span class="material-symbols-rounded">edit</span>
-            Edit
-          </button>
-          <button class="btn-delete-course" onclick="deleteCourse(${course.id})">
-            <span class="material-symbols-rounded">delete</span>
-            Delete
-          </button>
+  coursesGrid.innerHTML = courses.map(course => {
+    // Check if image is base64 or file path
+    const isBase64 = course.image && course.image.startsWith('data:');
+    let imageSrc = course.image;
+    
+    // Log image info for debugging
+    console.log('Course:', course.name, 'Image:', course.image, 'Is Base64:', isBase64);
+    
+    return `
+      <div class="course-card-admin">
+        <div class="course-card-image">
+          ${course.image ? `
+            <img src="${imageSrc}" 
+                 alt="${course.name}"
+                 loading="lazy"
+                 onerror="console.error('Image failed to load:', '${imageSrc}'); this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22%3E%3Crect fill=%22%23667eea%22 width=%22150%22 height=%22150%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2230%22 fill=%22white%22 text-anchor=%22middle%22 dy=%22.3em%22%3E📚%3C/text%3E%3C/svg%3E'">
+          ` : '<span class="material-symbols-rounded">image</span>'}
+        </div>
+        <div class="course-card-content">
+          <h3>${course.name}</h3>
+          <p class="course-card-meta">${course.language} • ${course.subjects.length} subjects</p>
+          <div class="course-card-actions">
+            <button class="btn-edit-course" onclick="editCourse(${course.id})">
+              <span class="material-symbols-rounded">edit</span>
+              Edit
+            </button>
+            <button class="btn-delete-course" onclick="deleteCourse(${course.id})">
+              <span class="material-symbols-rounded">delete</span>
+              Delete
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function editCourse(courseId) {
@@ -526,17 +548,23 @@ function displaySubjectEditor(subject) {
   document.getElementById('subjectsTitle').textContent = `Subjects (${getCourse(currentCourseId).subjects.length})`;
   
   // Overview
-  document.getElementById('overviewDisplay').innerHTML = `<p>${subject.overview || 'No overview set'}</p>`;
+  document.getElementById('overviewDisplay').innerHTML = subject.overview 
+    ? `<p>${subject.overview}</p>` 
+    : '<p style="color: var(--text-light); font-style: italic;">No overview set. Click edit to add one.</p>';
   document.getElementById('overviewInput').value = subject.overview || '';
 
   // Objectives
   const objectivesList = document.getElementById('objectivesList');
-  objectivesList.innerHTML = (subject.objectives || []).length > 0 
-    ? (subject.objectives.map(obj => `<li>${obj}</li>`).join(''))
-    : '<li style="color: var(--text-light);">No objectives set</li>';
+  if ((subject.objectives || []).length > 0) {
+    objectivesList.innerHTML = subject.objectives.map(obj => `<li>${obj}</li>`).join('');
+  } else {
+    objectivesList.innerHTML = '<li style="color: var(--text-light); font-style: italic;">No objectives set. Click edit to add some.</li>';
+  }
 
   // Content
-  document.getElementById('contentDisplay').innerHTML = subject.content || '<p>No content set</p>';
+  document.getElementById('contentDisplay').innerHTML = subject.content 
+    ? subject.content 
+    : '<p style="color: var(--text-light); font-style: italic;">No content set. Click edit to add content.</p>';
   document.getElementById('contentInput').value = subject.content || '';
 }
 
@@ -547,20 +575,114 @@ function toggleEditMode(section) {
 
   if (display.style.display === 'none') {
     // SAVE MODE - Hide input, show display
+    const newValue = input.value.trim();
+    
     if (section === 'overview') {
-      display.innerHTML = `<p>${input.value || 'No overview set'}</p>`;
+      display.innerHTML = newValue 
+        ? `<p>${newValue}</p>` 
+        : '<p style="color: var(--text-light); font-style: italic;">No overview set. Click edit to add one.</p>';
     } else if (section === 'content') {
-      display.innerHTML = input.value || '<p>No content set</p>';
+      display.innerHTML = newValue 
+        ? newValue 
+        : '<p style="color: var(--text-light); font-style: italic;">No content set. Click edit to add content.</p>';
     }
     display.style.display = 'block';
     input.classList.remove('active');
     button.innerHTML = '<span class="material-symbols-rounded">edit</span>';
+    
+    // Save the changes
+    const subject = getSubject(currentCourseId, currentSubjectId);
+    if (subject) {
+      if (section === 'overview') {
+        subject.overview = newValue;
+      } else if (section === 'content') {
+        subject.content = newValue;
+      }
+      saveToStorage();
+    }
   } else {
     // EDIT MODE - Show input, hide display
     display.style.display = 'none';
     input.classList.add('active');
     button.innerHTML = '<span class="material-symbols-rounded">check</span>';
     input.focus();
+  }
+}
+
+function handleObjectivesEdit() {
+  const display = document.getElementById('objectivesDisplay');
+  const input = document.getElementById('objectivesInput');
+  const button = event.target.closest('.btn-edit-toggle');
+  
+  const subject = getSubject(currentCourseId, currentSubjectId);
+  if (!subject) return;
+
+  if (display.style.display === 'none') {
+    // SAVE MODE - Hide input, show display
+    const objectiveInputs = Array.from(document.querySelectorAll('#objectivesEditList input[type="text"]'));
+    const objectives = objectiveInputs
+      .map(input => input.value.trim())
+      .filter(val => val !== '');
+    
+    subject.objectives = objectives;
+    saveToStorage();
+    
+    const objectivesList = document.getElementById('objectivesList');
+    if (objectives.length > 0) {
+      objectivesList.innerHTML = objectives.map(obj => `<li>${obj}</li>`).join('');
+    } else {
+      objectivesList.innerHTML = '<li style="color: var(--text-light); font-style: italic;">No objectives set. Click edit to add some.</li>';
+    }
+    
+    display.style.display = 'block';
+    input.classList.remove('active');
+    button.innerHTML = '<span class="material-symbols-rounded">edit</span>';
+  } else {
+    // EDIT MODE - Show input, hide display
+    const objectivesEditList = document.getElementById('objectivesEditList');
+    objectivesEditList.innerHTML = '';
+    
+    // Create input fields for existing objectives
+    (subject.objectives || []).forEach((obj, index) => {
+      const inputDiv = document.createElement('div');
+      inputDiv.style.display = 'flex';
+      inputDiv.style.gap = '0.5rem';
+      inputDiv.style.marginBottom = '0.5rem';
+      inputDiv.innerHTML = `
+        <input type="text" class="form-input" value="${obj}" placeholder="Objective ${index + 1}" style="flex: 1; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
+        <button type="button" class="btn-remove" onclick="this.parentElement.remove()" style="padding: 0.5rem 1rem; background: #f5576c; color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>
+      `;
+      objectivesEditList.appendChild(inputDiv);
+    });
+    
+    // Add button for new objective
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.textContent = '+ Add Objective';
+    addBtn.style.padding = '0.5rem 1rem';
+    addBtn.style.background = 'var(--primary-color)';
+    addBtn.style.color = 'white';
+    addBtn.style.border = 'none';
+    addBtn.style.borderRadius = '4px';
+    addBtn.style.cursor = 'pointer';
+    addBtn.style.marginTop = '0.5rem';
+    addBtn.onclick = function(e) {
+      e.preventDefault();
+      const inputDiv = document.createElement('div');
+      inputDiv.style.display = 'flex';
+      inputDiv.style.gap = '0.5rem';
+      inputDiv.style.marginBottom = '0.5rem';
+      inputDiv.innerHTML = `
+        <input type="text" class="form-input" placeholder="New Objective" style="flex: 1; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
+        <button type="button" class="btn-remove" onclick="this.parentElement.remove()" style="padding: 0.5rem 1rem; background: #f5576c; color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>
+      `;
+      objectivesEditList.insertBefore(inputDiv, addBtn);
+    };
+    objectivesEditList.appendChild(addBtn);
+    
+    display.style.display = 'none';
+    input.classList.add('active');
+    button.innerHTML = '<span class="material-symbols-rounded">check</span>';
   }
 }
 
@@ -635,7 +757,9 @@ function handleSaveSubject(e) {
     if (saveToStorage()) {
       closeSubjectModal();
       displaySubjects(course.subjects);
-      alert('✓ Subject created successfully');
+      // Automatically select the newly created subject
+      selectSubject(newSubject.id);
+      alert('✓ Subject created successfully. You can now add content!');
     }
   }
 }

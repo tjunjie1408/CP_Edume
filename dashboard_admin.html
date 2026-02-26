@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - EduMe Learning System</title>
+  <link rel="stylesheet" href="CSS/dashboard.css">
+  <link rel="stylesheet" href="CSS/dashboard_admin.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart Library for VARK Distribution -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+</head>
+<body>
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <!-- Sidebar Header -->
+    <nav class="sidebar-header">
+      <a href="dashboard_admin.html" class="header-logo">
+        <img src="image/Edume.png" alt="EduMe Logo" class="logo-image">
+        <span class="logo-text">EduMe</span>
+      </a>
+      <button class="sidebar-toggler">
+        <span class="material-symbols-rounded">chevron_left</span>
+      </button>
+    </nav>
+
+    <!-- Sidebar Navigation Menu -->
+    <nav class="sidebar-nav">
+      <!-- Primary Navigation -->
+      <ul class="nav-list primary-nav">
+        <li class="nav-item">
+          <a href="dashboard_admin.html" class="nav-link active">
+            <span class="material-symbols-rounded">dashboard</span>
+            <span class="nav-label">Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="course_manage_admin.html" class="nav-link">
+            <span class="material-symbols-rounded">library_books</span>
+            <span class="nav-label">Course Manage</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="user_manage_admin.html" class="nav-link">
+            <span class="material-symbols-rounded">people</span>
+            <span class="nav-label">User Manage</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="support_center_admin.html" class="nav-link">
+            <span class="material-symbols-rounded">support_agent</span>
+            <span class="nav-label">Support Center</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Secondary Navigation -->
+      <ul class="nav-list secondary-nav">
+        <li class="nav-item">
+          <a href="loginpage.html" class="nav-link">
+            <span class="material-symbols-rounded">logout</span>
+            <span class="nav-label">Logout</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Header/Top Navigation Bar -->
+  <header class="top-header">
+    <!-- Mobile Sidebar Menu Button -->
+    <button class="sidebar-menu-button">
+      <span class="material-symbols-rounded">menu</span>
+    </button>
+
+    <div class="header-left">
+      <h1>Admin Dashboard</h1>
+    </div>
+    <div class="header-right">
+      <div class="user-info" id="username">
+        <p class="hello">Hello, <span id="user-name">Admin</span></p>
+      </div>
+      <a href="profile_admin.html" class="user-avatar-link">
+        <img src="https://via.placeholder.com/50" alt="Admin Avatar" class="user-avatar" id="userAvatar">
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Admin Dashboard Content -->
+  <main class="dashboard-content">
+    <!-- Admin Welcome Banner -->
+    <section class="section welcome-banner admin-banner">
+      <div class="banner-content">
+        <h2>Welcome Back, <span id="banner-user-name">Admin</span>! 👨‍💼</h2>
+        <p>Manage your platform and monitor system performance</p>
+      </div>
+    </section>
+
+    <!-- Key Statistics Section -->
+    <section class="section admin-stats-section">
+      <div class="section-header">
+        <h3>Key Statistics</h3>
+        <button class="btn-refresh" id="refresh-stats" title="Refresh Statistics">
+          <span class="material-symbols-rounded">refresh</span>
+        </button>
+      </div>
+
+      <div class="admin-stats-grid">
+        <!-- Total Users Card -->
+        <div class="stat-card" data-stat="total-users">
+          <div class="stat-card-header">
+            <span class="stat-icon users-icon">
+              <span class="material-symbols-rounded">people</span>
+            </span>
+            <span class="stat-title">Total Users</span>
+          </div>
+          <div class="stat-card-content">
+            <div class="stat-value" id="total-users-value">---</div>
+            <div class="stat-subtitle">Active Users</div>
+          </div>
+          <div class="stat-footer">
+            <span class="stat-change positive" id="total-users-change">↑ Loading...</span>
+          </div>
+        </div>
+
+        <!-- Total Courses Card -->
+        <div class="stat-card" data-stat="total-courses">
+          <div class="stat-card-header">
+            <span class="stat-icon courses-icon">
+              <span class="material-symbols-rounded">library_books</span>
+            </span>
+            <span class="stat-title">Total Courses</span>
+          </div>
+          <div class="stat-card-content">
+            <div class="stat-value" id="total-courses-value">---</div>
+            <div class="stat-subtitle">Available Courses</div>
+          </div>
+          <div class="stat-footer">
+            <span class="stat-change" id="total-courses-change">Loading...</span>
+          </div>
+        </div>
+
+        <!-- Total Enrollments Card -->
+        <div class="stat-card" data-stat="total-enrollments">
+          <div class="stat-card-header">
+            <span class="stat-icon enrollments-icon">
+              <span class="material-symbols-rounded">assignment</span>
+            </span>
+            <span class="stat-title">Total Enrollments</span>
+          </div>
+          <div class="stat-card-content">
+            <div class="stat-value" id="total-enrollments-value">---</div>
+            <div class="stat-subtitle">Active Enrollments</div>
+          </div>
+          <div class="stat-footer">
+            <span class="stat-change positive" id="total-enrollments-change">↑ Loading...</span>
+          </div>
+        </div>
+
+        <!-- Completion Rate Card -->
+        <div class="stat-card" data-stat="completion-rate">
+          <div class="stat-card-header">
+            <span class="stat-icon completion-icon">
+              <span class="material-symbols-rounded">done_all</span>
+            </span>
+            <span class="stat-title">Completion Rate</span>
+          </div>
+          <div class="stat-card-content">
+            <div class="stat-value" id="completion-rate-value">---</div>
+            <div class="stat-subtitle">Overall Rate</div>
+          </div>
+          <div class="stat-footer">
+            <span class="stat-change" id="completion-rate-change">Loading...</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Charts Section -->
+    <div class="dashboard-grid">
+      <div class="dashboard-column-left">
+        <!-- VARK Distribution Chart -->
+        <section class="section chart-section">
+          <div class="section-header">
+            <h3>VARK Learning Style Distribution</h3>
+            <span class="chart-info">
+              <span class="material-symbols-rounded">info</span>
+            </span>
+          </div>
+          <div class="chart-container">
+            <canvas id="vark-chart"></canvas>
+          </div>
+          <div class="chart-legend" id="vark-legend">
+            <div class="legend-item">
+              <span class="legend-color visual"></span>
+              <span class="legend-label">Visual <span class="legend-value">(0)</span></span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color aural"></span>
+              <span class="legend-label">Aural <span class="legend-value">(0)</span></span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color reading"></span>
+              <span class="legend-label">Reading/Writing <span class="legend-value">(0)</span></span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color kinesthetic"></span>
+              <span class="legend-label">Kinesthetic <span class="legend-value">(0)</span></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- User Activity Chart -->
+        <section class="section chart-section">
+          <div class="section-header">
+            <h3>User Activity (Last 7 Days)</h3>
+          </div>
+          <div class="chart-container">
+            <canvas id="activity-chart"></canvas>
+          </div>
+        </section>
+      </div>
+
+      <div class="dashboard-column-right">
+        <!-- Top Courses Card -->
+        <section class="section">
+          <div class="section-header">
+            <h3>Top Performing Courses</h3>
+          </div>
+          <div class="courses-list" id="top-courses-list">
+            <div class="loading-placeholder">
+              <span class="material-symbols-rounded">hourglass_empty</span>
+              <p>Loading courses...</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Recent Users Card -->
+        <section class="section">
+          <div class="section-header">
+            <h3>Recent Sign-ups</h3>
+          </div>
+          <div class="users-list" id="recent-users-list">
+            <div class="loading-placeholder">
+              <span class="material-symbols-rounded">hourglass_empty</span>
+              <p>Loading users...</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- System Health Section -->
+    <section class="section system-health-section">
+      <div class="section-header">
+        <h3>System Health</h3>
+      </div>
+      <div class="health-grid" id="system-health">
+        <div class="health-item" data-health="server">
+          <div class="health-header">
+            <span class="health-status online"></span>
+            <span class="health-title">Server Status</span>
+          </div>
+          <div class="health-value">Online</div>
+        </div>
+        <div class="health-item" data-health="database">
+          <div class="health-header">
+            <span class="health-status online"></span>
+            <span class="health-title">Database</span>
+          </div>
+          <div class="health-value">Connected</div>
+        </div>
+        <div class="health-item" data-health="api">
+          <div class="health-header">
+            <span class="health-status online"></span>
+            <span class="health-title">API</span>
+          </div>
+          <div class="health-value">Running</div>
+        </div>
+        <div class="health-item" data-health="storage">
+          <div class="health-header">
+            <span class="health-status online"></span>
+            <span class="health-title">Storage</span>
+          </div>
+          <div class="health-value">Available</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Data Containers for Backend Integration -->
+    <div id="backend-data-container" style="display: none;">
+      <!-- This container will hold data from backend API -->
+      <!-- API Data will be injected here by JavaScript -->
+    </div>
+  </main>
+
+  <!-- ONLY load dashboard.js for shared functions, NO dashboard_admin.js yet -->
+  <script src="JS/dashboard.js"></script>
+  <script src="JS/dashboard_admin.js"></script>
+</body>
+</html>

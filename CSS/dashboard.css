@@ -49,7 +49,6 @@ body {
   background: linear-gradient(135deg, #F1F3FF 0%, #cbd4ff8a 100%);
   color: var(--text-dark);
   line-height: 1.6;
-  min-height: 100vh;
 }
 
 /* ============================================
@@ -172,11 +171,16 @@ body {
   color: var(--primary-color);
 }
 
-.nav-link.active {
-  background-color: rgba(102, 126, 234, 0.2);
+/* Active Navigation Item */
+.nav-item.active .nav-link {
+  background-color: rgba(102, 126, 234, 0.1);
   color: var(--primary-color);
-  border-left: 3px solid var(--primary-color);
-  padding-left: calc(1rem - 3px);
+  border-radius: 8px;
+}
+
+.nav-item.active .nav-label {
+  color: var(--primary-color);
+  font-weight: 700;
 }
 
 .nav-link span.material-symbols-rounded {
@@ -481,7 +485,6 @@ body {
   padding: 1.5rem;
   background: var(--light-bg);
   border-radius: 8px;
-  border: 1px solid var(--border-color);
 }
 
 .course-card h4 {

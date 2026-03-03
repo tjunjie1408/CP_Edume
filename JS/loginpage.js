@@ -92,7 +92,7 @@ document.getElementById('forgot-password-email-form').addEventListener('submit',
     // Simulate backend API call to verify email
     // In real implementation, this would call your backend API
     // verifyEmailWithBackend(email);
-    sendAjax("PHP/check_email.php",{email:email},function(response){
+    sendAjax("PHP/forget_password.php",{email:email},function(response){
         if(response.status===200){
             forgotPasswordEmailForm.style.left ="-400px";
             forgotPasswordResetForm.style.left ="50px";
@@ -376,9 +376,13 @@ loginForm.addEventListener("submit", function(e) {
         if(response.status===200){
             showNotification("Success",response.message,"success",function(){
                 if (response.role===1){//Admin
-                    window.location.href="admin_dashboard.html";
+                    window.location.href="dashboard_admin.html";
                 }else{
-                    window.location.href="questionnaire.html";
+                    if(response.learning_style !== null){
+                        window.location.href="dashboard.html";
+                    }else{
+                        window.location.href="questionnaire.html";
+                    }
                 }
             });
         }else{

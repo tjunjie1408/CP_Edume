@@ -20,7 +20,7 @@ if (!filter_var($email,FILTER_VALIDATE_EMAIL)) {
 
 
 //Check if email exists
-$stmt=$conn->prepare("SELECT user_ID,username,password,role FROM users WHERE email=?");
+$stmt=$conn->prepare("SELECT user_ID,username,password,role,learning_style FROM users WHERE email=?");
 $stmt->bind_param("s",$email);
 $stmt->execute();
 $stmt->store_result();
@@ -28,7 +28,7 @@ if ($stmt->num_rows==0) {
     echo json_encode(["status"=>422,"message"=>"Email does not exist"]);
     exit;
 }
-$stmt->bind_result($user_ID,$username,$hashed_password,$role);
+$stmt->bind_result($user_ID,$username,$hashed_password,$role,$learning_style);
 $stmt->fetch();
 
 //Verify Password
@@ -42,7 +42,7 @@ if (!password_verify($password,$hashed_password)) {
 $_SESSION["user_ID"]=$user_ID;
 $_SESSION["username"]=$username;
 $_SESSION["role"]=(int)$role;
-echo json_encode(["status"=>200,"message"=>"Login successful","role"=>$_SESSION["role"]]);
+echo json_encode(["status"=>200,"message"=>"Login successful","role"=>$_SESSION["role"],"learning_style"=>$learning_style]);
 $stmt->close();
 $conn->close();
 ?>

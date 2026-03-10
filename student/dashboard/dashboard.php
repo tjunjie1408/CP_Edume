@@ -116,7 +116,7 @@ $page->requireAuth();
             <span class="badge visual-badge">Visual Pick</span>
           </div>
           <div class="video-container">
-            <iframe width="100%" height="400" src="https://www.youtube.com/embed/zJSY8tbf_ys" title="PHP Programming For Beginners" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <iframe width="100%" height="400" src="https://www.youtube.com/embed/kqtD5dpn9C8" title="Python Basics For Beginners" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
           </div>
           
           <div class="accordion" id="notesAccordion">
@@ -125,7 +125,7 @@ $page->requireAuth();
               <span class="material-symbols-rounded">expand_more</span>
             </div>
             <div class="accordion-content">
-              <p>PHP is a server scripting language, and a powerful tool for making dynamic and interactive Web pages. PHP is a widely-used, free, and efficient alternative to competitors such as Microsoft's ASP.</p>
+              <p>Python is a high-level, interpreted, general-purpose programming language. Its design philosophy emphasizes code readability with the use of significant indentation. It's frequently used in web development, data science, and AI.</p>
             </div>
           </div>
           
@@ -145,22 +145,20 @@ $page->requireAuth();
                 <span class="badge read-badge">Reading Pick</span>
              </div>
              <article class="reading-material">
-               <h2>Introduction to PHP</h2>
-               <p>PHP code is executed on the server, and the result is returned to the browser as plain HTML.</p>
-               <h3>Basic PHP Syntax</h3>
-               <p>A PHP script can be placed anywhere in the document. A PHP script starts with <code>&lt;?php</code> and ends with <code>?&gt;</code>.</p>
-               <pre><code>&lt;?php
-  echo "Hello World!";
-?&gt;</code></pre>
-               <p>The default file extension for PHP files is ".php". A PHP file normally contains HTML tags, and some PHP scripting code.</p>
+               <h2>Introduction to Python</h2>
+               <p>Python code is executed by the Python interpreter, and is known for its elegant syntax and readability.</p>
+               <h3>Basic Python Syntax</h3>
+               <p>Python uses indentation to indicate a block of code, unlike other languages which often use curly brackets or keywords.</p>
+               <pre><code>print("Hello World!")</code></pre>
+               <p>The default file extension for Python files is ".py". Variables do not need to be declared with any particular type.</p>
              </article>
           </div>
           <div class="side-panel">
             <div class="card side-video-card">
               <h4>Prefer to watch?</h4>
               <div class="video-thumbnail">
-                <a href="https://www.youtube.com/watch?v=zJSY8tbf_ys" target="_blank">
-                  <img src="https://img.youtube.com/vi/zJSY8tbf_ys/hqdefault.jpg" alt="Video Thumbnail" style="width: 100%; border-radius: 8px;">
+                <a href="https://www.youtube.com/watch?v=kqtD5dpn9C8" target="_blank">
+                  <img src="https://img.youtube.com/vi/kqtD5dpn9C8/hqdefault.jpg" alt="Video Thumbnail" style="width: 100%; border-radius: 8px;">
                 </a>
               </div>
             </div>
@@ -183,20 +181,20 @@ $page->requireAuth();
           <div class="sandbox-container grid-two-col">
             <div class="mission-brief">
               <h4>🎯 Your Mission</h4>
-              <p>Write a PHP script that outputs "Hello World" using the <code>echo</code> command.</p>
+              <p>Write a Python script that outputs "Hello World" using the <code>print()</code> function.</p>
               
               <div class="help-actions">
                 <button class="btn-secondary" onclick="toggleHint('kHint1')">Show Hint</button>
-                <a href="https://www.php.net/manual/en/function.echo.php" target="_blank" class="btn-secondary">Read Docs</a>
+                <a href="https://docs.python.org/3/tutorial/inputoutput.html" target="_blank" class="btn-secondary">Read Docs</a>
               </div>
               
               <div id="kHint1" class="hint-box hide">
-                <p>Hint: Remember to wrap your string in quotes and end the statement with a semicolon (<code>;</code>).</p>
+                <p>Hint: Use the word <code>print</code> followed by parentheses containing your string in quotes. e.g. <code>print("Text")</code></p>
               </div>
             </div>
             
             <div class="code-editor-wrapper">
-              <textarea id="php-sandbox" name="code">&lt;?php&#13;&#10;// Write your code here...&#13;&#10;&#13;&#10;?&gt;</textarea>
+              <textarea id="php-sandbox" name="code"># Write your code here...&#13;&#10;</textarea>
               <div class="editor-toolbar">
                 <button class="btn-primary run-btn" onclick="runMockCompiler('php-sandbox')">Run Code</button>
               </div>

@@ -263,7 +263,7 @@ function initCodeMirror() {
   if (textarea) {
     editor = CodeMirror.fromTextArea(textarea, {
       lineNumbers: true,
-      mode: "application/x-httpd-php",
+      mode: "python",
       theme: "dracula",
       matchBrackets: true,
       indentUnit: 4,
@@ -283,13 +283,13 @@ function runMockCompiler(editorId) {
   
   const code = editor.getValue();
   
-  // Extremely lenient Regex: look for 'echo' followed by 'Hello World' (ignoring quotes, commas, spacing, casing, semicolons)
-  const isValid = /echo\s+['"]Hello\s+World['"]\s*;?/i.test(code);
+  // Extremely lenient Regex: look for 'print' followed by 'Hello World' (ignoring quotes, spacing, casing)
+  const isValid = /print\s*\(\s*['"]Hello\s+World['"]\s*\)/i.test(code);
   
   if (isValid) {
-    showNotification("Mission Accomplished! You successfully wrote Hello World in PHP! \uD83C\uDF89", "success");
+    showNotification("Mission Accomplished! You successfully wrote Hello World in Python! \uD83C\uDF89", "success");
   } else {
-    showNotification("Oops! That doesn't look quite right. Did you type 'echo \"Hello World\";'?", "error");
+    showNotification("Oops! That doesn't look quite right. Did you type 'print(\"Hello World\")'?", "error");
   }
 }
 

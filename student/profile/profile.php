@@ -1,11 +1,17 @@
+<?php
+require_once __DIR__ . '/../../config/constants.php';
+require_once CONFIG_PATH . '/StudentPage.php';
+$page = new StudentPage();
+$page->requireAuth();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Profile - EduMe Learning System</title>
-  <link rel="stylesheet" href="CSS/dashboard.css">
-  <link rel="stylesheet" href="CSS/profile.css">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/CSS/dashboard.css">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/CSS/profile.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -14,8 +20,8 @@
   <aside class="sidebar">
     <!-- Sidebar Header -->
     <nav class="sidebar-header">
-      <a href="dashboard.html" class="header-logo">
-        <img src="image/Edume.png" alt="EduMe Logo" class="logo-image">
+      <a href="<?= BASE_URL ?>/student/dashboard/dashboard.php" class="header-logo">
+        <img src="<?= BASE_URL ?>/image/Edume.png" alt="EduMe Logo" class="logo-image">
         <span class="logo-text">EduMe</span>
       </a>
       <button class="sidebar-toggler">
@@ -28,13 +34,13 @@
       <!-- Primary Navigation -->
       <ul class="nav-list primary-nav">
         <li class="nav-item">
-          <a href="dashboard.html" class="nav-link">
+          <a href="<?= BASE_URL ?>/student/dashboard/dashboard.php" class="nav-link">
             <span class="material-symbols-rounded">dashboard</span>
             <span class="nav-label">Dashboard</span>
           </a>
         </li>
         <li class="nav-item">
-          <a href="course.html" class="nav-link">
+          <a href="<?= BASE_URL ?>/student/course/course.php" class="nav-link">
             <span class="material-symbols-rounded">school</span>
             <span class="nav-label">Courses</span>
           </a>
@@ -44,7 +50,7 @@
       <!-- Secondary Navigation -->
       <ul class="nav-list secondary-nav">
         <li class="nav-item">
-          <a href="loginpage.html" class="nav-link">
+          <a href="<?= BASE_URL ?>/public/registration/login.php" class="nav-link">
             <span class="material-symbols-rounded">logout</span>
             <span class="nav-label">Logout</span>
           </a>
@@ -328,7 +334,7 @@
     </div>
   </main>
 
-  <script src="JS/dashboard.js"></script>
-  <script src="JS/profile.js"></script>
+  <script src="<?= BASE_URL ?>/JS/dashboard.js"></script>
+  <script src="<?= BASE_URL ?>/JS/profile.js"></script>
 </body>
 </html>

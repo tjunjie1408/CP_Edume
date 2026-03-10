@@ -1,17 +1,18 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome Edume</title>
-    <link rel="stylesheet" href="CSS/loginpage.css">
+    <link rel="stylesheet" href="../../CSS/loginpage.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
 <body>
     <div class="container">
         <div id="paper-container"></div>
         
-        <a href="index.html" class="back-to-home">
+        <a href="../index.html" class="back-to-home">
             <span class="material-symbols-outlined">arrow_back</span>Back to Home
         </a>
 
@@ -23,19 +24,19 @@
             </div>
 
             <div class="logo-img">
-                <img src="image/Edume.png" alt="logo-img">
+                <img src="../../image/Edume.png" alt="logo-img">
             </div>
 
             <!-- Login Form -->
             <form id="login-form" class="input-group">
                 <div class="input-field">
                     <span class="material-symbols-outlined">mail</span>
-                    <input type="email" id="loginEmail"placeholder="Email Id" required>
+                    <input type="email" id="loginEmail" placeholder="Email Id" required>
                 </div>
 
                 <div class="input-field">
                     <span class="material-symbols-outlined">password</span>
-                    <input type="password" id="loginPassword"placeholder="Password" required>
+                    <input type="password" id="loginPassword" placeholder="Password" required>
                 </div>
                 
                 <button type="submit" class="submit-btn">Log In</button>
@@ -50,11 +51,11 @@
                 </div>
                 <div class="input-field">
                     <span class="material-symbols-outlined">mail</span>
-                    <input type="email" id="registerEmail"placeholder="Email Id" required>
+                    <input type="email" id="registerEmail" placeholder="Email Id" required>
                 </div>
                 <div class="input-field">
                     <span class="material-symbols-outlined">password</span>
-                    <input type="password" id="registerPassword"placeholder="Password" required>
+                    <input type="password" id="registerPassword" placeholder="Password" required>
                 </div>
                 <div class="check-box registration-terms">
                     <input type="checkbox" id="terms" required>
@@ -111,6 +112,6 @@
         </div>
     </div>
 
-    <script src="JS/loginpage.js"></script>
+    <script src="../../JS/loginpage.js"></script>
 </body>
 </html>

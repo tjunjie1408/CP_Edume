@@ -1,20 +1,26 @@
+<?php
+require_once __DIR__ . '/../../config/constants.php';
+require_once CONFIG_PATH . '/StudentPage.php';
+$page = new StudentPage();
+$page->requireAuth();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edume - Learning Style Assessment</title>
-    <link rel="stylesheet" href="CSS/questionnaire.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/CSS/questionnaire.css">
 </head>
 <body>
     <div class="container">
         <header>
             <div class="left">
-                <img src="image/Edume.png" alt="logo">
+                <img src="<?= BASE_URL ?>/image/Edume.png" alt="logo">
                 <h1>Edume</h1>
             </div>
             <div class="auth-buttons">
-                <a href="index.html" class="btn btn-login">Back to Home</a>
+                <a href="<?= BASE_URL ?>/public/index.html" class="btn btn-login">Back to Home</a>
             </div>
         </header>
 
@@ -42,7 +48,7 @@
                 </div>
 
                 <div id="result-screen" class="hide">
-                    <img src="image/digital brain (2).png" alt="Brain" class="result-img">
+                    <img src="<?= BASE_URL ?>/image/digital brain (2).png" alt="Brain" class="result-img">
                     <h2>You are an <span id="result-title" class="gradient-text">Visual-Audio</span> Learner!</h2>
                     <p id="result-desc">You learn best by watching videos and discussing logic.</p>
                     
@@ -52,7 +58,7 @@
                         <div class="score-item">Kinesthetic: <span id="score-k">0</span></div>
                     </div>
 
-                    <a href="dashboard.html" class="action-btn">Go to Dashboard</a>
+                    <a href="<?= BASE_URL ?>/student/dashboard/dashboard.php" class="action-btn">Go to Dashboard</a>
                     <button id="restart-btn" class="secondary-btn">Retake Test</button>
                 </div>
 
@@ -60,6 +66,6 @@
         </section>
     </div>
 
-    <script src="JS/questionnaire.js"></script>
+    <script src="<?= BASE_URL ?>/JS/questionnaire.js"></script>
 </body>
 </html>

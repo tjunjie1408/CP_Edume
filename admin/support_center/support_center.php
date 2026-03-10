@@ -1,12 +1,18 @@
+<?php
+require_once __DIR__ . '/../../config/constants.php';
+require_once CONFIG_PATH . '/AdminPage.php';
+$page = new AdminPage();
+$page->requireAuth();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Support Center - EduMe Learning System</title>
-  <link rel="stylesheet" href="CSS/dashboard.css">
-  <link rel="stylesheet" href="CSS/dashboard_admin.css">
-  <link rel="stylesheet" href="CSS/support_center_admin.css">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/CSS/dashboard.css">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/CSS/dashboard_admin.css">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/CSS/support_center_admin.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -15,8 +21,8 @@
   <aside class="sidebar">
     <!-- Sidebar Header -->
     <nav class="sidebar-header">
-      <a href="dashboard_admin.html" class="header-logo">
-        <img src="image/Edume.png" alt="EduMe Logo" class="logo-image">
+      <a href="<?= BASE_URL ?>/admin/dashboard/dashboard.php" class="header-logo">
+        <img src="<?= BASE_URL ?>/image/Edume.png" alt="EduMe Logo" class="logo-image">
         <span class="logo-text">EduMe</span>
       </a>
       <button class="sidebar-toggler">
@@ -29,25 +35,25 @@
       <!-- Primary Navigation -->
       <ul class="nav-list primary-nav">
         <li class="nav-item">
-          <a href="dashboard_admin.html" class="nav-link">
+          <a href="<?= BASE_URL ?>/admin/dashboard/dashboard.php" class="nav-link">
             <span class="material-symbols-rounded">dashboard</span>
             <span class="nav-label">Dashboard</span>
           </a>
         </li>
         <li class="nav-item">
-          <a href="course_manage_admin.html" class="nav-link">
+          <a href="<?= BASE_URL ?>/admin/course_manage/course_manage.php" class="nav-link">
             <span class="material-symbols-rounded">library_books</span>
             <span class="nav-label">Course Manage</span>
           </a>
         </li>
         <li class="nav-item">
-          <a href="user_manage_admin.html" class="nav-link">
+          <a href="<?= BASE_URL ?>/admin/user_manage/user_manage.php" class="nav-link">
             <span class="material-symbols-rounded">people</span>
             <span class="nav-label">User Manage</span>
           </a>
         </li>
         <li class="nav-item">
-          <a href="support_center_admin.html" class="nav-link active">
+          <a href="<?= BASE_URL ?>/admin/support_center/support_center.php" class="nav-link active">
             <span class="material-symbols-rounded">support_agent</span>
             <span class="nav-label">Support Center</span>
           </a>
@@ -57,7 +63,7 @@
       <!-- Secondary Navigation -->
       <ul class="nav-list secondary-nav">
         <li class="nav-item">
-          <a href="loginpage.html" class="nav-link">
+          <a href="<?= BASE_URL ?>/public/registration/login.php" class="nav-link">
             <span class="material-symbols-rounded">logout</span>
             <span class="nav-label">Logout</span>
           </a>
@@ -80,7 +86,7 @@
       <div class="user-info" id="username">
         <p class="hello">Hello, <span id="user-name">Admin</span></p>
       </div>
-      <a href="profile_admin.html" class="user-avatar-link">
+      <a href="<?= BASE_URL ?>/admin/profile/profile.php" class="user-avatar-link">
         <img src="https://via.placeholder.com/50" alt="Admin Avatar" class="user-avatar" id="userAvatar">
       </a>
     </div>
@@ -268,8 +274,8 @@
   </div>
 
   <!-- Scripts -->
-  <script src="JS/dashboard.js"></script>
-  <script src="JS/dashboard_admin.js"></script>
-  <script src="JS/support_center_admin.js"></script>
+  <script src="<?= BASE_URL ?>/JS/dashboard.js"></script>
+  <script src="<?= BASE_URL ?>/JS/dashboard_admin.js"></script>
+  <script src="<?= BASE_URL ?>/JS/support_center_admin.js"></script>
 </body>
 </html>

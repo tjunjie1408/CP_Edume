@@ -96,7 +96,7 @@ function handleLogout() {
   localStorage.removeItem('enrolledCourses');
   sessionStorage.clear();
   alert('You have been logged out');
-  window.location.href = 'loginpage.html';
+  window.location.href = 'registration/login.php';
 }
 
 // Pulse animation for enrollment feedback

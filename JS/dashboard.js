@@ -253,3 +253,63 @@ window.addEventListener('load', function() {
     sidebar.classList.remove('collapsed', 'active');
   }
 });
+
+//   VARK PERSONALIZED DASHBOARD LOGIC
+
+// Initialize CodeMirror (Kinesthetic Sandbox)
+let editor = null;
+function initCodeMirror() {
+  const textarea = document.getElementById('php-sandbox');
+  if (textarea) {
+    editor = CodeMirror.fromTextArea(textarea, {
+      lineNumbers: true,
+      mode: "application/x-httpd-php",
+      theme: "dracula",
+      matchBrackets: true,
+      indentUnit: 4,
+      indentWithTabs: true
+    });
+  }
+}
+
+// Ensure CodeMirror is initialized if the text area is present
+document.addEventListener('DOMContentLoaded', () => {
+  initCodeMirror();
+});
+
+// Mock Compiler Logic
+function runMockCompiler(editorId) {
+  if (!editor) return;
+  
+  const code = editor.getValue();
+  
+  // Extremely lenient Regex: look for 'echo' followed by 'Hello World' (ignoring quotes, commas, spacing, casing, semicolons)
+  const isValid = /echo\s+['"]Hello\s+World['"]\s*;?/i.test(code);
+  
+  if (isValid) {
+    showNotification("Mission Accomplished! You successfully wrote Hello World in PHP! \uD83C\uDF89", "success");
+  } else {
+    showNotification("Oops! That doesn't look quite right. Did you type 'echo \"Hello World\";'?", "error");
+  }
+}
+
+// Accordion Toggle (Visual Learner)
+function toggleAccordion(id) {
+  const el = document.getElementById(id);
+  if(el) {
+    el.classList.toggle('active');
+  }
+}
+
+// Hint Toggle (Kinesthetic Learner)
+function toggleHint(id) {
+  const el = document.getElementById(id);
+  if(el) {
+    el.classList.toggle('hide');
+  }
+}
+
+// Scroll to Sandbox helper
+function scrollToSandbox() {
+  showNotification("The full sandbox is available on the course player page!", "info");
+}

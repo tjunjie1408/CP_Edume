@@ -1,8 +1,28 @@
 <?php
 require_once __DIR__ . '/../../config/constants.php';
 require_once CONFIG_PATH . '/AdminPage.php';
+require_once CONFIG_PATH . '/Database.php';
+require_once __DIR__ . '/../../public/registration/User.php';
+
 $page = new AdminPage();
 $page->requireAuth();
+
+$database = new Database();
+$db = $database->getConnection();
+$userModel = new User($db);
+
+$userData = $userModel->findById($_SESSION['user_id']);
+
+if (!$userData) {
+    // Failsafe: if the user was deleted but session still exists
+    session_destroy();
+    header("Location: " . BASE_URL . "/public/registration/login.php");
+    exit();
+}
+
+$gravatarUrl = "https://www.gravatar.com/avatar/" . md5(strtolower(trim($userData['email']))) . "?d=mp";
+$createdAtDate = date("F j, Y", strtotime($userData['created_at']));
+$displayRole = ucfirst($userData['role']); // e.g., "Admin"
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -84,10 +104,10 @@ $page->requireAuth();
     </div>
     <div class="header-right">
       <div class="user-info" id="username">
-        <p class="hello">Hello, <span id="user-name">Admin</span></p>
+        <p class="hello">Hello, <span id="user-name"><?= htmlspecialchars($userData['username']) ?></span></p>
       </div>
       <a href="#profile" class="user-avatar-link">
-        <img src="https://via.placeholder.com/50" alt="User Avatar" class="user-avatar" id="userAvatar">
+        <img src="<?= htmlspecialchars($gravatarUrl) ?>" alt="User Avatar" class="user-avatar" id="userAvatar">
       </a>
     </div>
   </header>
@@ -102,18 +122,17 @@ $page->requireAuth();
         <div class="profile-admin-header-content">
           <!-- Avatar with Edit Button -->
           <div class="profile-admin-avatar-wrapper">
-            <img src="https://via.placeholder.com/120" alt="Admin Avatar" class="profile-admin-avatar" id="profileAdminAvatar">
-            <button class="admin-avatar-edit-btn" id="avatar-upload-trigger" title="Change Avatar">
+            <img src="<?= htmlspecialchars($gravatarUrl) ?>" alt="Admin Avatar" class="profile-admin-avatar" id="profileAdminAvatar">
+            <a href="https://en.gravatar.com/" target="_blank" class="admin-avatar-edit-btn" id="avatar-upload-trigger" title="Change Avatar on Gravatar">
               <span class="material-symbols-rounded">camera_alt</span>
-            </button>
-            <input type="file" id="avatar-upload-input" style="display: none;" accept="image/*">
+            </a>
           </div>
           
           <!-- Admin Info Header -->
           <div class="profile-admin-info-header">
-            <h2 id="admin-username">Admin Name</h2>
-            <p class="admin-email" id="admin-email">admin@example.com</p>
-            <p class="admin-role" id="admin-role-display">Administrator</p>
+            <h2 id="admin-username"><?= htmlspecialchars($userData['username']) ?></h2>
+            <p class="admin-email" id="admin-email"><?= htmlspecialchars($userData['email']) ?></p>
+            <p class="admin-role" id="admin-role-display"><?= htmlspecialchars($displayRole) ?></p>
           </div>
         </div>
       </div>
@@ -148,19 +167,19 @@ $page->requireAuth();
               <div class="info-grid">
                 <div class="info-item">
                   <label>Full Name</label>
-                  <p id="view-full-name">John Administrator</p>
+                  <p id="view-full-name"><?= htmlspecialchars($userData['username']) ?></p>
                 </div>
                 <div class="info-item">
                   <label>Email Address</label>
-                  <p id="view-email">john.admin@example.com</p>
+                  <p id="view-email"><?= htmlspecialchars($userData['email']) ?></p>
                 </div>
                 <div class="info-item">
-                  <label>Phone Number</label>
-                  <p id="view-phone">+1 (555) 123-4567</p>
+                  <label>Joined Date</label>
+                  <p id="view-created-date"><?= htmlspecialchars($createdAtDate) ?></p>
                 </div>
                 <div class="info-item">
-                  <label>Department</label>
-                  <p id="view-department">System Administration</p>
+                  <label>Role</label>
+                  <p id="view-role"><?= htmlspecialchars($displayRole) ?></p>
                 </div>
               </div>
             </div>
@@ -170,19 +189,11 @@ $page->requireAuth();
               <form id="personal-form">
                 <div class="form-group">
                   <label for="edit-full-name">Full Name</label>
-                  <input type="text" id="edit-full-name" name="fullName" required>
+                  <input type="text" id="edit-full-name" name="fullName" value="<?= htmlspecialchars($userData['username']) ?>" required>
                 </div>
                 <div class="form-group">
                   <label for="edit-email">Email Address</label>
-                  <input type="email" id="edit-email" name="email" required>
-                </div>
-                <div class="form-group">
-                  <label for="edit-phone">Phone Number</label>
-                  <input type="tel" id="edit-phone" name="phone">
-                </div>
-                <div class="form-group">
-                  <label for="edit-department">Department</label>
-                  <input type="text" id="edit-department" name="department">
+                  <input type="email" id="edit-email" name="email" value="<?= htmlspecialchars($userData['email']) ?>" required>
                 </div>
                 <div class="form-actions">
                   <button type="submit" class="btn-save">
@@ -260,6 +271,12 @@ $page->requireAuth();
 
   <!-- Scripts -->
   <script src="<?= BASE_URL ?>/JS/dashboard.js"></script>
+  <!-- Pass specific paths for API into JS -->
+  <script>
+    window.AppConfig = {
+      baseUrl: "<?= BASE_URL ?>"
+    };
+  </script>
   <script src="<?= BASE_URL ?>/JS/profile_admin.js"></script>
 </body>
 </html>

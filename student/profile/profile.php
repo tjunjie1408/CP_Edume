@@ -1,8 +1,26 @@
 <?php
 require_once __DIR__ . '/../../config/constants.php';
 require_once CONFIG_PATH . '/StudentPage.php';
+require_once CONFIG_PATH . '/Database.php';
+require_once __DIR__ . '/../../public/registration/User.php';
+
 $page = new StudentPage();
 $page->requireAuth();
+
+$database = new Database();
+$db = $database->getConnection();
+$userModel = new User($db);
+
+$userData = $userModel->findById($_SESSION['user_id']);
+
+if (!$userData) {
+    session_destroy();
+    header("Location: " . BASE_URL . "/public/registration/login.php");
+    exit();
+}
+
+$gravatarUrl = "https://www.gravatar.com/avatar/" . md5(strtolower(trim($userData['email']))) . "?d=mp";
+$skills = $userModel->getUserSkills($_SESSION['user_id']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -71,10 +89,10 @@ $page->requireAuth();
     </div>
     <div class="header-right">
       <div class="user-info" id="username">
-        <p class="hello">Hello, <span id="user-name">John Doe</span></p>
+        <p class="hello">Hello, <span id="user-name"><?= htmlspecialchars($userData['username']) ?></span></p>
       </div>
       <a href="#profile" class="user-avatar-link">
-        <img src="https://via.placeholder.com/50" alt="User Avatar" class="user-avatar" id="userAvatar">
+        <img src="<?= htmlspecialchars($gravatarUrl) ?>" alt="User Avatar" class="user-avatar" id="userAvatar">
       </a>
     </div>
   </header>
@@ -89,15 +107,14 @@ $page->requireAuth();
         <div class="profile-header-content">
           <!-- In the profile-header-content section, modify the avatar part -->
           <div class="profile-avatar-wrapper">
-            <img src="https://via.placeholder.com/120" alt="Profile Avatar" class="profile-avatar" id="profileAvatar">
-            <button class="avatar-edit-btn" id="avatar-edit-btn" title="Change Avatar">
+            <img src="<?= htmlspecialchars($gravatarUrl) ?>" alt="Profile Avatar" class="profile-avatar" id="profileAvatar">
+            <a href="https://en.gravatar.com/" target="_blank" class="avatar-edit-btn" id="avatar-edit-btn" title="Change Avatar on Gravatar">
               <span class="material-symbols-rounded">edit</span>
-            </button>
-            <input type="file" id="avatar-file-input" accept="image/*" style="display: none;">
+            </a>
           </div>
           <div class="profile-info-header">
-            <h2 id="profile-username">John Doe</h2>
-            <p id="profile-email" class="profile-email">john@example.com</p>
+            <h2 id="profile-username"><?= htmlspecialchars($userData['username']) ?></h2>
+            <p id="profile-email" class="profile-email"><?= htmlspecialchars($userData['email']) ?></p>
           </div>
         </div>
       </div>
@@ -126,19 +143,19 @@ $page->requireAuth();
               <div class="info-grid">
                 <div class="info-item">
                   <label>Full Name</label>
-                  <p id="view-username">John Doe</p>
+                  <p id="view-username"><?= htmlspecialchars($userData['username']) ?></p>
                 </div>
                 <div class="info-item">
                   <label>Email Address</label>
-                  <p id="view-email">john@example.com</p>
+                  <p id="view-email"><?= htmlspecialchars($userData['email']) ?></p>
                 </div>
                 <div class="info-item">
                   <label>Learning Style</label>
-                  <p id="view-learning-style">Visual</p>
+                  <p id="view-learning-style"><?= htmlspecialchars($userData['learning_style'] ?? 'Not set') ?></p>
                 </div>
                 <div class="info-item">
                   <label>Experience Level</label>
-                  <p id="view-experience">Beginner</p>
+                  <p id="view-experience"><?= htmlspecialchars($userData['experience_level'] ?? 'Not set') ?></p>
                 </div>
               </div>
             </div>
@@ -148,29 +165,29 @@ $page->requireAuth();
               <form class="edit-form">
                 <div class="form-group">
                   <label for="e-username">Full Name</label>
-                  <input type="text" id="e-username" placeholder="Enter your full name">
+                  <input type="text" id="e-username" value="<?= htmlspecialchars($userData['username']) ?>" placeholder="Enter your full name">
                 </div>
                 <div class="form-group">
                   <label for="e-email">Email Address</label>
-                  <input type="email" id="e-email" placeholder="Enter your email">
+                  <input type="email" id="e-email" value="<?= htmlspecialchars($userData['email']) ?>" placeholder="Enter your email">
                 </div>
                 <div class="form-group">
                   <label for="e-learning-style">Learning Style</label>
                   <select id="e-learning-style">
-                    <option value="">Select learning style</option>
-                    <option value="Visual">Visual</option>
-                    <option value="Auditory">Auditory</option>
-                    <option value="Reading/Writing">Reading/Writing</option>
-                    <option value="Kinesthetic">Kinesthetic</option>
+                    <option value="" <?= empty($userData['learning_style']) ? 'selected' : '' ?>>Select learning style</option>
+                    <option value="Visual" <?= ($userData['learning_style'] ?? '') === 'Visual' ? 'selected' : '' ?>>Visual</option>
+                    <option value="Aural" <?= ($userData['learning_style'] ?? '') === 'Aural' ? 'selected' : '' ?>>Aural</option>
+                    <option value="Reading/Writing" <?= ($userData['learning_style'] ?? '') === 'Reading/Writing' ? 'selected' : '' ?>>Reading/Writing</option>
+                    <option value="Kinesthetic" <?= ($userData['learning_style'] ?? '') === 'Kinesthetic' ? 'selected' : '' ?>>Kinesthetic</option>
                   </select>
                 </div>
                 <div class="form-group">
                   <label for="e-experience">Experience Level</label>
                   <select id="e-experience">
-                    <option value="">Select experience level</option>
-                    <option value="Beginner">Beginner</option>
-                    <option value="Intermediate">Intermediate</option>
-                    <option value="Advanced">Advanced</option>
+                    <option value="" <?= empty($userData['experience_level']) ? 'selected' : '' ?>>Select experience level</option>
+                    <option value="Beginner" <?= ($userData['experience_level'] ?? '') === 'Beginner' ? 'selected' : '' ?>>Beginner</option>
+                    <option value="Intermediate" <?= ($userData['experience_level'] ?? '') === 'Intermediate' ? 'selected' : '' ?>>Intermediate</option>
+                    <option value="Advanced" <?= ($userData['experience_level'] ?? '') === 'Advanced' ? 'selected' : '' ?>>Advanced</option>
                   </select>
                 </div>
                 <div class="form-actions">
@@ -200,12 +217,13 @@ $page->requireAuth();
             <!-- Skills View Mode -->
             <div id="skillsViewMode">
               <div class="skills-container" id="skillsView">
-                <div class="skill-badge">React</div>
-                <div class="skill-badge">JavaScript</div>
-                <div class="skill-badge">CSS</div>
-                <div class="skill-badge">HTML5</div>
-                <div class="skill-badge">Node.js</div>
-                <div class="skill-badge">Web Design</div>
+                <?php if (!empty($skills)): ?>
+                  <?php foreach ($skills as $skill): ?>
+                    <div class="skill-badge"><?= htmlspecialchars($skill) ?></div>
+                  <?php endforeach; ?>
+                <?php else: ?>
+                  <p>No skills added yet.</p>
+                <?php endif; ?>
               </div>
             </div>
 
@@ -214,7 +232,7 @@ $page->requireAuth();
               <form class="edit-form">
                 <div class="form-group">
                   <label for="e-skills">My Skills</label>
-                  <textarea id="e-skills" placeholder="Enter skills separated by comma&#10;Example: React, JavaScript, CSS" rows="4"></textarea>
+                  <textarea id="e-skills" placeholder="Enter skills separated by comma&#10;Example: React, JavaScript, CSS" rows="4"><?= htmlspecialchars(implode(', ', $skills)) ?></textarea>
                 </div>
                 <div class="form-actions">
                   <button type="button" class="btn-save" onclick="saveSkills()">
@@ -243,7 +261,7 @@ $page->requireAuth();
             <!-- Bio View Mode -->
             <div id="bioViewMode">
               <div class="bio-content">
-                <p id="profile-bio">I'm a passionate learner interested in web development and programming. Always looking to improve my skills and stay updated with the latest technologies.</p>
+                <p id="profile-bio"><?= nl2br(htmlspecialchars($userData['bio'] ?? 'Write something about yourself...')) ?></p>
               </div>
             </div>
 
@@ -252,7 +270,7 @@ $page->requireAuth();
               <form class="edit-form">
                 <div class="form-group">
                   <label for="e-bio">About Me</label>
-                  <textarea id="e-bio" placeholder="Tell us about yourself..." rows="5"></textarea>
+                  <textarea id="e-bio" placeholder="Tell us about yourself..." rows="5"><?= htmlspecialchars($userData['bio'] ?? '') ?></textarea>
                 </div>
                 <div class="form-actions">
                   <button type="button" class="btn-save" onclick="saveBio()">
@@ -335,6 +353,11 @@ $page->requireAuth();
   </main>
 
   <script src="<?= BASE_URL ?>/JS/dashboard.js"></script>
+  <script>
+    window.AppConfig = {
+      baseUrl: "<?= BASE_URL ?>"
+    };
+  </script>
   <script src="<?= BASE_URL ?>/JS/profile.js"></script>
 </body>
 </html>

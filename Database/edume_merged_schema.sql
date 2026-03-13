@@ -1,5 +1,8 @@
 -- phpMyAdmin SQL Dump
--- Database: `edume_merged`
+-- Database: `edume`
+
+CREATE DATABASE IF NOT EXISTS `edume`;
+USE `edume`;
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -9,6 +12,33 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- Drop all tables to ensure a clean slate
+DROP TABLE IF EXISTS `user_achievements`;
+DROP TABLE IF EXISTS `achievements`;
+DROP TABLE IF EXISTS `user_progress`;
+DROP TABLE IF EXISTS `quiz_attempts`;
+DROP TABLE IF EXISTS `quiz_questions`;
+DROP TABLE IF EXISTS `quizzes`;
+DROP TABLE IF EXISTS `content_materials`;
+DROP TABLE IF EXISTS `chapter_objectives`;
+DROP TABLE IF EXISTS `chapters`;
+DROP TABLE IF EXISTS `courses`;
+DROP TABLE IF EXISTS `user_skills`;
+DROP TABLE IF EXISTS `user_vark_results`;
+DROP TABLE IF EXISTS `vark_options`;
+DROP TABLE IF EXISTS `vark_questions`;
+DROP TABLE IF EXISTS `users`;
+
+-- Also drop old tables from the previous `edume.sql` (if any exist) to avoid confusion
+DROP TABLE IF EXISTS `quiz_options`;
+DROP TABLE IF EXISTS `resources`;
+DROP TABLE IF EXISTS `subject_objectives`;
+DROP TABLE IF EXISTS `subjects`;
+
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- --------------------------------------------------------
 -- Table structure for table `users`

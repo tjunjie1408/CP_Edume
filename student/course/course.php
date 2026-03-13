@@ -1,8 +1,30 @@
 <?php
 require_once __DIR__ . '/../../config/constants.php';
 require_once CONFIG_PATH . '/StudentPage.php';
+require_once CONFIG_PATH . '/Database.php';
+require_once __DIR__ . '/../../public/registration/User.php';
+require_once __DIR__ . '/../../public/course/Course.php';
+
 $page = new StudentPage();
 $page->requireAuth();
+
+$database = new Database();
+$db = $database->getConnection();
+
+$userModel = new User($db);
+$userData = $userModel->findById($_SESSION['user_id']);
+
+if (!$userData) {
+    session_destroy();
+    header("Location: " . BASE_URL . "/public/registration/login.php");
+    exit();
+}
+
+$courseModel = new Course($db);
+$courses = $courseModel->getAllPublishedCourses();
+
+$studentVark = strtolower($userData['primary_vark_style'] ?? '');
+$gravatarUrl = "https://www.gravatar.com/avatar/" . md5(strtolower(trim($userData['email']))) . "?d=mp";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -71,10 +93,10 @@ $page->requireAuth();
     </div>
     <div class="header-right">
       <div class="user-info" id="username">
-        <p class="hello">Hello, <span id="user-name">John Doe</span></p>
+        <p class="hello">Hello, <span id="user-name"><?= htmlspecialchars($userData['username']) ?></span></p>
       </div>
       <a href="<?= BASE_URL ?>/student/profile/profile.php" class="user-avatar-link">
-        <img src="https://via.placeholder.com/50" alt="User Avatar" class="user-avatar" id="userAvatar">
+        <img src="<?= htmlspecialchars($gravatarUrl) ?>" alt="User Avatar" class="user-avatar" id="userAvatar">
       </a>
     </div>
   </header>
@@ -88,204 +110,51 @@ $page->requireAuth();
         <p>Learn from beginner to advanced level in your preferred programming language</p>
       </div>
 
-      <!-- 4x4 Grid Layout -->
+      <!-- Dynamic Grid Layout -->
       <div class="course-grid">
-        <!-- Python -->
-        <div class="course-card" data-language="Python">
-          <div class="card-inner">
-            <div class="card-image">
-              <img src="<?= BASE_URL ?>/image/1.png" alt="Python">
+        <?php if (empty($courses)): ?>
+          <p>No courses available at the moment.</p>
+        <?php else: ?>
+          <?php foreach ($courses as $course): 
+            $isRecommended = false;
+            // Check if course supports student's style
+            if ($studentVark === 'visual' && $course['has_visual']) $isRecommended = true;
+            if ($studentVark === 'read' && $course['has_read']) $isRecommended = true;
+            if ($studentVark === 'kinesthetic' && $course['has_kinesthetic']) $isRecommended = true;
+            if ($studentVark === 'aural' && $course['has_aural']) $isRecommended = true;
+          ?>
+            <div class="course-card" data-course-id="<?= htmlspecialchars($course['id']) ?>">
+              <div class="card-inner">
+                <div class="card-image">
+                  <img src="<?= htmlspecialchars(BASE_URL . $course['cover_image']) ?>" alt="<?= htmlspecialchars($course['title']) ?>">
+                </div>
+                <div class="card-content">
+                  <?php if ($isRecommended): ?>
+                    <span style="display:inline-block; font-size:0.75rem; background:#48dbfb; color:white; padding:3px 8px; border-radius:12px; margin-bottom:5px; font-weight:bold;">
+                      ★ Recommended for You
+                    </span>
+                  <?php endif; ?>
+                  <h3><?= htmlspecialchars($course['title']) ?></h3>
+                  <p><?= htmlspecialchars(ucfirst($course['difficulty'])) ?></p>
+                  <button class="btn-enroll" onclick="enrollCourse(<?= htmlspecialchars($course['id']) ?>)">
+                    <span class="material-symbols-rounded">arrow_forward</span>
+                  </button>
+                </div>
+              </div>
             </div>
-            <div class="card-content">
-              <h3>Python</h3>
-              <p>Beginner to Advanced</p>
-              <button class="btn-enroll" onclick="enrollCourse('Python')">
-                <span class="material-symbols-rounded">arrow_forward</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- PHP -->
-        <div class="course-card" data-language="PHP">
-          <div class="card-inner">
-            <div class="card-image">
-              <img src="<?= BASE_URL ?>/image/2.png" alt="PHP">
-            </div>
-            <div class="card-content">
-              <h3>PHP</h3>
-              <p>Beginner to Advanced</p>
-              <button class="btn-enroll" onclick="enrollCourse('PHP')">
-                <span class="material-symbols-rounded">arrow_forward</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Docker -->
-        <div class="course-card" data-language="Docker">
-          <div class="card-inner">
-            <div class="card-image">
-              <img src="<?= BASE_URL ?>/image/3.webp" alt="Docker">
-            </div>
-            <div class="card-content">
-              <h3>Docker</h3>
-              <p>Beginner to Advanced</p>
-              <button class="btn-enroll" onclick="enrollCourse('Docker')">
-                <span class="material-symbols-rounded">arrow_forward</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- C++ -->
-        <div class="course-card" data-language="C++">
-          <div class="card-inner">
-            <div class="card-image">
-              <img src="<?= BASE_URL ?>/image/5.png" alt="C++">
-            </div>
-            <div class="card-content">
-              <h3>C++</h3>
-              <p>Beginner to Advanced</p>
-              <button class="btn-enroll" onclick="enrollCourse('C++')">
-                <span class="material-symbols-rounded">arrow_forward</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- CSS -->
-        <div class="course-card" data-language="CSS">
-          <div class="card-inner">
-            <div class="card-image">
-              <img src="<?= BASE_URL ?>/image/6.png" alt="CSS">
-            </div>
-            <div class="card-content">
-              <h3>CSS</h3>
-              <p>Beginner to Advanced</p>
-              <button class="btn-enroll" onclick="enrollCourse('CSS')">
-                <span class="material-symbols-rounded">arrow_forward</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Rust -->
-        <div class="course-card" data-language="Rust">
-          <div class="card-inner">
-            <div class="card-image">
-              <img src="<?= BASE_URL ?>/image/7.png" alt="Rust">
-            </div>
-            <div class="card-content">
-              <h3>Rust</h3>
-              <p>Beginner to Advanced</p>
-              <button class="btn-enroll" onclick="enrollCourse('Rust')">
-                <span class="material-symbols-rounded">arrow_forward</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Golang -->
-        <div class="course-card" data-language="Golang">
-          <div class="card-inner">
-            <div class="card-image">
-              <img src="<?= BASE_URL ?>/image/8.png" alt="Golang">
-            </div>
-            <div class="card-content">
-              <h3>Golang</h3>
-              <p>Beginner to Advanced</p>
-              <button class="btn-enroll" onclick="enrollCourse('Golang')">
-                <span class="material-symbols-rounded">arrow_forward</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- HTML -->
-        <div class="course-card" data-language="HTML">
-          <div class="card-inner">
-            <div class="card-image">
-              <img src="<?= BASE_URL ?>/image/10.png" alt="HTML">
-            </div>
-            <div class="card-content">
-              <h3>HTML</h3>
-              <p>Beginner to Advanced</p>
-              <button class="btn-enroll" onclick="enrollCourse('HTML')">
-                <span class="material-symbols-rounded">arrow_forward</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- TailWind -->
-        <div class="course-card" data-language="TailWind">
-          <div class="card-inner">
-            <div class="card-image">
-              <img src="<?= BASE_URL ?>/image/11.png" alt="TailWind">
-            </div>
-            <div class="card-content">
-              <h3>TailWind</h3>
-              <p>Beginner to Advanced</p>
-              <button class="btn-enroll" onclick="enrollCourse('TailWind')">
-                <span class="material-symbols-rounded">arrow_forward</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- JavaScript -->
-        <div class="course-card" data-language="JavaScript">
-          <div class="card-inner">
-            <div class="card-image">
-              <img src="<?= BASE_URL ?>/image/12.png" alt="JavaScript">
-            </div>
-            <div class="card-content">
-              <h3>JavaScript</h3>
-              <p>Beginner to Advanced</p>
-              <button class="btn-enroll" onclick="enrollCourse('JavaScript')">
-                <span class="material-symbols-rounded">arrow_forward</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- NextJS -->
-        <div class="course-card" data-language="NextJS">
-          <div class="card-inner">
-            <div class="card-image">
-              <img src="<?= BASE_URL ?>/image/13.png" alt="NextJS">
-            </div>
-            <div class="card-content">
-              <h3>NextJS</h3>
-              <p>Beginner to Advanced</p>
-              <button class="btn-enroll" onclick="enrollCourse('NextJS')">
-                <span class="material-symbols-rounded">arrow_forward</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Networking -->
-        <div class="course-card" data-language="Networking">
-          <div class="card-inner">
-            <div class="card-image">
-              <img src="<?= BASE_URL ?>/image/grid2.png" alt="Networking">
-            </div>
-            <div class="card-content">
-              <h3>Networking</h3>
-              <p>Beginner to Advanced</p>
-              <button class="btn-enroll" onclick="enrollCourse('Networking')">
-                <span class="material-symbols-rounded">arrow_forward</span>
-              </button>
-            </div>
-          </div>
-        </div>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </div>
         </div>
       </div>
     </div>
   </main>
 
+  <script>
+    window.AppConfig = {
+      baseUrl: "<?= BASE_URL ?>"
+    };
+  </script>
   <script src="<?= BASE_URL ?>/JS/dashboard.js"></script>
   <script src="<?= BASE_URL ?>/JS/course.js"></script>
 </body>

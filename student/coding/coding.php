@@ -1,8 +1,25 @@
 <?php
 require_once __DIR__ . '/../../config/constants.php';
 require_once CONFIG_PATH . '/StudentPage.php';
+require_once CONFIG_PATH . '/Database.php';
+require_once __DIR__ . '/../../public/course/ContentMaterial.php';
+
 $page = new StudentPage();
 $page->requireAuth();
+
+$materialId = $_GET['material_id'] ?? null;
+$practiceData = null;
+
+if ($materialId && is_numeric($materialId)) {
+    $database = new Database();
+    $db = $database->getConnection();
+    $materialModel = new ContentMaterial($db);
+    $material = $materialModel->findById($materialId);
+    
+    if ($material && $material['content_type'] === 'practice') {
+        $practiceData = $material;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -50,7 +67,10 @@ $page->requireAuth();
       </div>
       
       <div class="toolbar-center">
-        <span class="editor-title" id="editor-title">Python Editor</span>
+        <!-- If it's a practice challenge, show the title -->
+        <span class="editor-title" id="editor-title">
+            <?= $practiceData ? htmlspecialchars($practiceData['title']) : 'Sandbox Editor' ?>
+        </span>
       </div>
       
       <div class="toolbar-right">
@@ -113,6 +133,13 @@ $page->requireAuth();
         Quick Reference
       </div>
       <div class="reference-content" id="reference-content">
+        <?php if ($practiceData): ?>
+        <div class="reference-section" style="background: rgba(254, 202, 87, 0.1); border-left: 4px solid #feca57; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+          <h4 style="color: #feca57; margin-top: 0;">🎯 Your Challenge</h4>
+          <p style="margin-bottom: 0; line-height: 1.5;"><?= nl2br(htmlspecialchars($practiceData['practice_problem'])) ?></p>
+        </div>
+        <?php endif; ?>
+
         <div class="reference-section">
           <h4>Keyboard Shortcuts</h4>
           <ul>
@@ -127,6 +154,16 @@ $page->requireAuth();
   </main>
 
   <script src="<?= BASE_URL ?>/JS/dashboard.js"></script>
+  
+  <!-- Pass PHP data to JS -->
+  <script>
+    window.PracticeData = <?= json_encode([
+        'isChallenge' => $practiceData !== null,
+        'language' => $practiceData['practice_language'] ?? 'python',
+        'expectedKeys' => $practiceData['practice_solution'] ?? ''
+    ]) ?>;
+  </script>
+  
   <script src="<?= BASE_URL ?>/JS/coding.js"></script>
 </body>
 </html>

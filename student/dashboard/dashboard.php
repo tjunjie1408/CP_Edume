@@ -1,8 +1,24 @@
 <?php
 require_once __DIR__ . '/../../config/constants.php';
 require_once CONFIG_PATH . '/StudentPage.php';
+require_once CONFIG_PATH . '/Database.php';
+require_once __DIR__ . '/../../public/course/Progress.php';
+
 $page = new StudentPage();
 $page->requireAuth();
+
+$database = new Database();
+$db = $database->getConnection();
+$progressModel = new Progress($db);
+
+$userId = $_SESSION['user_id'];
+$dashboardStats = $progressModel->getUserDashboardData($userId);
+$enrolledCourses = $progressModel->getEnrolledCoursesProgress($userId);
+$recentActivities = $progressModel->getRecentActivity($userId, 3);
+
+// Calculate streak (Mocked for now since streak isn't in DB Schema)
+$streakDays = 1; 
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -91,15 +107,15 @@ $page->requireAuth();
         <p>Continue your learning journey and unlock your potential</p>
         <div class="banner-stats">
           <div class="stat-box">
-            <span class="stat-number">12</span>
+            <span class="stat-number"><?= $dashboardStats['active_courses'] ?></span>
             <span class="stat-label">Courses Active</span>
           </div>
           <div class="stat-box">
-            <span class="stat-number">85%</span>
+            <span class="stat-number"><?= $dashboardStats['overall_progress'] ?>%</span>
             <span class="stat-label">Progress Overall</span>
           </div>
           <div class="stat-box">
-            <span class="stat-number">24</span>
+            <span class="stat-number"><?= $streakDays ?></span>
             <span class="stat-label">Days Streak</span>
           </div>
         </div>
@@ -252,33 +268,22 @@ $page->requireAuth();
             <h3>Your Progress</h3>
           </div>
           <div class="card-content">
-            <div class="progress-item">
-              <div class="progress-header">
-                <span class="course-name">React Fundamentals</span>
-                <span class="percentage">65%</span>
-              </div>
-              <div class="progress-bar">
-                <div class="progress-fill" style="width: 65%"></div>
-              </div>
-            </div>
-            <div class="progress-item">
-              <div class="progress-header">
-                <span class="course-name">JavaScript Mastery</span>
-                <span class="percentage">82%</span>
-              </div>
-              <div class="progress-bar">
-                <div class="progress-fill" style="width: 82%"></div>
-              </div>
-            </div>
-            <div class="progress-item">
-              <div class="progress-header">
-                <span class="course-name">Web Design Basics</span>
-                <span class="percentage">45%</span>
-              </div>
-              <div class="progress-bar">
-                <div class="progress-fill" style="width: 45%"></div>
-              </div>
-            </div>
+            <?php if (empty($enrolledCourses)): ?>
+               <p style="color: var(--text-muted);">You haven't enrolled in any courses yet.</p>
+               <a href="<?= BASE_URL ?>/student/course/course.php" class="btn-primary" style="text-decoration: none; display: inline-block; margin-top: 1rem;">Browse Courses</a>
+            <?php else: ?>
+                <?php foreach ($enrolledCourses as $course): ?>
+                <div class="progress-item">
+                  <div class="progress-header">
+                    <span class="course-name"><?= htmlspecialchars($course['title']) ?></span>
+                    <span class="percentage"><?= $course['progress_percent'] ?>%</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: <?= $course['progress_percent'] ?>%"></div>
+                  </div>
+                </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
           </div>
         </section>
       </div>
@@ -291,18 +296,24 @@ $page->requireAuth();
             <h3>Continue Learning</h3>
           </div>
           <div class="card-content">
-            <div class="resume-course-card">
-              <h4>Advanced React Hooks</h4>
-              <p class="course-meta">Module 5 of 12</p>
-              <p class="last-accessed">Last accessed: Yesterday</p>
-              <button class="btn-primary">Resume Course</button>
-            </div>
-            <div class="resume-course-card">
-              <h4>JavaScript ES6 Features</h4>
-              <p class="course-meta">Module 3 of 8</p>
-              <p class="last-accessed">Last accessed: 3 days ago</p>
-              <button class="btn-primary">Resume Course</button>
-            </div>
+            <?php if (empty($enrolledCourses)): ?>
+                <p style="color: var(--text-muted);">No active courses to resume.</p>
+            <?php else: ?>
+                <?php 
+                // Show top 2 most recently accessed courses
+                $recentResume = array_slice($enrolledCourses, 0, 2); 
+                foreach ($recentResume as $course): 
+                ?>
+                <div class="resume-course-card">
+                  <h4><?= htmlspecialchars($course['title']) ?></h4>
+                  <p class="course-meta">Progress: <?= $course['progress_percent'] ?>%</p>
+                  <p class="last-accessed">
+                     Last activity: <?= $course['last_activity'] ? date('M j, Y', strtotime($course['last_activity'])) : 'Never' ?>
+                  </p>
+                  <a href="<?= BASE_URL ?>/student/course_details/course_details.php?id=<?= $course['id'] ?>" class="btn-primary" style="text-decoration: none; display: inline-block;">Resume Course</a>
+                </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
           </div>
         </section>
 
@@ -338,21 +349,21 @@ $page->requireAuth();
           </div>
           <div class="card-content">
             <ul class="activity-list">
-              <li class="activity-item">
-                <span class="activity-icon">✓</span>
-                <span class="activity-text">Completed "State Management" quiz</span>
-                <small>Today</small>
-              </li>
-              <li class="activity-item">
-                <span class="activity-icon">▶</span>
-                <span class="activity-text">Started "Component Lifecycle" lesson</span>
-                <small>Yesterday</small>
-              </li>
-              <li class="activity-item">
-                <span class="activity-icon">⭐</span>
-                <span class="activity-text">Earned badge "Quick Learner"</span>
-                <small>2 days ago</small>
-              </li>
+              <?php if (empty($recentActivities)): ?>
+                  <li class="activity-item">
+                    <span class="activity-text" style="color: var(--text-muted);">No recent activity. Start learning!</span>
+                  </li>
+              <?php else: ?>
+                  <?php foreach ($recentActivities as $activity): ?>
+                  <li class="activity-item">
+                    <span class="activity-icon" style="color: var(--accent-success);">✓</span>
+                    <span class="activity-text">
+                        Passed Quiz: "<?= htmlspecialchars($activity['chapter_title']) ?>" in <?= htmlspecialchars($activity['course_title']) ?>
+                    </span>
+                    <small><?= date('M j', strtotime($activity['timestamp'])) ?></small>
+                  </li>
+                  <?php endforeach; ?>
+              <?php endif; ?>
             </ul>
           </div>
         </section>

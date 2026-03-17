@@ -85,7 +85,7 @@ $page->requireAuth();
     </div>
     <div class="header-right">
       <div class="user-info" id="username">
-        <p class="hello">Hello, <span id="user-name">Admin</span></p>
+        <p class="hello">Hello, <span id="user-name"><?= htmlspecialchars($_SESSION['username'] ?? 'Admin') ?></span></p>
       </div>
       <a href="<?= BASE_URL ?>/admin/profile/profile.php" class="user-avatar-link">
         <img src="https://via.placeholder.com/50" alt="Admin Avatar" class="user-avatar" id="userAvatar">
@@ -98,7 +98,7 @@ $page->requireAuth();
     <!-- Admin Welcome Banner -->
     <section class="section welcome-banner admin-banner">
       <div class="banner-content">
-        <h2>Welcome Back, <span id="banner-user-name">Admin</span>! 👨‍💼</h2>
+        <h2>Welcome Back, <span id="banner-user-name"><?= htmlspecialchars($_SESSION['username'] ?? 'Admin') ?></span>! 👨‍💼</h2>
         <p>Manage your platform and monitor system performance</p>
       </div>
     </section>

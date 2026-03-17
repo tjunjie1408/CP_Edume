@@ -43,7 +43,7 @@ if ($materialId && is_numeric($materialId)) {
     </div>
     <div class="header-right">
       <div class="user-info" id="username">
-        <p class="hello">Hello, <span id="user-name">John Doe</span></p>
+        <p class="hello">Hello, <span id="user-name"><?= htmlspecialchars($_SESSION['username'] ?? 'Student') ?></span></p>
       </div>
       <a href="<?= BASE_URL ?>/student/profile/profile.php" class="user-avatar-link">
         <img src="https://via.placeholder.com/50" alt="User Avatar" class="user-avatar" id="userAvatar">
@@ -53,6 +53,13 @@ if ($materialId && is_numeric($materialId)) {
 
   <!-- Main Coding Content -->
   <main class="coding-content">
+    <!-- Back Button -->
+    <div style="padding: 0.5rem 1rem 0;">
+      <a href="javascript:history.back()" style="display: inline-flex; align-items: center; gap: 0.4rem; text-decoration: none; color: var(--primary-color); font-weight: 600; font-size: 0.9rem;">
+        <span class="material-symbols-rounded" style="font-size: 18px;">arrow_back</span>
+        Back
+      </a>
+    </div>
     <!-- Editor Toolbar -->
     <div class="editor-toolbar">
       <div class="toolbar-left">

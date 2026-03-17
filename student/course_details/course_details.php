@@ -129,6 +129,13 @@ if ($activeChapterId) {
 
   <!-- Main Content -->
   <main class="python-content">
+    <!-- Back Button -->
+    <div style="padding: 0.75rem 1.5rem;">
+      <a href="<?= BASE_URL ?>/student/course/course.php" style="display: inline-flex; align-items: center; gap: 0.4rem; text-decoration: none; color: var(--primary-color); font-weight: 600; font-size: 0.95rem;">
+        <span class="material-symbols-rounded" style="font-size: 20px;">arrow_back</span>
+        Back to Courses
+      </a>
+    </div>
     <div class="python-container">
       
       <!-- Left Sidebar -->
@@ -256,17 +263,17 @@ if ($activeChapterId) {
                                 </div>
                             
                             <?php elseif ($material['content_type'] === 'text'): ?>
-                                <div class="material-block text-block" style="margin-bottom: 2rem; background: #2a2a35; padding: 1.5rem; border-radius: 8px; <?= ($studentVark === 'read') ? 'border: 2px solid #ff9ff3;' : '' ?>">
-                                    <h4><?= htmlspecialchars($material['title']) ?> <?= ($studentVark === 'read') ? '<span style="font-size:0.8rem; background:#ff9ff3; color:white; padding:2px 6px; border-radius:8px;">Recommended</span>' : '' ?></h4>
-                                    <div class="text-content" style="line-height: 1.6; color: #d0d0ec;">
+                                <div class="material-block text-block" style="margin-bottom: 2rem; background: #f8f9fc; padding: 1.5rem; border-radius: 8px; border: 1px solid #e2e6f0; <?= ($studentVark === 'read') ? 'border: 2px solid #ff9ff3;' : '' ?>">
+                                    <h4 style="color: #2c3e50; margin-bottom: 0.75rem;"><?= htmlspecialchars($material['title']) ?> <?= ($studentVark === 'read') ? '<span style="font-size:0.8rem; background:#ff9ff3; color:white; padding:2px 6px; border-radius:8px;">Recommended</span>' : '' ?></h4>
+                                    <div class="text-content" style="line-height: 1.8; color: #34495e;">
                                         <!-- Note: If text_content contains safe HTML from a wysiwyg, use it without htmlspecialchars. Assuming safe for now -->
                                         <?= $material['text_content'] ?>
                                     </div>
                                 </div>
                                 
                             <?php elseif ($material['content_type'] === 'practice'): ?>
-                                <div class="material-block practice-block" style="margin-bottom: 2rem; background: #2a2a35; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #feca57; <?= ($studentVark === 'kinesthetic') ? 'border: 2px solid #feca57;' : '' ?>">
-                                    <h4>🎯 Practice: <?= htmlspecialchars($material['title']) ?> <?= ($studentVark === 'kinesthetic') ? '<span style="font-size:0.8rem; background:#feca57; color:#222; padding:2px 6px; border-radius:8px;">Recommended</span>' : '' ?></h4>
+                                <div class="material-block practice-block" style="margin-bottom: 2rem; background: #fffdf5; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #feca57; border: 1px solid #f0e6c8; <?= ($studentVark === 'kinesthetic') ? 'border: 2px solid #feca57;' : '' ?>">
+                                    <h4 style="color: #2c3e50; margin-bottom: 0.75rem;">🎯 Practice: <?= htmlspecialchars($material['title']) ?> <?= ($studentVark === 'kinesthetic') ? '<span style="font-size:0.8rem; background:#feca57; color:#222; padding:2px 6px; border-radius:8px;">Recommended</span>' : '' ?></h4>
                                     <p><?= nl2br(htmlspecialchars($material['practice_problem'])) ?></p>
                                     <a href="<?= BASE_URL ?>/student/coding/coding.php?material_id=<?= $material['id'] ?>" class="btn-primary" style="display: inline-block; margin-top: 1rem; text-decoration: none;">
                                         Open Sandbox Editor

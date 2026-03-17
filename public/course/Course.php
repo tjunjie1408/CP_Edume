@@ -14,4 +14,12 @@ class Course implements CourseInterface {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function findById(int $id): ?array {
+        $stmt = $this->db->prepare("SELECT * FROM courses WHERE id = :id");
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
 }

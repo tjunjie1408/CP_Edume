@@ -9,10 +9,10 @@ class Chapter implements ChapterInterface {
     }
 
     public function getChaptersByCourseId(int $courseId): array {
-        $query = "SELECT id, title, chapter_order, description 
+        $query = "SELECT id, title, order_num AS chapter_order, overview AS description 
                   FROM chapters 
                   WHERE course_id = :course_id 
-                  ORDER BY chapter_order ASC";
+                  ORDER BY order_num ASC";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':course_id', $courseId, PDO::PARAM_INT);
         $stmt->execute();

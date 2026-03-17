@@ -3,9 +3,10 @@
 require_once 'ProgressInterface.php';
 
 class Progress implements ProgressInterface {
-    private PDO $conn;
+    /** @var PDO */
+    private $conn;
 
-    public function __construct(PDO $db) {
+    public function __construct($db) {
         $this->conn = $db;
     }
 
@@ -13,17 +14,20 @@ class Progress implements ProgressInterface {
         // Query to get active courses and overall progress.
         // We calculate progress per course first (completed chapters / total chapters)
         // Then we average those out.
-        // NULLIF prevents division by zero if total_chapters is 0.
+        // Uses subquery to count total chapters since courses table has no total_chapters column.
         $query = "
             SELECT 
                 COUNT(DISTINCT c.id) as active_courses,
                 COALESCE(AVG(
-                    (SELECT COUNT(up.id) 
-                     FROM user_progress up 
-                     JOIN chapters ch ON up.chapter_id = ch.id 
-                     WHERE up.user_id = :user_id 
-                       AND ch.course_id = c.id) 
-                    / NULLIF(c.total_chapters, 0) * 100
+                    (SELECT COUNT(up_inner.id) 
+                     FROM user_progress up_inner 
+                     JOIN chapters ch_inner ON up_inner.chapter_id = ch_inner.id 
+                     WHERE up_inner.user_id = :user_id_inner 
+                       AND ch_inner.course_id = c.id
+                       AND up_inner.is_completed = 1) 
+                    / NULLIF(
+                        (SELECT COUNT(ch_total.id) FROM chapters ch_total WHERE ch_total.course_id = c.id)
+                    , 0) * 100
                 ), 0) as overall_progress
             FROM courses c
             JOIN chapters ch ON c.id = ch.course_id
@@ -33,6 +37,7 @@ class Progress implements ProgressInterface {
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->bindParam(':user_id_inner', $userId, PDO::PARAM_INT);
         $stmt->execute();
         
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -44,19 +49,18 @@ class Progress implements ProgressInterface {
     }
 
     public function getRecentActivity(int $userId, int $limit = 5): array {
-        // Fetch recent progress updates across all courses
+        // Fetch recent completed chapters and quiz attempts across all courses
         $query = "
             SELECT 
                 c.title as course_title,
                 ch.title as chapter_title,
-                up.score,
-                up.last_accessed as timestamp,
-                'quiz_passed' as activity_type
+                up.completed_at as timestamp,
+                'chapter_completed' as activity_type
             FROM user_progress up
             JOIN chapters ch ON up.chapter_id = ch.id
             JOIN courses c ON ch.course_id = c.id
-            WHERE up.user_id = :user_id AND up.completed = 1
-            ORDER BY up.last_accessed DESC
+            WHERE up.user_id = :user_id AND up.is_completed = 1
+            ORDER BY up.completed_at DESC
             LIMIT :limit
         ";
 
@@ -75,12 +79,16 @@ class Progress implements ProgressInterface {
                 c.title,
                 c.cover_image,
                 c.difficulty,
-                (SELECT COUNT(up.id) 
-                 FROM user_progress up 
-                 JOIN chapters ch2 ON up.chapter_id = ch2.id 
-                 WHERE up.user_id = :user_id AND ch2.course_id = c.id AND up.completed = 1) as completed_chapters,
-                c.total_chapters,
-                MAX(up_main.last_accessed) as last_activity
+                (SELECT COUNT(up_inner.id) 
+                 FROM user_progress up_inner 
+                 JOIN chapters ch2 ON up_inner.chapter_id = ch2.id 
+                 WHERE up_inner.user_id = :user_id_inner 
+                   AND ch2.course_id = c.id 
+                   AND up_inner.is_completed = 1) as completed_chapters,
+                (SELECT COUNT(ch_total.id) 
+                 FROM chapters ch_total 
+                 WHERE ch_total.course_id = c.id) as total_chapters,
+                MAX(up_main.completed_at) as last_activity
             FROM courses c
             JOIN chapters ch ON c.id = ch.course_id
             JOIN user_progress up_main ON ch.id = up_main.chapter_id
@@ -91,6 +99,7 @@ class Progress implements ProgressInterface {
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->bindParam(':user_id_inner', $userId, PDO::PARAM_INT);
         $stmt->execute();
         
         $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);

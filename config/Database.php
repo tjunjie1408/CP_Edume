@@ -6,7 +6,7 @@
 class Database
 {
     private string $host     = "localhost";
-    private string $db_name  = "edume_merged";
+    private string $db_name  = "edume";
     private string $username = "root";
     private string $password = "";
 

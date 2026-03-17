@@ -18,7 +18,7 @@ class User implements UserInterface
     public function findById(int $id): ?array
     {
         $stmt = $this->db->prepare(
-            "SELECT id, username, email, password_hash, role, primary_vark_style, learning_style, created_at
+            "SELECT id, username, email, password_hash, role, primary_vark_style, primary_vark_style AS learning_style, experience_level, bio, created_at
              FROM users WHERE id = ?"
         );
         $stmt->execute([$id]);
@@ -98,7 +98,7 @@ class User implements UserInterface
     public function updateStudentProfile(int $id, string $username, string $email, string $learningStyle, string $experience): bool
     {
         // For enum fields, they should match DB definitions. learning_style: 'Visual','Aural','Reading/Writing','Kinesthetic'. We will assume correct input format.
-        $stmt = $this->db->prepare("UPDATE users SET username = ?, email = ?, learning_style = ?, experience_level = ? WHERE id = ?");
+        $stmt = $this->db->prepare("UPDATE users SET username = ?, email = ?, primary_vark_style = ?, experience_level = ? WHERE id = ?");
         return $stmt->execute([$username, $email, $learningStyle, $experience, $id]);
     }
 

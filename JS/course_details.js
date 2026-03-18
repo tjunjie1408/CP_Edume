@@ -52,20 +52,32 @@ function setupReportForm() {
         submitBtn.innerHTML = '<span class="material-symbols-rounded loading">refresh</span> Submitting...';
         submitBtn.disabled = true;
 
-        // Simulate API delay for submitting report
-        setTimeout(() => {
-            showReportStatus('Report submitted successfully! Thank you for your feedback.', 'success');
-            
-            // Reset form
-            this.reset();
+        // Extract course ID from URL (?id=X)
+        const urlParams = new URLSearchParams(window.location.search);
+        const courseId = urlParams.get('id') || null;
+
+        fetch((window.AppConfig?.baseUrl || '') + '/student/course_details/submit_report_api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reportType, content: submitContent, courseId })
+        })
+        .then(res => res.json().then(data => ({ ok: res.ok, data })))
+        .then(({ ok, data }) => {
+            if (!ok) throw new Error(data.error || 'Failed to submit report');
+            showReportStatus(data.message || 'Report submitted successfully!', 'success');
+            reportForm.reset();
             charCount.textContent = '0';
-            
+        })
+        .catch(err => {
+            showReportStatus('Error: ' + err.message, 'error');
+        })
+        .finally(() => {
             setTimeout(() => {
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
                 if(reportStatus) reportStatus.style.display = 'none';
             }, 3000);
-        }, 1000);
+        });
     });
 }
 

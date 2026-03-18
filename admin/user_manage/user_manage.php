@@ -294,8 +294,10 @@ $page->requireAuth();
   <!-- Toast Notification -->
   <div class="toast" id="toast-notification"></div>
 
+  <script>
+    window.AppConfig = { baseUrl: '<?= BASE_URL ?>' };
+  </script>
   <script src="<?= BASE_URL ?>/JS/dashboard.js"></script>
-  <script src="<?= BASE_URL ?>/JS/dashboard_admin.js"></script>
   <script src="<?= BASE_URL ?>/JS/user_manage_admin.js"></script>
 </body>
 </html>

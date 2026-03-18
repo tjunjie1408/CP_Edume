@@ -46,52 +46,18 @@ async function loadAdminData() {
   }
 }
 
-// Fetch Admin Dashboard Data from Backend
+// Fetch Admin Dashboard Data from Backend API
 async function fetchAdminDashboardData() {
-  // TODO: Replace with actual API endpoint
-  // Example: const response = await fetch('/api/admin/dashboard');
-  
-  // For now, return mock data structure
-  return {
-    statistics: {
-      totalUsers: 1250,
-      totalCourses: 12,
-      totalEnrollments: 3847,
-      completionRate: 68.5,
-      usersChange: '+12%',
-      coursesChange: '+3',
-      enrollmentsChange: '+156',
-      completionRateChange: '+2.3%'
-    },
-    varkDistribution: {
-      visual: 320,
-      aural: 280,
-      reading: 350,
-      kinesthetic: 300
-    },
-    userActivity: {
-      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      data: [45, 52, 48, 61, 55, 40, 35]
-    },
-    topCourses: [
-      { id: 1, name: 'Python Basics', enrollments: 450, rating: 4.8 },
-      { id: 2, name: 'Web Development', enrollments: 380, rating: 4.6 },
-      { id: 3, name: 'JavaScript Mastery', enrollments: 320, rating: 4.7 },
-      { id: 4, name: 'Data Science 101', enrollments: 290, rating: 4.5 }
-    ],
-    recentUsers: [
-      { id: 1, name: 'Sarah Johnson', email: 'sarah@example.com', joinDate: '2024-02-20' },
-      { id: 2, name: 'Mike Chen', email: 'mike@example.com', joinDate: '2024-02-19' },
-      { id: 3, name: 'Emma Davis', email: 'emma@example.com', joinDate: '2024-02-18' },
-      { id: 4, name: 'John Smith', email: 'john@example.com', joinDate: '2024-02-17' }
-    ],
-    systemHealth: {
-      server: { status: 'online', uptime: '99.9%' },
-      database: { status: 'online', load: '45%' },
-      api: { status: 'online', responseTime: '125ms' },
-      storage: { status: 'online', usage: '65%' }
-    }
-  };
+  const response = await fetch(window.AppConfig?.baseUrl
+    ? window.AppConfig.baseUrl + '/admin/dashboard/admin_dashboard_api.php'
+    : 'admin_dashboard_api.php');
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || 'Failed to fetch dashboard data');
+  }
+
+  return await response.json();
 }
 
 // Update Statistics Cards

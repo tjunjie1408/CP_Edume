@@ -113,4 +113,40 @@ class Progress implements ProgressInterface {
         
         return $courses;
     }
+    /**
+     * Get chapters completed per day over the last 7 days.
+     * Returns labels (day names) and data (counts) with PHP-side gap filling.
+     */
+    public function getWeeklyActivity(int $userId): array {
+        $query = "
+            SELECT DATE(completed_at) as activity_date, COUNT(*) as cnt
+            FROM user_progress
+            WHERE user_id = :user_id
+              AND is_completed = 1
+              AND completed_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+            GROUP BY DATE(completed_at)
+            ORDER BY activity_date ASC
+        ";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        // Build lookup: 'YYYY-MM-DD' => count
+        $rows = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $rows[$row['activity_date']] = (int) $row['cnt'];
+        }
+
+        // Fill all 7 days (prevents Chart.js time-series gaps)
+        $labels = [];
+        $data = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = date('Y-m-d', strtotime("-{$i} days"));
+            $labels[] = date('D', strtotime($date)); // Mon, Tue, ...
+            $data[] = $rows[$date] ?? 0;
+        }
+
+        return ['labels' => $labels, 'data' => $data];
+    }
 }

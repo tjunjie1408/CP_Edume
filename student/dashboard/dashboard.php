@@ -15,6 +15,7 @@ $userId = $_SESSION['user_id'];
 $dashboardStats = $progressModel->getUserDashboardData($userId);
 $enrolledCourses = $progressModel->getEnrolledCoursesProgress($userId);
 $recentActivities = $progressModel->getRecentActivity($userId, 3);
+$weeklyActivity = $progressModel->getWeeklyActivity($userId);
 
 // Calculate streak (Mocked for now since streak isn't in DB Schema)
 $streakDays = 1; 
@@ -286,6 +287,16 @@ $streakDays = 1;
             <?php endif; ?>
           </div>
         </section>
+
+        <!-- Learning Activity Chart -->
+        <section class="card">
+          <div class="section-header">
+            <h3>Learning Activity</h3>
+          </div>
+          <div class="card-content">
+            <canvas id="student-activity-chart" height="200"></canvas>
+          </div>
+        </section>
       </div>
 
       <!-- Right Column -->
@@ -380,6 +391,62 @@ $streakDays = 1;
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/clike/clike.min.js"></script>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="<?= BASE_URL ?>/JS/dashboard.js"></script>
+  <script>
+    // Student Learning Activity Line Chart
+    document.addEventListener('DOMContentLoaded', function() {
+      const ctx = document.getElementById('student-activity-chart');
+      if (!ctx) return;
+
+      const activityData = <?= json_encode($weeklyActivity) ?>;
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: activityData.labels,
+          datasets: [{
+            label: 'Chapters Completed',
+            data: activityData.data,
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102, 126, 234, 0.12)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#667eea',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { stepSize: 1, color: '#9ca3af' },
+              grid: { color: 'rgba(156, 163, 175, 0.15)' }
+            },
+            x: {
+              ticks: { color: '#9ca3af' },
+              grid: { display: false }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#1e1e2f',
+              titleColor: '#fff',
+              bodyColor: '#e6e6e6',
+              padding: 10,
+              cornerRadius: 8
+            }
+          }
+        }
+      });
+    });
+  </script>
 </body>
 </html>

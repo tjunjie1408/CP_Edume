@@ -304,7 +304,7 @@ $page->requireAuth();
   <script>
     window.AppConfig = { baseUrl: '<?= BASE_URL ?>' };
   </script>
-  <!-- ONLY load dashboard.js for shared functions, NO dashboard_admin.js yet -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="<?= BASE_URL ?>/JS/dashboard.js"></script>
   <script src="<?= BASE_URL ?>/JS/dashboard_admin.js"></script>
 </body>

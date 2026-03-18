@@ -19,24 +19,16 @@ function initializeApp() {
   displayCoursesList();
 }
 
-// ============================================
-// LOAD & SAVE DATA - Using JSON Storage
-// ============================================
+const API_URL = () => (window.AppConfig?.baseUrl || '') + '/admin/course_manage/admin_courses_api.php';
 
-const STORAGE_KEY = 'coursesDataAdmin';
-
-function loadCoursesData() {
-  // Try to load from localStorage first
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    try {
-      coursesData = JSON.parse(saved);
-      console.log('✓ Loaded courses from storage:', Object.keys(coursesData).length, 'courses');
-    } catch (error) {
-      console.error('Error parsing stored data:', error);
-      initializeDefaultData();
-    }
-  } else {
+async function loadCoursesData() {
+  try {
+    const response = await fetch(API_URL());
+    if (!response.ok) throw new Error('Failed to load courses');
+    coursesData = await response.json();
+    console.log('✓ Loaded courses from API:', Object.keys(coursesData).length, 'courses');
+  } catch (error) {
+    console.error('Error loading courses:', error);
     initializeDefaultData();
   }
 }
@@ -117,20 +109,12 @@ function initializeDefaultData() {
 }
 
 /**
- * CORE JSON SAVE FUNCTION - All changes go through here
+ * LOCAL-ONLY save — real persistence happens in individual API calls.
+ * This function just dispatches the update event for UI sync.
  */
 function saveToStorage() {
-  try {
-    const jsonString = JSON.stringify(coursesData, null, 2);
-    localStorage.setItem(STORAGE_KEY, jsonString);
-    console.log('✓ Data saved to localStorage');
-    notifyCoursesUpdated();
-    return true;
-  } catch (error) {
-    console.error('Error saving to localStorage:', error);
-    alert('Error saving data. Please try again.');
-    return false;
-  }
+  notifyCoursesUpdated();
+  return true;
 }
 
 /**
@@ -405,25 +389,27 @@ function displayCoursesList() {
   }).join('');
 }
 
-function editCourse(courseId) {
-  const course = getCourse(courseId);
-  if (!course) {
-    alert('Course not found');
-    return;
+async function editCourse(courseId) {
+  try {
+    // Lazy load: fetch course + chapters from API
+    const response = await fetch(API_URL() + `?course_id=${courseId}`);
+    if (!response.ok) throw new Error('Failed to load course');
+    const course = await response.json();
+
+    // Store in local cache
+    coursesData[courseId] = course;
+    currentCourseId = courseId;
+
+    document.getElementById('courseBreadcrumbName').textContent = `${course.name} (${course.language})`;
+    document.getElementById('pageTitle').textContent = `${course.name}`;
+    displaySubjects(course.subjects);
+
+    document.getElementById('coursesListView').classList.add('hidden');
+    document.getElementById('courseEditorView').classList.remove('hidden');
+  } catch (error) {
+    console.error('Error loading course:', error);
+    alert('Error: ' + error.message);
   }
-
-  currentCourseId = courseId;
-
-  // Update header with course name and language
-  document.getElementById('courseBreadcrumbName').textContent = `${course.name} (${course.language})`;
-  document.getElementById('pageTitle').textContent = `${course.name}`;
-
-  // Display subjects
-  displaySubjects(course.subjects);
-
-  // Switch views
-  document.getElementById('coursesListView').classList.add('hidden');
-  document.getElementById('courseEditorView').classList.remove('hidden');
 }
 
 function backToCoursesList() {
@@ -434,17 +420,26 @@ function backToCoursesList() {
   currentSubjectId = null;
 }
 
-function deleteCourse(courseId) {
+async function deleteCourse(courseId) {
   if (confirm('Are you sure you want to delete this course? This cannot be undone.')) {
-    delete coursesData[courseId];
-    if (saveToStorage()) {
+    try {
+      const response = await fetch(API_URL() + `?action=course&id=${courseId}`, {
+        method: 'DELETE'
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to delete course');
+
+      delete coursesData[courseId];
       displayCoursesList();
       alert('✓ Course deleted successfully');
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      alert('Error: ' + error.message);
     }
   }
 }
 
-function handleSaveCourse(e) {
+async function handleSaveCourse(e) {
   e.preventDefault();
   
   const name = document.getElementById('courseName').value.trim();
@@ -458,37 +453,26 @@ function handleSaveCourse(e) {
 
   if (!currentCourseImageBase64) {
     alert('Please upload a course logo image');
-    console.warn('No image selected');
     return;
   }
 
-  if (currentCourseImageBase64.length < 100) {
-    alert('Image data is too small. Please try uploading again.');
-    console.warn('Image data too small:', currentCourseImageBase64.length);
-    return;
-  }
+  try {
+    const response = await fetch(API_URL() + '?action=course', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, language, description, image: currentCourseImageBase64 })
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Failed to create course');
 
-  const newCourse = {
-    id: Date.now(),
-    name,
-    language,
-    description,
-    image: currentCourseImageBase64,
-    subjects: []
-  };
-
-  console.log('Creating new course with compressed image size:', (currentCourseImageBase64.length / 1024).toFixed(2), 'KB');
-
-  coursesData[newCourse.id] = newCourse;
-  
-  if (saveToStorage()) {
-    console.log('✓ Course saved to storage successfully');
+    // Reload courses from API
+    await loadCoursesData();
     closeCourseModal();
     displayCoursesList();
     alert('✓ Course created successfully!');
-  } else {
-    console.error('Failed to save course to storage');
-    alert('Error saving course. Please check console and try again.');
+  } catch (error) {
+    console.error('Error creating course:', error);
+    alert('Error: ' + error.message);
   }
 }
 
@@ -520,27 +504,37 @@ function displaySubjects(subjects) {
   }
 }
 
-function selectSubject(subjectId) {
+async function selectSubject(subjectId) {
   currentSubjectId = subjectId;
-  const subject = getSubject(currentCourseId, subjectId);
 
-  if (!subject) {
-    console.error('Subject not found:', subjectId);
-    return;
-  }
+  // Lazy load: fetch chapter details from API
+  try {
+    const response = await fetch(API_URL() + `?chapter_id=${subjectId}`);
+    if (!response.ok) throw new Error('Failed to load chapter');
+    const subject = await response.json();
 
-  // Update active state
-  document.querySelectorAll('.subject-item-admin').forEach(item => {
-    item.classList.remove('active');
-    if (item.dataset.subjectId === String(subjectId)) {
-      item.classList.add('active');
+    // Update local cache
+    const course = getCourse(currentCourseId);
+    if (course) {
+      const idx = course.subjects.findIndex(s => s.id === subjectId);
+      if (idx !== -1) course.subjects[idx] = subject;
     }
-  });
 
-  // Display subject details
-  displaySubjectEditor(subject);
-  displayResources(subject.resources || []);
-  displayQuiz(subject.quiz || []);
+    // Update active state
+    document.querySelectorAll('.subject-item-admin').forEach(item => {
+      item.classList.remove('active');
+      if (item.dataset.subjectId === String(subjectId)) {
+        item.classList.add('active');
+      }
+    });
+
+    displaySubjectEditor(subject);
+    displayResources(subject.resources || []);
+    displayQuiz(subject.quiz || []);
+  } catch (error) {
+    console.error('Error loading chapter details:', error);
+    alert('Error: ' + error.message);
+  }
 }
 
 function displaySubjectEditor(subject) {
@@ -728,7 +722,7 @@ function deleteSubject() {
   }
 }
 
-function handleSaveSubject(e) {
+async function handleSaveSubject(e) {
   e.preventDefault();
   
   const name = document.getElementById('subjectName').value.trim();
@@ -739,28 +733,26 @@ function handleSaveSubject(e) {
     return;
   }
 
-  const newSubject = {
-    id: Date.now(),
-    title: name,
-    level,
-    overview: '',
-    objectives: [],
-    content: '',
-    resources: [],
-    quiz: []
-  };
+  try {
+    const response = await fetch(API_URL() + '?action=chapter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ courseId: currentCourseId, title: name, level })
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Failed to create chapter');
 
-  const course = getCourse(currentCourseId);
-  if (course) {
-    course.subjects.push(newSubject);
-    
-    if (saveToStorage()) {
-      closeSubjectModal();
-      displaySubjects(course.subjects);
-      // Automatically select the newly created subject
-      selectSubject(newSubject.id);
-      alert('✓ Subject created successfully. You can now add content!');
-    }
+    // Reload course to get updated chapters
+    const courseResp = await fetch(API_URL() + `?course_id=${currentCourseId}`);
+    const course = await courseResp.json();
+    coursesData[currentCourseId] = course;
+
+    closeSubjectModal();
+    displaySubjects(course.subjects);
+    alert('✓ Subject created successfully. You can now add content!');
+  } catch (error) {
+    console.error('Error creating subject:', error);
+    alert('Error: ' + error.message);
   }
 }
 

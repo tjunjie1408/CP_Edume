@@ -433,8 +433,10 @@ $page->requireAuth();
     </div>
   </div>
 
+  <script>
+    window.AppConfig = { baseUrl: '<?= BASE_URL ?>' };
+  </script>
   <script src="<?= BASE_URL ?>/JS/dashboard.js"></script>
-  <script src="<?= BASE_URL ?>/JS/dashboard_admin.js"></script>
   <script src="<?= BASE_URL ?>/JS/course_manage_admin.js"></script>
 </body>
 </html>

@@ -31,6 +31,7 @@ $db->exec("
         `id` INT AUTO_INCREMENT PRIMARY KEY,
         `user_id` INT NOT NULL,
         `course_id` INT DEFAULT NULL,
+        `report_type` VARCHAR(50) NOT NULL,
         `content` TEXT NOT NULL,
         `status` ENUM('pending','resolved') DEFAULT 'pending',
         `admin_notes` TEXT DEFAULT NULL,
@@ -46,7 +47,7 @@ try {
         // ── GET: List all reports ──
         case 'GET':
             $stmt = $db->query("
-                SELECT r.id, r.content, r.status, r.admin_notes, r.created_at,
+                SELECT r.id, r.report_type, r.content, r.status, r.admin_notes, r.created_at,
                        u.username, u.email,
                        c.title as course_title
                 FROM reports r
@@ -62,7 +63,8 @@ try {
                     'userName'   => htmlspecialchars($row['username'], ENT_QUOTES, 'UTF-8'),
                     'userEmail'  => htmlspecialchars($row['email'], ENT_QUOTES, 'UTF-8'),
                     'course'     => htmlspecialchars($row['course_title'] ?? 'General', ENT_QUOTES, 'UTF-8'),
-                    'content'    => htmlspecialchars($row['content'], ENT_QUOTES, 'UTF-8'),
+                    // Prefix report content with its true type for UI viewing instead of hardcoded prefix
+                    'content'    => '[' . htmlspecialchars($row['report_type'], ENT_QUOTES, 'UTF-8') . '] ' . htmlspecialchars($row['content'], ENT_QUOTES, 'UTF-8'),
                     'submitDate' => $row['created_at'],
                     'status'     => $row['status'],
                     'notes'      => htmlspecialchars($row['admin_notes'] ?? '', ENT_QUOTES, 'UTF-8')

@@ -36,19 +36,19 @@ if (!$reportType || strlen($content) < 5) {
     exit;
 }
 
-// Prepend report type to content for admin readability
-$fullContent = "[{$reportType}] " . $content;
+// No longer prepending to content; using explicit report_type column
 
 try {
     $database = new Database();
     $db = $database->getConnection();
 
-    // Auto-create reports table if not exists
+    // Auto-create reports table if not exists with correct schema
     $db->exec("
         CREATE TABLE IF NOT EXISTS `reports` (
             `id` INT AUTO_INCREMENT PRIMARY KEY,
             `user_id` INT NOT NULL,
             `course_id` INT DEFAULT NULL,
+            `report_type` VARCHAR(50) NOT NULL,
             `content` TEXT NOT NULL,
             `status` ENUM('pending','resolved') DEFAULT 'pending',
             `admin_notes` TEXT DEFAULT NULL,
@@ -59,13 +59,14 @@ try {
     ");
 
     $stmt = $db->prepare("
-        INSERT INTO reports (user_id, course_id, content, status)
-        VALUES (:uid, :cid, :content, 'pending')
+        INSERT INTO reports (user_id, course_id, report_type, content, status)
+        VALUES (:uid, :cid, :type, :content, 'pending')
     ");
     $stmt->execute([
         ':uid'     => $_SESSION['user_id'],
         ':cid'     => $courseId,
-        ':content' => $fullContent
+        ':type'    => $reportType,
+        ':content' => $content
     ]);
 
     echo json_encode([

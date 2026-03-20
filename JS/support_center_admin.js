@@ -227,15 +227,14 @@ async function toggleReportStatus() {
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Failed to update report');
-
     report.status = newStatus;
     report.notes = notes;
     filterReports();
     closeReportModal();
-    showNotification(`✓ Report marked as ${newStatus === 'pending' ? 'Pending' : 'Resolved'}`, 'success');
+    triggerNotification(`✓ Report marked as ${newStatus === 'pending' ? 'Pending' : 'Resolved'}`, 'success');
   } catch (error) {
     console.error('Error updating report:', error);
-    showNotification('Error: ' + error.message, 'error');
+    triggerNotification('Error: ' + error.message, 'error');
   }
 }
 
@@ -259,10 +258,10 @@ async function confirmDelete() {
     allReports = allReports.filter(r => r.id !== currentEditingReportId);
     filterReports();
     closeDeleteModal();
-    showNotification('✓ Report deleted successfully', 'success');
+    triggerNotification('✓ Report deleted successfully', 'success');
   } catch (error) {
     console.error('Error deleting report:', error);
-    showNotification('Error: ' + error.message, 'error');
+    triggerNotification('Error: ' + error.message, 'error');
   }
 }
 
@@ -337,10 +336,10 @@ function saveReports() {
   console.log('Reports persisted via API');
 }
 
-function showNotification(message, type = 'info') {
+function triggerNotification(message, type = 'info') {
   // Use existing notification function from dashboard.js if available
-  if (typeof showNotification === 'function') {
-    showNotification(message, type);
+  if (typeof window.showNotification === 'function') {
+    window.showNotification(message, type);
   } else {
     console.log(`[${type.toUpperCase()}] ${message}`);
   }
@@ -348,8 +347,8 @@ function showNotification(message, type = 'info') {
 
 function showErrorMessage(message) {
   console.error(message);
-  if (typeof showNotification === 'function') {
-    showNotification(message, 'error');
+  if (typeof window.showNotification === 'function') {
+    window.showNotification(message, 'error');
   }
 }
 

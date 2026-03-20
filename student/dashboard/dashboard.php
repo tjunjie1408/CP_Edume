@@ -4,21 +4,36 @@ require_once CONFIG_PATH . '/StudentPage.php';
 require_once CONFIG_PATH . '/Database.php';
 require_once __DIR__ . '/../../public/course/Progress.php';
 
+require_once __DIR__ . '/../../public/registration/User.php';
+
 $page = new StudentPage();
 $page->requireAuth();
 
 $database = new Database();
 $db = $database->getConnection();
 $progressModel = new Progress($db);
+$userModel = new User($db);
 
 $userId = $_SESSION['user_id'];
 $dashboardStats = $progressModel->getUserDashboardData($userId);
 $enrolledCourses = $progressModel->getEnrolledCoursesProgress($userId);
-$recentActivities = $progressModel->getRecentActivity($userId, 3);
+$recentActivities = $progressModel->getRecentActivity($userId, 4);
 $weeklyActivity = $progressModel->getWeeklyActivity($userId);
 
-// Calculate streak (Mocked for now since streak isn't in DB Schema)
-$streakDays = 1; 
+// Calculate streak from DB
+$currentUser = $userModel->findById($userId);
+$streakDays = $currentUser['current_streak'] ?? 0;
+
+// Fetch Recommended Courses based on style
+$userStyle = $_SESSION['primary_vark_style'] ?? 'visual';
+// Validate userStyle to prevent SQL injection logic error, default to visual
+if (!in_array($userStyle, ['visual', 'read', 'kinesthetic', 'aural'])) {
+    $userStyle = 'visual';
+}
+$styleColumn = 'has_' . $userStyle;
+$stmtRec = $db->prepare("SELECT id, title, description, difficulty FROM courses WHERE is_published = 1 AND {$styleColumn} = 1 AND id NOT IN (SELECT course_id FROM user_progress WHERE user_id = ?) LIMIT 2");
+$stmtRec->execute([$userId]);
+$recommendedCourses = $stmtRec->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 <!DOCTYPE html>
@@ -34,6 +49,7 @@ $streakDays = 1;
   <!-- CodeMirror CSS for Sandbox -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+  <link rel="icon" type="image/png" href="<?= BASE_URL ?>/image/Edume.png?v=1.0">
 </head>
 <body>
   <!-- Sidebar Navigation -->
@@ -220,6 +236,35 @@ $streakDays = 1;
         </div>
       </section>
 
+    <?php break; case 'aural': ?>
+      <!-- AURAL LEARNER -->
+      <section class="section personalized-section aural-mode">
+        <div class="card core-video-card">
+          <div class="section-header">
+            <h3>Audio-Focused Lesson</h3>
+            <span class="badge aural-badge" style="background: rgba(167, 139, 250, 0.2); color: #a78bfa; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.85rem; font-weight: 500;">Aural Pick</span>
+          </div>
+          <div class="listen-container" style="display: flex; gap: 2rem; align-items: center; padding: 1.5rem;">
+            <div class="podcast-icon" style="flex-shrink: 0; background: rgba(167, 139, 250, 0.1); padding: 2rem; border-radius: 50%;">
+              <span class="material-symbols-rounded" style="font-size: 4rem; color: #a78bfa;">headphones</span>
+            </div>
+            <div class="podcast-info">
+              <h4 style="font-size: 1.25rem; font-weight: 600; color: var(--text-light); margin-bottom: 0.5rem;">The Architecture of Python</h4>
+              <p style="color: var(--text-muted); margin-bottom: 1.5rem;">A deep dive discussion into how Python runs under the hood, tailored for auditory comprehension.</p>
+              
+              <div class="audio-controls" style="background: var(--bg-card); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                <audio controls style="width: 100%;">
+                  <!-- Utilizing youtube as fallback since we don't host mp3 currently, but keeping the styling aural -->
+                  <source src="#" type="audio/mpeg">
+                  Your browser does not support the audio element. Play the video below instead.
+                </audio>
+              </div>
+            </div>
+          </div>
+          <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding-bottom: 1rem;">Audio unavailable? <a href="https://www.youtube.com/watch?v=kqtD5dpn9C8" target="_blank" style="color: var(--accent-primary);">Listen to the lecture on YouTube</a></p>
+        </div>
+      </section>
+
     <?php break; default: ?>
       <!-- UNASSIGNED LEARNER -->
       <section class="section personalized-section unassigned-mode">
@@ -245,21 +290,19 @@ $streakDays = 1;
             <h3>Smart Feed</h3>
           </div>
           <div class="card-content">
-            <div class="feed-item">
-              <h4>Latest Course Update</h4>
-              <p>New lessons available in "Advanced Web Development"</p>
-              <small>2 hours ago</small>
-            </div>
-            <div class="feed-item">
-              <h4>Achievement Unlocked!</h4>
-              <p>You've completed 50% of "React Fundamentals"</p>
-              <small>1 day ago</small>
-            </div>
-            <div class="feed-item">
-              <h4>Streak Milestone!</h4>
-              <p>You've maintained a 7-day learning streak</p>
-              <small>3 days ago</small>
-            </div>
+            <?php if (empty($recentActivities)): ?>
+              <div class="feed-item">
+                <p style="color: var(--text-muted); padding: 1rem 0;">Your activity feed will appear here as you learn!</p>
+              </div>
+            <?php else: ?>
+              <?php foreach ($recentActivities as $item): ?>
+              <div class="feed-item">
+                <h4>Quiz Completed! 🎉</h4>
+                <p>You conquered "<?= htmlspecialchars($item['chapter_title']) ?>" in <?= htmlspecialchars($item['course_title']) ?></p>
+                <small><?= date('M j, Y - g:i A', strtotime($item['timestamp'])) ?></small>
+              </div>
+              <?php endforeach; ?>
+            <?php endif; ?>
           </div>
         </section>
 
@@ -334,50 +377,24 @@ $streakDays = 1;
             <h3>Tailored For You</h3>
           </div>
           <div class="card-content">
-            <div class="course-card">
-              <h4>Vue.js for Beginners</h4>
-              <p class="course-description">Learn Vue.js from scratch and build dynamic web applications.</p>
-              <div class="course-footer">
-                <span class="course-level">Beginner</span>
-                <button class="btn-secondary">Enroll</button>
-              </div>
-            </div>
-            <div class="course-card">
-              <h4>Python Data Science</h4>
-              <p class="course-description">Master data analysis and visualization with Python.</p>
-              <div class="course-footer">
-                <span class="course-level">Intermediate</span>
-                <button class="btn-secondary">Enroll</button>
-              </div>
-            </div>
+            <?php if (empty($recommendedCourses)): ?>
+               <p style="color: var(--text-muted);">You're all caught up! Browse the catalog for more.</p>
+            <?php else: ?>
+               <?php foreach ($recommendedCourses as $rec): ?>
+               <div class="course-card">
+                 <h4><?= htmlspecialchars($rec['title']) ?></h4>
+                 <p class="course-description"><?= htmlspecialchars(substr($rec['description'], 0, 70)) ?>...</p>
+                 <div class="course-footer">
+                   <span class="course-level" style="text-transform: capitalize;"><?= htmlspecialchars($rec['difficulty']) ?></span>
+                   <a href="<?= BASE_URL ?>/student/course/course.php" class="btn-secondary" style="text-decoration: none;">View</a>
+                 </div>
+               </div>
+               <?php endforeach; ?>
+            <?php endif; ?>
           </div>
         </section>
 
-        <!-- Recent Activity Section -->
-        <section class="card">
-          <div class="section-header">
-            <h3>Recent Activity</h3>
-          </div>
-          <div class="card-content">
-            <ul class="activity-list">
-              <?php if (empty($recentActivities)): ?>
-                  <li class="activity-item">
-                    <span class="activity-text" style="color: var(--text-muted);">No recent activity. Start learning!</span>
-                  </li>
-              <?php else: ?>
-                  <?php foreach ($recentActivities as $activity): ?>
-                  <li class="activity-item">
-                    <span class="activity-icon" style="color: var(--accent-success);">✓</span>
-                    <span class="activity-text">
-                        Passed Quiz: "<?= htmlspecialchars($activity['chapter_title']) ?>" in <?= htmlspecialchars($activity['course_title']) ?>
-                    </span>
-                    <small><?= date('M j', strtotime($activity['timestamp'])) ?></small>
-                  </li>
-                  <?php endforeach; ?>
-              <?php endif; ?>
-            </ul>
-          </div>
-        </section>
+
       </div>
     </div>
   </main>

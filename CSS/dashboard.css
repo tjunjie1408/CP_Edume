@@ -876,3 +876,15 @@ body {
     font-size: 0.85rem;
   }
 }
+
+/* ============================================
+   DARK MODE
+   ============================================ */
+body.dark-mode {
+  --light-bg: #1a1a2e;
+  --card-bg: #1e1e2f;
+  --text-dark: #e6e6e6;
+  --text-light: #9ca3af;
+  --border-color: #2a2a3f;
+  background: var(--dark-bg);
+}

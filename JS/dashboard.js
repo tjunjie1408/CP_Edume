@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
   setActiveNav();
   setupSharedEventListeners();
   
+  
   // Only run if progress bars exist (Dashboard only)
   if (document.querySelector('.progress-fill')) {
     animateProgressBars();
@@ -11,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   setupSidebarToggle();
   setupMobileMenu();
+  initDarkMode();
 });
 
 // Set Active Navigation Link
@@ -301,3 +303,11 @@ function toggleHint(id) {
 function scrollToSandbox() {
   showNotification("The full sandbox is available on the course player page!", "info");
 }
+
+// Dark Mode logic (Shared across site)
+function initDarkMode() {
+  const currentTheme = localStorage.getItem('theme');
+  if (currentTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+  }
+}

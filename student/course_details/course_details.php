@@ -41,6 +41,20 @@ $gravatarUrl = "https://www.gravatar.com/avatar/" . md5(strtolower(trim($userDat
 // Fetch Chapters
 $chapters = $chapterModel->getChaptersByCourseId($courseId);
 
+// Inject initial progress record so they appear in 'Enrolled Courses'
+if (!empty($chapters)) {
+    try {
+        $firstChapterId = $chapters[0]['id'];
+        $insertStmt = $db->prepare("
+            INSERT IGNORE INTO user_progress (user_id, chapter_id, is_completed, xp_earned) 
+            VALUES (?, ?, 0, 0)
+        ");
+        $insertStmt->execute([$_SESSION['user_id'], $firstChapterId]);
+    } catch (PDOException $e) {
+        // Silently ignore if it fails, as it's just an enrollment tracker
+    }
+}
+
 // For the initial load, just grab the materials for the first chapter if chapters exist
 $activeChapterId = isset($_GET['chapter']) ? (int)$_GET['chapter'] : ($chapters[0]['id'] ?? null);
 $materials = [];
@@ -86,6 +100,7 @@ if ($activeChapterId) {
   <link rel="stylesheet" href="<?= BASE_URL ?>/CSS/python.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" type="image/png" href="<?= BASE_URL ?>/image/Edume.png?v=1.0">
 </head>
 <body>
   <!-- Sidebar Navigation -->

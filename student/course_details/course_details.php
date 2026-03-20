@@ -48,6 +48,25 @@ $activeChapterData = null;
 
 if ($activeChapterId) {
     $materials = $materialModel->getMaterialsByChapterId($activeChapterId);
+
+    // ── VARK-based content reordering ──
+    // Move materials matching the student's VARK style to the front
+    $varkTagMap = [
+        'visual'      => 'visual',
+        'aural'       => 'visual',  // aural + visual combined per project spec
+        'read'        => 'read',
+        'kinesthetic' => 'kinesthetic'
+    ];
+    $preferredTag = $varkTagMap[$studentVark] ?? null;
+
+    if ($preferredTag) {
+        usort($materials, function($a, $b) use ($preferredTag) {
+            $aMatch = (strtolower($a['vark_tag'] ?? '') === $preferredTag) ? -1 : 0;
+            $bMatch = (strtolower($b['vark_tag'] ?? '') === $preferredTag) ? -1 : 0;
+            return $aMatch - $bMatch; // preferred first
+        });
+    }
+
     foreach ($chapters as $ch) {
         if ($ch['id'] === $activeChapterId) {
             $activeChapterData = $ch;

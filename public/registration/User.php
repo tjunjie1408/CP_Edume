@@ -145,4 +145,34 @@ class User implements UserInterface
         }
         return $skills;
     }
+
+    public function updateLoginStreak(int $id): void
+    {
+        $stmt = $this->db->prepare("SELECT current_streak, last_login_date FROM users WHERE id = ?");
+        $stmt->execute([$id]);
+        $row = $stmt->fetch();
+
+        if (!$row) return;
+
+        $today = date('Y-m-d');
+        $lastLogin = $row['last_login_date'];
+        $streak = (int)$row['current_streak'];
+
+        if ($lastLogin === $today) {
+            // Already logged in today, do nothing
+            return;
+        }
+
+        $yesterday = date('Y-m-d', strtotime('-1 day'));
+        if ($lastLogin === $yesterday) {
+            // Logged in yesterday, increment streak
+            $streak++;
+        } else {
+            // Missed a day (or first login), reset to 1
+            $streak = 1;
+        }
+
+        $updateStmt = $this->db->prepare("UPDATE users SET current_streak = ?, last_login_date = ? WHERE id = ?");
+        $updateStmt->execute([$streak, $today, $id]);
+    }
 }

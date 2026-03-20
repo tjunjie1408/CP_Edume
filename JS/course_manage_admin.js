@@ -13,9 +13,9 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeApp();
 });
 
-function initializeApp() {
-  loadCoursesData();
+async function initializeApp() {
   setupEventListeners();
+  await loadCoursesData();
   displayCoursesList();
 }
 
@@ -357,8 +357,14 @@ function displayCoursesList() {
     const isBase64 = course.image && course.image.startsWith('data:');
     let imageSrc = course.image;
     
+    if (imageSrc && !imageSrc.startsWith('data:') && !imageSrc.startsWith('http')) {
+       const imgPath = imageSrc.startsWith('/') ? imageSrc : '/' + imageSrc;
+       const baseUrl = window.AppConfig.baseUrl ? window.AppConfig.baseUrl.replace(/\/$/, '') : '';
+       imageSrc = baseUrl + imgPath;
+    }
+    
     // Log image info for debugging
-    console.log('Course:', course.name, 'Image:', course.image, 'Is Base64:', isBase64);
+    console.log('Course:', course.name, 'Image:', course.image, 'ParsedSrc:', imageSrc);
     
     return `
       <div class="course-card-admin">
@@ -372,7 +378,7 @@ function displayCoursesList() {
         </div>
         <div class="course-card-content">
           <h3>${course.name}</h3>
-          <p class="course-card-meta">${course.language} • ${course.subjects.length} subjects</p>
+          <p class="course-card-meta">${course.language} • ${course.subjectCount ?? course.subjects?.length ?? 0} subjects</p>
           <div class="course-card-actions">
             <button class="btn-edit-course" onclick="editCourse(${course.id})">
               <span class="material-symbols-rounded">edit</span>
@@ -484,10 +490,31 @@ function displaySubjects(subjects) {
   const subjectsList = document.getElementById('subjectsList');
   if (!subjectsList) return;
 
+  const subjectEditorBody = document.getElementById('subjectEditorBody');
+  
   if (subjects.length === 0) {
     subjectsList.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 1rem;">No subjects yet</p>';
-    document.getElementById('subjectEditorBody').innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 2rem;">Click "+" to add a subject</p>';
+    
+    // Hide the editor body instead of destroying its HTML
+    if (subjectEditorBody) subjectEditorBody.style.display = 'none';
+    
+    // Show or create empty state message
+    let emptyMsg = document.getElementById('subjectEmptyStateMsg');
+    if (!emptyMsg) {
+      emptyMsg = document.createElement('div');
+      emptyMsg.id = 'subjectEmptyStateMsg';
+      emptyMsg.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 2rem;">Click "+" to add a subject</p>';
+      subjectEditorBody.parentNode.appendChild(emptyMsg);
+    }
+    emptyMsg.style.display = 'block';
+    
+    document.getElementById('subjectTitle').textContent = 'No Subjects';
+    
     return;
+  } else {
+    if (subjectEditorBody) subjectEditorBody.style.display = 'block';
+    const emptyMsg = document.getElementById('subjectEmptyStateMsg');
+    if (emptyMsg) emptyMsg.style.display = 'none';
   }
 
   subjectsList.innerHTML = subjects.map((subject, index) => `

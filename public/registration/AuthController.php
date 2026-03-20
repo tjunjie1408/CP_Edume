@@ -123,6 +123,9 @@ class AuthController
         $_SESSION['role']     = $user['role'];
         $_SESSION['primary_vark_style'] = $user['primary_vark_style'];
 
+        // Update Login Streak
+        $this->user->updateLoginStreak((int)$user['id']);
+
         // Map role to numeric for JS compatibility
         $roleNum = ($user['role'] === 'admin') ? 1 : 0;
 

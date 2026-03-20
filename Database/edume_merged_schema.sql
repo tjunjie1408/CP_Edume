@@ -53,6 +53,9 @@ CREATE TABLE `users` (
   `experience_level` varchar(50) DEFAULT 'Beginner',
   `bio` text DEFAULT NULL,
   `profile_avatar_url` varchar(255) DEFAULT NULL,
+  `current_streak` int(11) NOT NULL DEFAULT 0,
+  `last_login_date` date DEFAULT NULL,
+  `email_notifications_enabled` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
@@ -279,6 +282,23 @@ CREATE TABLE `user_vark_results` (
   PRIMARY KEY (`id`),
   KEY `idx_user_vark_res` (`user_id`),
   CONSTRAINT `user_vark_results_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- Table structure for table `reports`
+-- --------------------------------------------------------
+CREATE TABLE `reports` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `course_id` int(11) DEFAULT NULL,
+  `report_type` varchar(50) NOT NULL,
+  `content` text NOT NULL,
+  `status` enum('pending','resolved') DEFAULT 'pending',
+  `admin_notes` text DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_user_reports` (`user_id`),
+  CONSTRAINT `fk_user_reports` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 COMMIT;

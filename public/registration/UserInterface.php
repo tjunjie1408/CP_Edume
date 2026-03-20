@@ -70,4 +70,9 @@ interface UserInterface
      * Get a simple array of skill names for a given user ID.
      */
     public function getUserSkills(int $id): array;
+
+    /**
+     * Update the user's login streak based on the current date and last_login_date.
+     */
+    public function updateLoginStreak(int $id): void;
 }

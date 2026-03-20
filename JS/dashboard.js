@@ -30,23 +30,11 @@ function setActiveNav() {
   });
 }
 
-// Load User Data (Safe for both pages)
+// Load User Data — Names are now rendered server-side by PHP via $_SESSION.
+// This function is kept as a no-op so any callers don't break.
 function loadUserData() {
-  const userData = {
-    name: 'John Doe',
-    email: 'john@example.com',
-    learningStyle: 'Visual',
-    profilePicture: 'https://via.placeholder.com/50'
-  };
-
-  const userNameEl = document.getElementById('user-name');
-  const bannerUserNameEl = document.getElementById('banner-user-name');
-
-  // Only update if the elements exist on the current HTML page
-  if (userNameEl) userNameEl.textContent = userData.name;
-  if (bannerUserNameEl) bannerUserNameEl.textContent = userData.name;
-  
-  sessionStorage.setItem('userData', JSON.stringify(userData));
+  // PHP already injects the real username into #user-name and #banner-user-name.
+  // No client-side override needed.
 }
 
 // Setup Shared Event Listeners

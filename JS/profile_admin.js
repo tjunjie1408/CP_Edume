@@ -8,62 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Load Admin Profile Data
 function loadAdminProfileData() {
-  // Attempt to load from localStorage first, fallback to defaults
-  const savedData = localStorage.getItem('adminProfileData');
-  const adminProfileData = savedData ? JSON.parse(savedData) : {
-    fullName: 'John Administrator',
-    email: 'john.admin@example.com',
-    phone: '+1 (555) 123-4567',
-    department: 'System Administration',
-    adminLevel: 'Super Administrator',
-    accountStatus: 'Active',
-    createdDate: 'January 15, 2024',
-    lastLogin: 'Today at 10:30 AM',
-    avatar: 'https://via.placeholder.com/120'
-  };
-
-  // Safe DOM updates
-  const setElementText = (id, text) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = text;
-  };
-  
-  const setElementValue = (id, val) => {
-    const el = document.getElementById(id);
-    if (el) el.value = val;
-  };
-
-  const setElementSrc = (id, src) => {
-    const el = document.getElementById(id);
-    if (el) el.src = src;
-  };
-
-  // Update profile header
-  setElementText('admin-username', adminProfileData.fullName);
-  setElementText('admin-email', adminProfileData.email);
-  setElementText('admin-role-display', adminProfileData.adminLevel);
-  setElementSrc('profileAdminAvatar', adminProfileData.avatar);
-  setElementSrc('userAvatar', adminProfileData.avatar);
-  setElementText('user-name', adminProfileData.fullName);
-
-  // Update view mode
-  setElementText('view-full-name', adminProfileData.fullName);
-  setElementText('view-email', adminProfileData.email);
-  setElementText('view-phone', adminProfileData.phone);
-  setElementText('view-department', adminProfileData.department);
-  setElementText('view-admin-level', adminProfileData.adminLevel);
-  setElementText('view-account-status', adminProfileData.accountStatus);
-  setElementText('view-created-date', adminProfileData.createdDate);
-  setElementText('view-last-login', adminProfileData.lastLogin);
-
-  // Update edit mode
-  setElementValue('edit-full-name', adminProfileData.fullName);
-  setElementValue('edit-email', adminProfileData.email);
-  setElementValue('edit-phone', adminProfileData.phone);
-  setElementValue('edit-department', adminProfileData.department);
-
-  // Save to localStorage
-  localStorage.setItem('adminProfileData', JSON.stringify(adminProfileData));
+  // Initial display is now entirely rendered via PHP in profile.php
+  // We no longer populate using localStorage!
 }
 
 // Setup Admin Profile Event Listeners
@@ -119,44 +65,70 @@ function switchToViewPersonal(e) {
 function savePersonalInfo(e) {
   e.preventDefault();
 
+  const submitBtn = document.querySelector('#personal-form .btn-save');
+  const currentText = submitBtn.innerHTML;
+  submitBtn.innerHTML = '<span class="material-symbols-rounded">sync</span> Saving...';
+  submitBtn.disabled = true;
+
   // Get form data
   const formData = {
-    fullName: document.getElementById('edit-full-name').value,
-    email: document.getElementById('edit-email').value,
-    phone: document.getElementById('edit-phone').value,
-    department: document.getElementById('edit-department').value
+    fullName: document.getElementById('edit-full-name').value.trim(),
+    email: document.getElementById('edit-email').value.trim()
   };
 
   // Validate data
   if (!formData.fullName || !formData.email) {
     alert('Please fill in all required fields');
+    resetButton();
     return;
   }
 
-  // Get existing data and update
-  const savedData = localStorage.getItem('adminProfileData');
-  const adminProfileData = savedData ? JSON.parse(savedData) : {};
-  
-  Object.assign(adminProfileData, formData);
-  
-  // Save to localStorage
-  localStorage.setItem('adminProfileData', JSON.stringify(adminProfileData));
+  // Send AJAX request
+  fetch((window.AppConfig?.baseUrl || '') + '/admin/profile/update_profile_api.php', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(formData)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.status === 200) {
+      // Update display
+      document.getElementById('admin-username').textContent = formData.fullName;
+      document.getElementById('admin-email').textContent = formData.email;
+      document.getElementById('user-name').textContent = formData.fullName;
+      
+      document.getElementById('view-full-name').textContent = formData.fullName;
+      document.getElementById('view-email').textContent = formData.email;
 
-  // Update display
-  document.getElementById('admin-username').textContent = formData.fullName;
-  document.getElementById('admin-email').textContent = formData.email;
-  document.getElementById('user-name').textContent = formData.fullName;
-  
-  document.getElementById('view-full-name').textContent = formData.fullName;
-  document.getElementById('view-email').textContent = formData.email;
-  document.getElementById('view-phone').textContent = formData.phone;
-  document.getElementById('view-department').textContent = formData.department;
+      // Switch back to view mode
+      switchToViewPersonal({preventDefault: () => {}});
 
-  // Switch back to view mode
-  switchToViewPersonal({preventDefault: () => {}});
+      // Show success message
+      showSuccessMessage(data.message || 'Personal information updated successfully!');
+      
+      // Attempt to reload the page completely after a short delay so the fresh Gravatar URL and server state loads
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
 
-  // Show success message
-  showSuccessMessage('Personal information updated successfully!');
+    } else {
+      alert(data.message || 'Failed to update profile');
+    }
+  })
+  .catch(error => {
+    console.error('Error updating profile:', error);
+    alert('A network error occurred. Please try again.');
+  })
+  .finally(() => {
+    resetButton();
+  });
+
+  function resetButton() {
+    submitBtn.innerHTML = currentText;
+    submitBtn.disabled = false;
+  }
 }
 
 // Setup Tab Navigation
@@ -197,45 +169,8 @@ function openTab(tabName, element) {
 
 // Setup Avatar Upload
 function setupAvatarUpload() {
-  const uploadTrigger = document.getElementById('avatar-upload-trigger');
-  const uploadInput = document.getElementById('avatar-upload-input');
-
-  if (uploadTrigger && uploadInput) {
-    uploadTrigger.addEventListener('click', function() {
-      uploadInput.click();
-    });
-
-    uploadInput.addEventListener('change', handleAvatarUpload);
-  }
-}
-
-// Handle Avatar Upload
-function handleAvatarUpload(e) {
-  const file = e.target.files[0];
-  
-  if (file && file.type.startsWith('image/')) {
-    const reader = new FileReader();
-    
-    reader.onload = function(event) {
-      const imageData = event.target.result;
-      
-      // Update avatar images
-      document.getElementById('profileAdminAvatar').src = imageData;
-      document.getElementById('userAvatar').src = imageData;
-      
-      // Save to localStorage
-      const savedData = localStorage.getItem('adminProfileData');
-      const adminProfileData = savedData ? JSON.parse(savedData) : {};
-      adminProfileData.avatar = imageData;
-      localStorage.setItem('adminProfileData', JSON.stringify(adminProfileData));
-      
-      showSuccessMessage('Avatar updated successfully!');
-    };
-    
-    reader.readAsDataURL(file);
-  } else {
-    alert('Please select a valid image file');
-  }
+  // Avatar uploading is now disabled from the frontend logic since
+  // we rely on the direct Gravatar link placed in profile.php HTML.
 }
 
 // Handle Change Password

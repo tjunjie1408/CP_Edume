@@ -71,96 +71,15 @@ async function loadReports() {
   }
 }
 
-// Fetch Reports Data (Mock or API)
+// Fetch Reports Data from Backend API
 async function fetchReportsData() {
-  // TODO: Replace with actual API endpoint
-  // Example: const response = await fetch('/api/admin/reports');
-  // const data = await response.json();
-  // return data;
-
-  // Mock data structure with only pending and resolved status
-  return [
-    {
-      id: 1,
-      userName: 'Sarah Johnson',
-      userEmail: 'sarah@example.com',
-      course: 'Python',
-      content: 'There is a typo in chapter 3 about loops. The code example shows "for i in range(10)" but the explanation says "range(5)". Please fix this inconsistency.',
-      submitDate: '2024-02-22T10:30:00',
-      status: 'pending',
-      notes: ''
-    },
-    {
-      id: 2,
-      userName: 'Mike Chen',
-      userEmail: 'mike@example.com',
-      course: 'JavaScript',
-      content: 'The quiz question on async/await is confusing. The explanation doesn\'t match the correct answer. Please review this question.',
-      submitDate: '2024-02-21T14:15:00',
-      status: 'resolved',
-      notes: 'Fixed on 2024-02-21. Updated explanation and correct answer.'
-    },
-    {
-      id: 3,
-      userName: 'Emma Davis',
-      userEmail: 'emma@example.com',
-      course: 'Web Development',
-      content: 'The video link in lesson 2 is broken. It returns a 404 error. The YouTube link needs to be updated.',
-      submitDate: '2024-02-20T09:45:00',
-      status: 'resolved',
-      notes: 'Fixed on 2024-02-21. New video link added.'
-    },
-    {
-      id: 4,
-      userName: 'John Smith',
-      userEmail: 'john@example.com',
-      course: 'Data Science',
-      content: 'In the data visualization section, the matplotlib example doesn\'t run. There\'s an import error. Please provide a corrected version.',
-      submitDate: '2024-02-19T16:20:00',
-      status: 'pending',
-      notes: ''
-    },
-    {
-      id: 5,
-      userName: 'Lisa Wong',
-      userEmail: 'lisa@example.com',
-      course: 'Python',
-      content: 'Chapter 5 resources are outdated. The pandas documentation links point to old versions.',
-      submitDate: '2024-02-18T11:00:00',
-      status: 'pending',
-      notes: ''
-    },
-    {
-      id: 6,
-      userName: 'Alex Turner',
-      userEmail: 'alex@example.com',
-      course: 'JavaScript',
-      content: 'Great course! Just a suggestion - could you add more real-world project examples?',
-      submitDate: '2024-02-17T13:30:00',
-      status: 'resolved',
-      notes: 'Suggestion noted for future updates'
-    },
-    {
-      id: 7,
-      userName: 'Rachel Green',
-      userEmail: 'rachel@example.com',
-      course: 'Web Development',
-      content: 'The CSS grid section has outdated browser compatibility information. Modern browsers support all features now.',
-      submitDate: '2024-02-16T10:15:00',
-      status: 'pending',
-      notes: ''
-    },
-    {
-      id: 8,
-      userName: 'Tom Harris',
-      userEmail: 'tom@example.com',
-      course: 'Python',
-      content: 'The quiz feedback for question 3 is incomplete. It doesn\'t explain why other options are wrong.',
-      submitDate: '2024-02-15T15:45:00',
-      status: 'pending',
-      notes: ''
-    }
-  ];
+  const apiUrl = (window.AppConfig?.baseUrl || '') + '/admin/support_center/admin_reports_api.php';
+  const response = await fetch(apiUrl);
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || 'Failed to fetch reports');
+  }
+  return await response.json();
 }
 
 // Filter Reports
@@ -291,21 +210,33 @@ function viewReport(reportId) {
   document.getElementById('reportModal').classList.add('active');
 }
 
-// Toggle Report Status (Pending <-> Resolved)
-function toggleReportStatus() {
+// Toggle Report Status (Pending <-> Resolved) via API
+async function toggleReportStatus() {
   const report = allReports.find(r => r.id === currentEditingReportId);
   if (!report) return;
 
-  // Toggle between pending and resolved
-  report.status = report.status === 'pending' ? 'resolved' : 'pending';
-  report.notes = document.getElementById('adminNotes').value;
+  const newStatus = report.status === 'pending' ? 'resolved' : 'pending';
+  const notes = document.getElementById('adminNotes').value;
 
-  saveReports();
-  filterReports();
-  closeReportModal();
-  
-  const newStatus = report.status === 'pending' ? 'Pending' : 'Resolved';
-  showNotification(`✓ Report marked as ${newStatus}`, 'success');
+  try {
+    const apiUrl = (window.AppConfig?.baseUrl || '') + '/admin/support_center/admin_reports_api.php';
+    const response = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: currentEditingReportId, status: newStatus, notes })
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Failed to update report');
+
+    report.status = newStatus;
+    report.notes = notes;
+    filterReports();
+    closeReportModal();
+    showNotification(`✓ Report marked as ${newStatus === 'pending' ? 'Pending' : 'Resolved'}`, 'success');
+  } catch (error) {
+    console.error('Error updating report:', error);
+    showNotification('Error: ' + error.message, 'error');
+  }
 }
 
 // Delete Report
@@ -314,13 +245,25 @@ function deleteReport(reportId) {
   document.getElementById('deleteModal').classList.add('active');
 }
 
-function confirmDelete() {
-  allReports = allReports.filter(r => r.id !== currentEditingReportId);
-  saveReports();
-  filterReports();
-  closeDeleteModal();
-  
-  showNotification('✓ Report deleted successfully', 'success');
+async function confirmDelete() {
+  try {
+    const apiUrl = (window.AppConfig?.baseUrl || '') + '/admin/support_center/admin_reports_api.php';
+    const response = await fetch(apiUrl, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: currentEditingReportId })
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Failed to delete report');
+
+    allReports = allReports.filter(r => r.id !== currentEditingReportId);
+    filterReports();
+    closeDeleteModal();
+    showNotification('✓ Report deleted successfully', 'success');
+  } catch (error) {
+    console.error('Error deleting report:', error);
+    showNotification('Error: ' + error.message, 'error');
+  }
 }
 
 // Pagination Functions
@@ -388,14 +331,10 @@ function scrollToTop() {
   document.querySelector('.reports-section').scrollIntoView({ behavior: 'smooth' });
 }
 
+// saveReports is now handled by individual API calls (PUT/DELETE)
 function saveReports() {
-  // TODO: Save to backend
-  // fetch('/api/admin/reports', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(allReports)
-  // });
-  console.log('Reports saved:', allReports);
+  // No-op: persistence handled by API
+  console.log('Reports persisted via API');
 }
 
 function showNotification(message, type = 'info') {

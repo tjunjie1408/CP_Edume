@@ -1,11 +1,34 @@
+<?php
+require_once __DIR__ . '/../../config/constants.php';
+require_once CONFIG_PATH . '/StudentPage.php';
+require_once CONFIG_PATH . '/Database.php';
+require_once __DIR__ . '/../../public/course/ContentMaterial.php';
+
+$page = new StudentPage();
+$page->requireAuth();
+
+$materialId = $_GET['material_id'] ?? null;
+$practiceData = null;
+
+if ($materialId && is_numeric($materialId)) {
+    $database = new Database();
+    $db = $database->getConnection();
+    $materialModel = new ContentMaterial($db);
+    $material = $materialModel->findById($materialId);
+    
+    if ($material && $material['content_type'] === 'practice') {
+        $practiceData = $material;
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Code Editor - EduMe Learning System</title>
-  <link rel="stylesheet" href="CSS/dashboard.css">
-  <link rel="stylesheet" href="CSS/coding.css">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/CSS/dashboard.css">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/CSS/coding.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -20,9 +43,9 @@
     </div>
     <div class="header-right">
       <div class="user-info" id="username">
-        <p class="hello">Hello, <span id="user-name">John Doe</span></p>
+        <p class="hello">Hello, <span id="user-name"><?= htmlspecialchars($_SESSION['username'] ?? 'Student') ?></span></p>
       </div>
-      <a href="profile.html" class="user-avatar-link">
+      <a href="<?= BASE_URL ?>/student/profile/profile.php" class="user-avatar-link">
         <img src="https://via.placeholder.com/50" alt="User Avatar" class="user-avatar" id="userAvatar">
       </a>
     </div>
@@ -30,6 +53,13 @@
 
   <!-- Main Coding Content -->
   <main class="coding-content">
+    <!-- Back Button -->
+    <div style="padding: 0.5rem 1rem 0;">
+      <a href="javascript:history.back()" style="display: inline-flex; align-items: center; gap: 0.4rem; text-decoration: none; color: var(--primary-color); font-weight: 600; font-size: 0.9rem;">
+        <span class="material-symbols-rounded" style="font-size: 18px;">arrow_back</span>
+        Back
+      </a>
+    </div>
     <!-- Editor Toolbar -->
     <div class="editor-toolbar">
       <div class="toolbar-left">
@@ -44,7 +74,10 @@
       </div>
       
       <div class="toolbar-center">
-        <span class="editor-title" id="editor-title">Python Editor</span>
+        <!-- If it's a practice challenge, show the title -->
+        <span class="editor-title" id="editor-title">
+            <?= $practiceData ? htmlspecialchars($practiceData['title']) : 'Sandbox Editor' ?>
+        </span>
       </div>
       
       <div class="toolbar-right">
@@ -107,6 +140,13 @@
         Quick Reference
       </div>
       <div class="reference-content" id="reference-content">
+        <?php if ($practiceData): ?>
+        <div class="reference-section" style="background: rgba(254, 202, 87, 0.1); border-left: 4px solid #feca57; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+          <h4 style="color: #feca57; margin-top: 0;">🎯 Your Challenge</h4>
+          <p style="margin-bottom: 0; line-height: 1.5;"><?= nl2br(htmlspecialchars($practiceData['practice_problem'])) ?></p>
+        </div>
+        <?php endif; ?>
+
         <div class="reference-section">
           <h4>Keyboard Shortcuts</h4>
           <ul>
@@ -120,7 +160,17 @@
     </div>
   </main>
 
-  <script src="JS/dashboard.js"></script>
-  <script src="JS/coding.js"></script>
+  <script src="<?= BASE_URL ?>/JS/dashboard.js"></script>
+  
+  <!-- Pass PHP data to JS -->
+  <script>
+    window.PracticeData = <?= json_encode([
+        'isChallenge' => $practiceData !== null,
+        'language' => $practiceData['practice_language'] ?? 'python',
+        'expectedKeys' => $practiceData['practice_solution'] ?? ''
+    ]) ?>;
+  </script>
+  
+  <script src="<?= BASE_URL ?>/JS/coding.js"></script>
 </body>
 </html>

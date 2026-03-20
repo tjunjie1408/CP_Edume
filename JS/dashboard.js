@@ -30,23 +30,11 @@ function setActiveNav() {
   });
 }
 
-// Load User Data (Safe for both pages)
+// Load User Data — Names are now rendered server-side by PHP via $_SESSION.
+// This function is kept as a no-op so any callers don't break.
 function loadUserData() {
-  const userData = {
-    name: 'John Doe',
-    email: 'john@example.com',
-    learningStyle: 'Visual',
-    profilePicture: 'https://via.placeholder.com/50'
-  };
-
-  const userNameEl = document.getElementById('user-name');
-  const bannerUserNameEl = document.getElementById('banner-user-name');
-
-  // Only update if the elements exist on the current HTML page
-  if (userNameEl) userNameEl.textContent = userData.name;
-  if (bannerUserNameEl) bannerUserNameEl.textContent = userData.name;
-  
-  sessionStorage.setItem('userData', JSON.stringify(userData));
+  // PHP already injects the real username into #user-name and #banner-user-name.
+  // No client-side override needed.
 }
 
 // Setup Shared Event Listeners
@@ -253,3 +241,63 @@ window.addEventListener('load', function() {
     sidebar.classList.remove('collapsed', 'active');
   }
 });
+
+//   VARK PERSONALIZED DASHBOARD LOGIC
+
+// Initialize CodeMirror (Kinesthetic Sandbox)
+let editor = null;
+function initCodeMirror() {
+  const textarea = document.getElementById('php-sandbox');
+  if (textarea) {
+    editor = CodeMirror.fromTextArea(textarea, {
+      lineNumbers: true,
+      mode: "python",
+      theme: "dracula",
+      matchBrackets: true,
+      indentUnit: 4,
+      indentWithTabs: true
+    });
+  }
+}
+
+// Ensure CodeMirror is initialized if the text area is present
+document.addEventListener('DOMContentLoaded', () => {
+  initCodeMirror();
+});
+
+// Mock Compiler Logic
+function runMockCompiler(editorId) {
+  if (!editor) return;
+  
+  const code = editor.getValue();
+  
+  // Extremely lenient Regex: look for 'print' followed by 'Hello World' (ignoring quotes, spacing, casing)
+  const isValid = /print\s*\(\s*['"]Hello\s+World['"]\s*\)/i.test(code);
+  
+  if (isValid) {
+    showNotification("Mission Accomplished! You successfully wrote Hello World in Python! \uD83C\uDF89", "success");
+  } else {
+    showNotification("Oops! That doesn't look quite right. Did you type 'print(\"Hello World\")'?", "error");
+  }
+}
+
+// Accordion Toggle (Visual Learner)
+function toggleAccordion(id) {
+  const el = document.getElementById(id);
+  if(el) {
+    el.classList.toggle('active');
+  }
+}
+
+// Hint Toggle (Kinesthetic Learner)
+function toggleHint(id) {
+  const el = document.getElementById(id);
+  if(el) {
+    el.classList.toggle('hide');
+  }
+}
+
+// Scroll to Sandbox helper
+function scrollToSandbox() {
+  showNotification("The full sandbox is available on the course player page!", "info");
+}

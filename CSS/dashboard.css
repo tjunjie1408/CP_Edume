@@ -292,6 +292,15 @@ body {
   margin-left: var(--sidebar-collapsed-width);
 }
 
+/* Section Spacing */
+.section {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 1.5rem 2rem;
+  margin-bottom: 1.5rem;
+}
+
 /* Welcome Banner */
 .welcome-banner {
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);

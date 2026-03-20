@@ -1,12 +1,38 @@
+<?php
+require_once __DIR__ . '/../../config/constants.php';
+require_once CONFIG_PATH . '/AdminPage.php';
+require_once CONFIG_PATH . '/Database.php';
+require_once __DIR__ . '/../../public/registration/User.php';
+
+$page = new AdminPage();
+$page->requireAuth();
+
+$database = new Database();
+$db = $database->getConnection();
+$userModel = new User($db);
+
+$userData = $userModel->findById($_SESSION['user_id']);
+
+if (!$userData) {
+    // Failsafe: if the user was deleted but session still exists
+    session_destroy();
+    header("Location: " . BASE_URL . "/public/registration/login.php");
+    exit();
+}
+
+$gravatarUrl = "https://www.gravatar.com/avatar/" . md5(strtolower(trim($userData['email']))) . "?d=mp";
+$createdAtDate = date("F j, Y", strtotime($userData['created_at']));
+$displayRole = ucfirst($userData['role']); // e.g., "Admin"
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Profile - EduMe Learning System</title>
-  <link rel="stylesheet" href="CSS/dashboard.css">
-  <link rel="stylesheet" href="CSS/dashboard_admin.css">
-  <link rel="stylesheet" href="CSS/profile_admin.css">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/CSS/dashboard.css">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/CSS/dashboard_admin.css">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/CSS/profile_admin.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -15,8 +41,8 @@
   <aside class="sidebar">
     <!-- Sidebar Header -->
     <nav class="sidebar-header">
-      <a href="dashboard_admin.html" class="header-logo">
-        <img src="image/Edume.png" alt="EduMe Logo" class="logo-image">
+      <a href="<?= BASE_URL ?>/admin/dashboard/dashboard.php" class="header-logo">
+        <img src="<?= BASE_URL ?>/image/Edume.png" alt="EduMe Logo" class="logo-image">
         <span class="logo-text">EduMe</span>
       </a>
       <button class="sidebar-toggler">
@@ -29,25 +55,25 @@
       <!-- Primary Navigation -->
       <ul class="nav-list primary-nav">
         <li class="nav-item">
-          <a href="dashboard_admin.html" class="nav-link">
+          <a href="<?= BASE_URL ?>/admin/dashboard/dashboard.php" class="nav-link">
             <span class="material-symbols-rounded">dashboard</span>
             <span class="nav-label">Dashboard</span>
           </a>
         </li>
         <li class="nav-item">
-          <a href="course_manage_admin.html" class="nav-link">
+          <a href="<?= BASE_URL ?>/admin/course_manage/course_manage.php" class="nav-link">
             <span class="material-symbols-rounded">library_books</span>
             <span class="nav-label">Course Manage</span>
           </a>
         </li>
         <li class="nav-item">
-          <a href="user_manage_admin.html" class="nav-link">
+          <a href="<?= BASE_URL ?>/admin/user_manage/user_manage.php" class="nav-link">
             <span class="material-symbols-rounded">people</span>
             <span class="nav-label">User Manage</span>
           </a>
         </li>
         <li class="nav-item">
-          <a href="support_center_admin.html" class="nav-link">
+          <a href="<?= BASE_URL ?>/admin/support_center/support_center.php" class="nav-link">
             <span class="material-symbols-rounded">support_agent</span>
             <span class="nav-label">Support Center</span>
           </a>
@@ -57,7 +83,7 @@
       <!-- Secondary Navigation -->
       <ul class="nav-list secondary-nav">
         <li class="nav-item">
-          <a href="loginpage.html" class="nav-link">
+          <a href="<?= BASE_URL ?>/public/registration/login.php" class="nav-link">
             <span class="material-symbols-rounded">logout</span>
             <span class="nav-label">Logout</span>
           </a>
@@ -78,10 +104,10 @@
     </div>
     <div class="header-right">
       <div class="user-info" id="username">
-        <p class="hello">Hello, <span id="user-name">Admin</span></p>
+        <p class="hello">Hello, <span id="user-name"><?= htmlspecialchars($userData['username']) ?></span></p>
       </div>
       <a href="#profile" class="user-avatar-link">
-        <img src="https://via.placeholder.com/50" alt="User Avatar" class="user-avatar" id="userAvatar">
+        <img src="<?= htmlspecialchars($gravatarUrl) ?>" alt="User Avatar" class="user-avatar" id="userAvatar">
       </a>
     </div>
   </header>
@@ -96,18 +122,17 @@
         <div class="profile-admin-header-content">
           <!-- Avatar with Edit Button -->
           <div class="profile-admin-avatar-wrapper">
-            <img src="https://via.placeholder.com/120" alt="Admin Avatar" class="profile-admin-avatar" id="profileAdminAvatar">
-            <button class="admin-avatar-edit-btn" id="avatar-upload-trigger" title="Change Avatar">
+            <img src="<?= htmlspecialchars($gravatarUrl) ?>" alt="Admin Avatar" class="profile-admin-avatar" id="profileAdminAvatar">
+            <a href="https://en.gravatar.com/" target="_blank" class="admin-avatar-edit-btn" id="avatar-upload-trigger" title="Change Avatar on Gravatar">
               <span class="material-symbols-rounded">camera_alt</span>
-            </button>
-            <input type="file" id="avatar-upload-input" style="display: none;" accept="image/*">
+            </a>
           </div>
           
           <!-- Admin Info Header -->
           <div class="profile-admin-info-header">
-            <h2 id="admin-username">Admin Name</h2>
-            <p class="admin-email" id="admin-email">admin@example.com</p>
-            <p class="admin-role" id="admin-role-display">Administrator</p>
+            <h2 id="admin-username"><?= htmlspecialchars($userData['username']) ?></h2>
+            <p class="admin-email" id="admin-email"><?= htmlspecialchars($userData['email']) ?></p>
+            <p class="admin-role" id="admin-role-display"><?= htmlspecialchars($displayRole) ?></p>
           </div>
         </div>
       </div>
@@ -142,19 +167,19 @@
               <div class="info-grid">
                 <div class="info-item">
                   <label>Full Name</label>
-                  <p id="view-full-name">John Administrator</p>
+                  <p id="view-full-name"><?= htmlspecialchars($userData['username']) ?></p>
                 </div>
                 <div class="info-item">
                   <label>Email Address</label>
-                  <p id="view-email">john.admin@example.com</p>
+                  <p id="view-email"><?= htmlspecialchars($userData['email']) ?></p>
                 </div>
                 <div class="info-item">
-                  <label>Phone Number</label>
-                  <p id="view-phone">+1 (555) 123-4567</p>
+                  <label>Joined Date</label>
+                  <p id="view-created-date"><?= htmlspecialchars($createdAtDate) ?></p>
                 </div>
                 <div class="info-item">
-                  <label>Department</label>
-                  <p id="view-department">System Administration</p>
+                  <label>Role</label>
+                  <p id="view-role"><?= htmlspecialchars($displayRole) ?></p>
                 </div>
               </div>
             </div>
@@ -164,19 +189,11 @@
               <form id="personal-form">
                 <div class="form-group">
                   <label for="edit-full-name">Full Name</label>
-                  <input type="text" id="edit-full-name" name="fullName" required>
+                  <input type="text" id="edit-full-name" name="fullName" value="<?= htmlspecialchars($userData['username']) ?>" required>
                 </div>
                 <div class="form-group">
                   <label for="edit-email">Email Address</label>
-                  <input type="email" id="edit-email" name="email" required>
-                </div>
-                <div class="form-group">
-                  <label for="edit-phone">Phone Number</label>
-                  <input type="tel" id="edit-phone" name="phone">
-                </div>
-                <div class="form-group">
-                  <label for="edit-department">Department</label>
-                  <input type="text" id="edit-department" name="department">
+                  <input type="email" id="edit-email" name="email" value="<?= htmlspecialchars($userData['email']) ?>" required>
                 </div>
                 <div class="form-actions">
                   <button type="submit" class="btn-save">
@@ -253,7 +270,13 @@
   </main>
 
   <!-- Scripts -->
-  <script src="JS/dashboard.js"></script>
-  <script src="JS/profile_admin.js"></script>
+  <script src="<?= BASE_URL ?>/JS/dashboard.js"></script>
+  <!-- Pass specific paths for API into JS -->
+  <script>
+    window.AppConfig = {
+      baseUrl: "<?= BASE_URL ?>"
+    };
+  </script>
+  <script src="<?= BASE_URL ?>/JS/profile_admin.js"></script>
 </body>
 </html>

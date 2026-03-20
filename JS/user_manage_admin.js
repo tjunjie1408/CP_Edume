@@ -39,57 +39,13 @@ async function loadUsers() {
 }
 
 async function fetchUsersData() {
-  // TODO: Replace with actual API endpoint
-  // Example: const response = await fetch('/api/admin/users');
-  
-  // Load from localStorage or return mock data
-  const savedUsers = localStorage.getItem('users_data');
-  if (savedUsers) {
-    try {
-      return JSON.parse(savedUsers);
-    } catch (error) {
-      console.error('Error parsing saved users:', error);
-    }
+  const apiUrl = (window.AppConfig?.baseUrl || '') + '/admin/user_manage/admin_users_api.php';
+  const response = await fetch(apiUrl);
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || 'Failed to fetch users');
   }
-
-  // Mock data structure matching your database schema
-  return [
-    {
-      userID: 'USR001',
-      username: 'sarah_j',
-      email: 'sarah.johnson@example.com',
-      password: 'hashed_password_1',
-      learningStyle: 'Visual'
-    },
-    {
-      userID: 'USR002',
-      username: 'mike_chen',
-      email: 'mike.chen@example.com',
-      password: 'hashed_password_2',
-      learningStyle: 'Aural'
-    },
-    {
-      userID: 'USR003',
-      username: 'emma_d',
-      email: 'emma.davis@example.com',
-      password: 'hashed_password_3',
-      learningStyle: 'Reading/Writing'
-    },
-    {
-      userID: 'USR004',
-      username: 'john_smith',
-      email: 'john.smith@example.com',
-      password: 'hashed_password_4',
-      learningStyle: 'Kinesthetic'
-    },
-    {
-      userID: 'USR005',
-      username: 'lisa_a',
-      email: 'lisa.anderson@example.com',
-      password: 'hashed_password_5',
-      learningStyle: 'Visual'
-    }
-  ];
+  return await response.json();
 }
 
 function displayUsers(users) {
@@ -323,7 +279,6 @@ function displayChangesSummary(changes) {
 
 async function saveUserChanges() {
   try {
-    // Validate and get changes
     let changes;
     try {
       changes = getChangedFields();
@@ -332,77 +287,55 @@ async function saveUserChanges() {
       return;
     }
 
-    // If no changes, close modal
     if (Object.keys(changes).length === 0) {
       showInfoMessage('No changes made');
       closeUserModal();
       return;
     }
 
-    // Display changes summary
     displayChangesSummary(changes);
 
-    // Disable button while saving
     const saveBtn = document.getElementById('save-changes-btn');
     saveBtn.disabled = true;
     saveBtn.textContent = 'Saving...';
 
-    // Fetch all users and update the target user
-    let users = await fetchUsersData();
-    const userIndex = users.findIndex(u => u.userID === currentEditingUser.userID);
+    // Build API payload
+    const payload = {
+      dbId: currentEditingUser.dbId
+    };
+    if (changes.username) payload.username = changes.username.to;
+    if (changes.email) payload.email = changes.email.to;
+    if (changes.password) payload.newPassword = document.getElementById('detail-password').value;
+    if (changes.learningStyle) payload.learningStyle = changes.learningStyle.to;
 
-    if (userIndex === -1) {
-      showErrorMessage('User not found');
-      saveBtn.disabled = false;
-      saveBtn.textContent = 'Save Changes';
-      return;
+    const apiUrl = (window.AppConfig?.baseUrl || '') + '/admin/user_manage/admin_users_api.php';
+    const response = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to save changes');
     }
 
-    // Update user data
-    if (changes.username) {
-      users[userIndex].username = changes.username.to.replace('***', 'new_username');
-    }
-    if (changes.email) {
-      users[userIndex].email = changes.email.to;
-    }
-    if (changes.password) {
-      // In production, this should be hashed on the backend
-      users[userIndex].password = document.getElementById('detail-password').value;
-    }
-    if (changes.learningStyle) {
-      users[userIndex].learningStyle = changes.learningStyle.to;
-    }
+    showSuccessMessage(result.message || 'User updated successfully!');
 
-    // Save to localStorage
-    localStorage.setItem('users_data', JSON.stringify(users));
-
-    // TODO: Replace with actual API call
-    // const response = await fetch(`/api/admin/users/${currentEditingUser.userID}`, {
-    //   method: 'PUT',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(users[userIndex])
-    // });
-    // if (!response.ok) throw new Error('Failed to save changes');
-
-    showSuccessMessage('User information updated successfully!');
-    
-    // Reset button
     saveBtn.disabled = false;
     saveBtn.textContent = 'Save Changes';
 
-    // Reload data and close modal
     await loadUsers();
     await loadUserStatistics();
-    
-    // Close modal after short delay
+
     setTimeout(() => {
       closeUserModal();
     }, 1000);
 
   } catch (error) {
     console.error('Error saving user:', error);
-    showErrorMessage('Failed to save user changes');
-    
+    showErrorMessage(error.message || 'Failed to save user changes');
+
     const saveBtn = document.getElementById('save-changes-btn');
     saveBtn.disabled = false;
     saveBtn.textContent = 'Save Changes';
@@ -419,26 +352,31 @@ async function deleteUser(userID) {
   }
 
   try {
-    let users = await fetchUsersData();
-    const deletedUser = users.find(u => u.userID === userID);
-    
-    users = users.filter(u => u.userID !== userID);
+    // Find the user to get the dbId
+    const user = allUsers.find(u => u.userID === userID);
+    if (!user) {
+      showErrorMessage('User not found');
+      return;
+    }
 
-    // Save to localStorage
-    localStorage.setItem('users_data', JSON.stringify(users));
+    const apiUrl = (window.AppConfig?.baseUrl || '') + '/admin/user_manage/admin_users_api.php';
+    const response = await fetch(apiUrl, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dbId: user.dbId })
+    });
 
-    // TODO: Replace with actual API call
-    // const response = await fetch(`/api/admin/users/${userID}`, {
-    //   method: 'DELETE'
-    // });
-    // if (!response.ok) throw new Error('Failed to delete user');
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to delete user');
+    }
 
-    showSuccessMessage(`User ${deletedUser.username} deleted successfully`);
+    showSuccessMessage(result.message || `User ${user.username} deleted successfully`);
     await loadUsers();
     await loadUserStatistics();
   } catch (error) {
     console.error('Error deleting user:', error);
-    showErrorMessage('Failed to delete user');
+    showErrorMessage(error.message || 'Failed to delete user');
   }
 }
 

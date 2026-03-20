@@ -8,61 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Load Profile Data
 function loadProfileData() {
-  // Attempt to load from localStorage first, fallback to defaults
-  const savedData = localStorage.getItem('profileData');
-  const profileData = savedData ? JSON.parse(savedData) : {
-    username: 'John Doe',
-    email: 'john@example.com',
-    learningStyle: 'Visual',
-    experience: 'Beginner',
-    bio: 'I\'m a passionate learner interested in web development and programming. Always looking to improve my skills and stay updated with the latest technologies.',
-    skills: ['React', 'JavaScript', 'CSS', 'HTML5', 'Node.js', 'Web Design'],
-    avatar: 'https://via.placeholder.com/120'
-  };
-
-  // Safe DOM updates
-  const setElementText = (id, text) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = text;
-  };
-  
-  const setElementValue = (id, val) => {
-    const el = document.getElementById(id);
-    if (el) el.value = val;
-  };
-
-  const setElementSrc = (id, src) => {
-    const el = document.getElementById(id);
-    if (el) el.src = src;
-  };
-
-  // Update profile header
-  setElementText('profile-username', profileData.username);
-  setElementText('profile-email', profileData.email);
-  setElementSrc('profileAvatar', profileData.avatar);
-  setElementSrc('userAvatar', profileData.avatar);
-
-  // Update view mode
-  setElementText('view-username', profileData.username);
-  setElementText('view-email', profileData.email);
-  setElementText('view-learning-style', profileData.learningStyle);
-  setElementText('view-experience', profileData.experience);
-  setElementText('profile-bio', profileData.bio);
-
-  // Update edit mode
-  setElementValue('e-username', profileData.username);
-  setElementValue('e-email', profileData.email);
-  setElementValue('e-learning-style', profileData.learningStyle);
-  setElementValue('e-experience', profileData.experience);
-
-  // Load skills
-  displaySkills(profileData.skills);
-  setElementValue('e-skills', profileData.skills.join(', '));
-
-  // Load bio
-  setElementValue('e-bio', profileData.bio);
-
-  localStorage.setItem('profileData', JSON.stringify(profileData));
+  // Initial page data is now rendered directly via PHP in profile.php
+  // using $userData and $skills. We no longer use localStorage mock data.
 }
 
 // Display Skills
@@ -118,93 +65,12 @@ function setupTabNavigation() {
 }
 
 // ============================================
-// AVATAR UPLOAD FEATURE
+// AVATAR UPLOAD FEATURE 
 // ============================================
 
-// Setup Avatar Upload
 function setupAvatarUpload() {
-  const avatarEditBtn = document.getElementById('avatar-edit-btn');
-  const avatarFileInput = document.getElementById('avatar-file-input');
-
-  if (avatarEditBtn) {
-    avatarEditBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      avatarFileInput.click();
-    });
-  }
-
-  if (avatarFileInput) {
-    avatarFileInput.addEventListener('change', handleAvatarChange);
-  }
-}
-
-// Handle Avatar File Change
-function handleAvatarChange(event) {
-  const file = event.target.files[0];
-
-  if (!file) return;
-
-  // Validate file type
-  if (!file.type.startsWith('image/')) {
-    showNotification('Please select an image file', 'error');
-    return;
-  }
-
-  // Validate file size (max 5MB)
-  const maxSize = 5 * 1024 * 1024; // 5MB
-  if (file.size > maxSize) {
-    showNotification('File size must be less than 5MB', 'error');
-    return;
-  }
-
-  // Read file and convert to base64
-  const reader = new FileReader();
-  
-  reader.onload = function(e) {
-    const base64Image = e.target.result;
-
-    // Update avatar in profile
-    updateAvatar(base64Image);
-
-    // Save to localStorage
-    saveAvatarToStorage(base64Image);
-
-    // Show success message
-    showNotification('Avatar updated successfully!', 'success');
-  };
-
-  reader.onerror = function() {
-    showNotification('Error reading file', 'error');
-  };
-
-  reader.readAsDataURL(file);
-
-  // Reset file input
-  event.target.value = '';
-}
-
-// Update Avatar Display
-function updateAvatar(imageData) {
-  const profileAvatar = document.getElementById('profileAvatar');
-  const userAvatar = document.getElementById('userAvatar');
-
-  if (profileAvatar) {
-    profileAvatar.src = imageData;
-  }
-
-  if (userAvatar) {
-    userAvatar.src = imageData;
-  }
-}
-
-// Save Avatar to Storage
-function saveAvatarToStorage(imageData) {
-  const savedData = localStorage.getItem('profileData');
-  const profileData = savedData ? JSON.parse(savedData) : {};
-
-  profileData.avatar = imageData;
-
-  localStorage.setItem('profileData', JSON.stringify(profileData));
+  // Avatar uploading is now disabled from the frontend logic since
+  // we rely on the direct Gravatar link placed in profile.php HTML.
 }
 
 // Show Notification
@@ -328,106 +194,124 @@ function cancelEditBio() {
 
 // Save Changes - Personal Information
 function saveChanges() {
+  const btn = document.querySelector('#editMode .btn-save');
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = '<span class="material-symbols-rounded">sync</span> Saving...';
+  btn.disabled = true;
+
   const username = document.getElementById("e-username").value.trim();
   const email = document.getElementById("e-email").value.trim();
   const learningStyle = document.getElementById("e-learning-style").value;
   const experience = document.getElementById("e-experience").value;
 
-  if (!username || !email || !learningStyle || !experience) {
-    showNotification('Please fill in all fields', 'warning');
+  if (!username || !email) {
+    showNotification('Name and Email are required', 'warning');
+    resetBtn(btn, originalHtml);
     return;
   }
 
   if (!isValidEmail(email)) {
     showNotification('Please enter a valid email address', 'error');
+    resetBtn(btn, originalHtml);
     return;
   }
 
-  const savedData = localStorage.getItem('profileData');
-  const profileData = savedData ? JSON.parse(savedData) : {};
+  const formData = { username, email, learningStyle, experience };
 
-  profileData.username = username;
-  profileData.email = email;
-  profileData.learningStyle = learningStyle;
-  profileData.experience = experience;
+  fetch((window.AppConfig?.baseUrl || '') + '/student/profile/update_student_profile_api.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(formData)
+  })
+  .then(resp => resp.json())
+  .then(data => {
+    if (data.status === 200) {
+      showNotification(data.message || 'Profile updated successfully!', 'success');
+      setTimeout(() => window.location.reload(), 1500);
+    } else {
+      showNotification(data.message || 'Failed to update', 'error');
+      resetBtn(btn, originalHtml);
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    showNotification('Network error occurred', 'error');
+    resetBtn(btn, originalHtml);
+  });
+}
 
-  localStorage.setItem('profileData', JSON.stringify(profileData));
-
-  loadProfileData();
-
-  const viewMode = document.getElementById("viewMode");
-  const editMode = document.getElementById("editMode");
-  
-  if (viewMode) viewMode.classList.remove("hidden");
-  if (editMode) editMode.classList.add("hidden");
-
-  showNotification('Profile updated successfully!', 'success');
+function resetBtn(btn, originalHtml) {
+  btn.innerHTML = originalHtml;
+  btn.disabled = false;
 }
 
 // Save Skills
 function saveSkills() {
+  const btn = document.querySelector('#skillsEditMode .btn-save');
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = '<span class="material-symbols-rounded">sync</span> Saving...';
+  btn.disabled = true;
+
   const skillsInput = document.getElementById("e-skills").value.trim();
-
-  if (!skillsInput) {
-    showNotification('Please enter at least one skill', 'warning');
-    return;
-  }
-
   const skills = skillsInput.split(',').map(skill => skill.trim()).filter(skill => skill);
 
-  if (skills.length === 0) {
-    showNotification('Please enter at least one valid skill', 'warning');
-    return;
-  }
-
-  const savedData = localStorage.getItem('profileData');
-  const profileData = savedData ? JSON.parse(savedData) : {};
-
-  profileData.skills = skills;
-
-  localStorage.setItem('profileData', JSON.stringify(profileData));
-
-  displaySkills(skills);
-
-  const viewMode = document.getElementById("skillsViewMode");
-  const editMode = document.getElementById("skillsEditMode");
-  
-  if (viewMode) viewMode.classList.remove("hidden");
-  if (editMode) editMode.classList.add("hidden");
-
-  showNotification('Skills updated successfully!', 'success');
+  fetch((window.AppConfig?.baseUrl || '') + '/student/profile/update_skills_api.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ skills })
+  })
+  .then(resp => resp.json())
+  .then(data => {
+    if (data.status === 200) {
+      showNotification(data.message || 'Skills updated successfully!', 'success');
+      setTimeout(() => window.location.reload(), 1500);
+    } else {
+      showNotification(data.message || 'Failed to update skills', 'error');
+      resetBtn(btn, originalHtml);
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    showNotification('Network error occurred', 'error');
+    resetBtn(btn, originalHtml);
+  });
 }
 
 // Save Bio
 function saveBio() {
-  const bio = document.getElementById("e-bio").value.trim();
+  const btn = document.querySelector('#bioEditMode .btn-save');
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = '<span class="material-symbols-rounded">sync</span> Saving...';
+  btn.disabled = true;
 
-  if (!bio) {
-    showNotification('Please enter your bio', 'warning');
-    return;
-  }
+  const bio = document.getElementById("e-bio").value.trim();
 
   if (bio.length > 500) {
     showNotification('Bio must be 500 characters or less', 'error');
+    resetBtn(btn, originalHtml);
     return;
   }
 
-  const savedData = localStorage.getItem('profileData');
-  const profileData = savedData ? JSON.parse(savedData) : {};
-
-  profileData.bio = bio;
-
-  localStorage.setItem('profileData', JSON.stringify(profileData));
-
-  document.getElementById('profile-bio').textContent = bio;
-
-  const viewMode = document.getElementById("bioViewMode");
-  const editMode = document.getElementById("bioEditMode");
-  
-  if (viewMode) viewMode.classList.remove("hidden");
-  if (editMode) editMode.classList.add("hidden");
-
-  showNotification('Bio updated successfully!', 'success');
+  fetch((window.AppConfig?.baseUrl || '') + '/student/profile/update_bio_api.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ bio })
+  })
+  .then(resp => resp.json())
+  .then(data => {
+    if (data.status === 200) {
+      showNotification(data.message || 'Bio updated successfully!', 'success');
+      setTimeout(() => window.location.reload(), 1500);
+    } else {
+      showNotification(data.message || 'Failed to update bio', 'error');
+      resetBtn(btn, originalHtml);
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    showNotification('Network error occurred', 'error');
+    resetBtn(btn, originalHtml);
+  });
 }
 
 // Email Validation

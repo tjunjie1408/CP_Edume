@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
   loadProfileData();
   setupProfileEventListeners();
   setupTabNavigation();
+  setupSettingsEventListeners();
   setupAvatarUpload();
 });
 
@@ -124,6 +125,57 @@ function showNotification(message, type = 'info') {
     notification.style.animation = 'slideOut 0.3s ease-in-out';
     setTimeout(() => notification.remove(), 300);
   }, 3000);
+}
+
+// ============================================
+// SETTINGS EVENT LISTENERS
+// ============================================
+
+function setupSettingsEventListeners() {
+  const darkModeToggle = document.getElementById('dark-mode-toggle');
+  const emailNotifToggle = document.getElementById('email-notif-toggle');
+
+  if (darkModeToggle) {
+    darkModeToggle.checked = localStorage.getItem('theme') === 'dark';
+    darkModeToggle.addEventListener('change', function() {
+      if (this.checked) {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
+        showNotification('Dark Mode enabled!', 'success');
+      } else {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light');
+        showNotification('Light Mode enabled!', 'info');
+      }
+    });
+  }
+
+  if (emailNotifToggle) {
+    emailNotifToggle.addEventListener('change', function() {
+      const isEnabled = this.checked;
+      
+      fetch((window.AppConfig?.baseUrl || '') + '/student/profile/update_settings_api.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ enabled: isEnabled })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 200) {
+          showNotification(data.message || 'Notification settings updated.', 'success');
+        } else {
+          showNotification(data.message || 'Failed to update settings.', 'error');
+          this.checked = !isEnabled; // revert
+        }
+      })
+      .catch(err => {
+        showNotification('Network error occurred.', 'error');
+        this.checked = !isEnabled; // revert
+      });
+    });
+  }
 }
 
 // ============================================

@@ -11,6 +11,7 @@ $page->requireAuth();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edume - Learning Style Assessment</title>
     <link rel="stylesheet" href="<?= BASE_URL ?>/CSS/questionnaire.css">
+    <link rel="icon" type="image/png" href="<?= BASE_URL ?>/image/Edume.png?v=1.0">
 </head>
 <body>
     <div class="container">

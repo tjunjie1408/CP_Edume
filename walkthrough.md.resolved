@@ -1,0 +1,264 @@
+# Edume — Architecture Analysis
+
+## Overview
+
+**Edume** is a customizable e-learning platform built on the **VARK** (Visual, Aural, Read/Write, Kinesthetic) model, designed to tailor content delivery to individual learning styles. The tech stack is:
+
+| Layer | Technology |
+|---|---|
+| Frontend | Static HTML pages + Vanilla CSS + Vanilla JS |
+| Backend API | PHP (XAMPP) — JSON API endpoints |
+| Database | MySQL (via `mysqli`) |
+| Communication | AJAX (`XMLHttpRequest`) — JSON POST |
+| Auth | PHP Sessions (`$_SESSION`) |
+| Avatar | Gravatar API *(planned, not yet integrated)* |
+
+---
+
+## Project Structure
+
+```
+Edume/
+├── index.html                  # Landing page (VARK intro videos, FAQ)
+├── loginpage.html              # Combined Login / Register / Forgot-Password
+├── questionnaire.html          # VARK Assessment Quiz (8 questions)
+├── dashboard.html              # Student dashboard (sidebar + courses)
+├── course.html                 # Course catalog (12 languages listed)
+├── python.html                 # Python course player (chapters + resources)
+├── coding.html                 # Coding Sandbox (multi-language editor)
+├── profile.html                # Student profile (avatar, skills, bio)
+│
+├── dashboard_admin.html        # Admin dashboard (charts + stats)
+├── course_manage_admin.html    # Admin course CRUD
+├── user_manage_admin.html      # Admin user management
+├── support_center_admin.html   # Admin support/report center
+├── profile_admin.html          # Admin profile page
+│
+├── JS/                         # 13 JavaScript modules (one per page)
+├── CSS/                        # 13 CSS files (one per page) + style.css
+├── PHP/                        # 6 PHP API endpoints
+├── database/                   # SQL schema files
+├── image/                      # Static images & backgrounds
+├── video/                      # Hero/promo videos
+└── material/                   # Capstone Proposal PDF
+```
+
+---
+
+## Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph "Frontend (Static HTML + JS)"
+        LP["loginpage.html"]
+        QS["questionnaire.html"]
+        DB["dashboard.html"]
+        CR["course.html"]
+        PY["python.html"]
+        CD["coding.html"]
+        PR["profile.html"]
+        AD["Admin Pages"]
+    end
+
+    subgraph "JS Layer (AJAX + DOM)"
+        LPjs["loginpage.js"]
+        QSjs["questionnaire.js"]
+        DBjs["dashboard.js"]
+        CRjs["course.js"]
+        PYjs["python.js"]
+        CDjs["coding.js"]
+        PRjs["profile.js"]
+        ADjs["Admin JS Modules"]
+    end
+
+    subgraph "PHP API (JSON Endpoints)"
+        Login["login.php"]
+        Signup["signup.php"]
+        Forgot["forget_password.php"]
+        Reset["reset_password.php"]
+        SaveLS["save_learning_style.php"]
+        ConnDB["connect_db.php"]
+    end
+
+    subgraph "MySQL Database"
+        Users["users"]
+        Courses["courses"]
+        Chapters["chapters"]
+        Content["content_materials"]
+        Quizzes["quizzes + quiz_questions"]
+        Progress["user_progress"]
+        VARK["vark_questions + vark_options + user_vark_results"]
+        Achieve["achievements + user_achievements"]
+    end
+
+    LP --> LPjs
+    QS --> QSjs
+    DB --> DBjs
+    CR --> CRjs
+    PY --> PYjs
+    CD --> CDjs
+    PR --> PRjs
+
+    LPjs -- "POST JSON" --> Login
+    LPjs -- "POST JSON" --> Signup
+    LPjs -- "POST JSON" --> Forgot
+    LPjs -- "POST JSON" --> Reset
+    QSjs -- "POST JSON" --> SaveLS
+
+    Login --> ConnDB
+    Signup --> ConnDB
+    Forgot --> ConnDB
+    Reset --> ConnDB
+    SaveLS --> ConnDB
+    ConnDB --> Users
+```
+
+---
+
+## Data Flow & Communication Pattern
+
+All client-server communication follows **one consistent pattern**:
+
+```
+JS (sendAjax) ──POST JSON──▶ PHP endpoint ──mysqli──▶ MySQL
+                                  │
+                          JSON response
+                                  │
+JS callback ◀──────────────────────
+```
+
+The [sendAjax()](file:///d:/School/CapstoneProject/Edume/JS/loginpage.js#336-349) helper is **duplicated** in [loginpage.js](file:///d:/School/CapstoneProject/Edume/JS/loginpage.js) and [questionnaire.js](file:///d:/School/CapstoneProject/Edume/JS/questionnaire.js):
+
+```javascript
+function sendAjax(url, data, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            callback(JSON.parse(xhr.responseText));
+        }
+    };
+    xhr.send(JSON.stringify(data));
+}
+```
+
+> [!NOTE]
+> Many modules (dashboard, course, profile, admin pages) use **hardcoded mock data** or **localStorage/sessionStorage** instead of real AJAX calls. The PHP API layer currently only covers authentication and VARK style saving.
+
+---
+
+## Database Schema (14 Tables)
+
+Defined in [edume_merged_schema.sql](file:///d:/School/CapstoneProject/Edume/database/edume_merged_schema.sql):
+
+```mermaid
+erDiagram
+    users ||--o{ user_skills : has
+    users ||--o{ user_progress : tracks
+    users ||--o{ quiz_attempts : takes
+    users ||--o{ user_achievements : earns
+    users ||--o{ user_vark_results : assessed
+
+    courses ||--o{ chapters : contains
+    chapters ||--o{ chapter_objectives : lists
+    chapters ||--o{ content_materials : holds
+    chapters ||--o{ quizzes : includes
+    chapters ||--o{ user_progress : tracks
+
+    quizzes ||--o{ quiz_questions : contains
+    quizzes ||--o{ quiz_attempts : attempted
+
+    achievements ||--o{ user_achievements : awarded
+    vark_questions ||--o{ vark_options : has
+```
+
+| Table | Purpose |
+|---|---|
+| `users` | Auth, role (student/admin), VARK style, profile |
+| `user_skills` | Tags for student skill tracking |
+| `courses` | Course catalog with VARK flags per style |
+| `chapters` | Ordered lessons within a course |
+| `chapter_objectives` | Learning objectives per chapter |
+| `content_materials` | Videos, text, practice problems with `vark_tag` |
+| `quizzes` / `quiz_questions` | MCQ quizzes per chapter |
+| `quiz_attempts` | Student quiz score history |
+| `user_progress` | Chapter completion + XP tracking |
+| `achievements` / `user_achievements` | Gamification badges |
+| `vark_questions` / `vark_options` | VARK assessment questionnaire (DB-driven) |
+| `user_vark_results` | Per-dimension VARK scores |
+
+---
+
+## Module Breakdown
+
+### Student Module
+
+| Page | JS File | Key Features |
+|---|---|---|
+| **Landing** | [app.js](file:///d:/School/CapstoneProject/Edume/JS/app.js) | VARK intro video hover-to-play, FAQ accordion |
+| **Login** | [loginpage.js](file:///d:/School/CapstoneProject/Edume/JS/loginpage.js) | Combined login/register with animated slide transitions, forgot-password flow (email verify → reset), AJAX to PHP, admin redirect logic |
+| **VARK Quiz** | [questionnaire.js](file:///d:/School/CapstoneProject/Edume/JS/questionnaire.js) | 8-question assessment (VA/R/K categories), progress bar, saves result via AJAX to [save_learning_style.php](file:///d:/School/CapstoneProject/Edume/PHP/save_learning_style.php) |
+| **Dashboard** | [dashboard.js](file:///d:/School/CapstoneProject/Edume/JS/dashboard.js) | Sidebar nav with collapse/mobile toggle, progress bars, course enrollment/resume, search, logout |
+| **Courses** | [course.js](file:///d:/School/CapstoneProject/Edume/JS/course.js) | 12-language catalog, enrollment via `localStorage`, page routing map |
+| **Python Course** | [python.js](file:///d:/School/CapstoneProject/Edume/JS/python.js) | 3-chapter course (Intro/Syntax/Output), VARK-filtered resources (VA=YouTube, R=text, K=practice), MCQ quiz engine, report form |
+| **Coding Sandbox** | [coding.js](file:///d:/School/CapstoneProject/Edume/JS/coding.js) | Multi-language editor (Python/JS/HTML/CSS/C++), simulated execution, line numbers, save/load via `localStorage` |
+| **Profile** | [profile.js](file:///d:/School/CapstoneProject/Edume/JS/profile.js) | Tab navigation, avatar upload with preview, inline edit for name/email/skills/bio, Gravatar-ready |
+
+### Admin Module
+
+| Page | JS File | Key Features |
+|---|---|---|
+| **Dashboard** | [dashboard_admin.js](file:///d:/School/CapstoneProject/Edume/JS/dashboard_admin.js) | Stats cards, VARK distribution chart (Chart.js doughnut), activity line chart, top courses, recent users, system health |
+| **Course Mgmt** | [course_manage_admin.js](file:///d:/School/CapstoneProject/Edume/JS/course_manage_admin.js) | 3-level drill-down (Courses → Subjects → Resources/Quizzes), full CRUD, image compression via Canvas API, JSON `localStorage` storage |
+| **User Mgmt** | [user_manage_admin.js](file:///d:/School/CapstoneProject/Edume/JS/user_manage_admin.js) | User list with search/filter, modal edit with change detection, delete with confirm, CSV export, auto-refresh |
+| **Support** | [support_center_admin.js](file:///d:/School/CapstoneProject/Edume/JS/support_center_admin.js) | Report table with pagination, status toggle (Pending ↔ Resolved), filter/search, mock data |
+| **Profile** | [profile_admin.js](file:///d:/School/CapstoneProject/Edume/JS/profile_admin.js) | Tab nav, avatar upload, personal info edit, change password |
+
+---
+
+## PHP API Endpoints
+
+| Endpoint | Method | Purpose |
+|---|---|---|
+| [login.php](file:///d:/School/CapstoneProject/Edume/PHP/login.php) | POST | Email/password auth → session creation, returns role + learning_style |
+| [signup.php](file:///d:/School/CapstoneProject/Edume/PHP/signup.php) | POST | Register (username + email + bcrypt password), unique checks |
+| [forget_password.php](file:///d:/School/CapstoneProject/Edume/PHP/forget_password.php) | POST | Verify email exists, block admin password resets |
+| [reset_password.php](file:///d:/School/CapstoneProject/Edume/PHP/reset_password.php) | POST | Reset password (validates not same as old, bcrypt hash) |
+| [save_learning_style.php](file:///d:/School/CapstoneProject/Edume/PHP/save_learning_style.php) | POST | Save VARK result to `users.learning_style` (session-protected) |
+| [connect_db.php](file:///d:/School/CapstoneProject/Edume/PHP/connect_db.php) | — | Shared `mysqli` connection to `edume` database |
+
+All endpoints follow this pattern:
+- Read raw `php://input` → `json_decode`
+- Validate input → Prepared statements (`bind_param`)
+- Return `json_encode(["status" => ..., "message" => ...])`
+
+---
+
+## Key Observations
+
+> [!IMPORTANT]
+> ### What's Working (Connected to Backend)
+> - ✅ Login / Register / Forgot Password / Reset Password
+> - ✅ VARK Assessment → saves learning style to DB
+> - ✅ Session-based auth with role-based redirects (student vs admin)
+
+> [!WARNING]
+> ### What's Using Mock/Local Data (Not Yet Connected)
+> - ⚠️ **Dashboard** — [loadUserData()](file:///d:/School/CapstoneProject/Edume/JS/coding.js#454-471) uses hardcoded `John Doe` data
+> - ⚠️ **Course catalog** — enrollment tracked in `localStorage` only
+> - ⚠️ **Python course** — chapter data, resources, quizzes all hardcoded in JS
+> - ⚠️ **Coding sandbox** — code save/load uses `localStorage`
+> - ⚠️ **Profile** — all profile data in `localStorage`/`sessionStorage`
+> - ⚠️ **Admin dashboard** — uses mock data with `setTimeout` simulating API calls
+> - ⚠️ **Admin course management** — full CRUD but using `localStorage` JSON, not MySQL
+> - ⚠️ **Admin user management** — [fetchUsersData()](file:///d:/School/CapstoneProject/Edume/JS/user_manage_admin.js#41-94) generates mock users
+> - ⚠️ **Support center** — mock report data
+> - ⚠️ **Gravatar API** — mentioned as a requirement but not yet integrated anywhere
+
+> [!NOTE]
+> ### Architecture Patterns
+> - **No shared JS module** — [sendAjax()](file:///d:/School/CapstoneProject/Edume/JS/loginpage.js#336-349) is duplicated, [showNotification()](file:///d:/School/CapstoneProject/Edume/JS/dashboard.js#175-201) has different implementations per file
+> - **No session validation middleware** — only [save_learning_style.php](file:///d:/School/CapstoneProject/Edume/PHP/save_learning_style.php) checks `$_SESSION`; other pages don't verify auth
+> - **No CORS or CSRF protection** on PHP endpoints
+> - **Database schema is more mature than the code** — the 14-table schema supports features (progress tracking, achievements, quiz attempts, VARK questions from DB) that the frontend doesn't use yet

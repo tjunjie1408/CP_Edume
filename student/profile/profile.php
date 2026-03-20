@@ -32,6 +32,7 @@ $skills = $userModel->getUserSkills($_SESSION['user_id']);
   <link rel="stylesheet" href="<?= BASE_URL ?>/CSS/profile.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" type="image/png" href="<?= BASE_URL ?>/image/Edume.png?v=1.0">
 </head>
 <body>
   <!-- Sidebar Navigation -->
@@ -297,20 +298,21 @@ $skills = $userModel->getUserSkills($_SESSION['user_id']);
                 <p>Receive notifications via email</p>
               </div>
               <label class="toggle-switch">
-                <input type="checkbox" checked>
+                <input type="checkbox" id="email-notif-toggle" <?= (!empty($userData['email_notifications_enabled'])) ? 'checked' : '' ?>>
                 <span class="slider"></span>
               </label>
             </div>
             <div class="settings-item">
               <div class="setting-info">
-                <h4>Course Updates</h4>
-                <p>Get notified about new course updates</p>
+                <h4>Dark Mode</h4>
+                <p>Switch between light and dark themes</p>
               </div>
               <label class="toggle-switch">
-                <input type="checkbox" checked>
+                <input type="checkbox" id="dark-mode-toggle">
                 <span class="slider"></span>
               </label>
             </div>
+            
             <div class="settings-item">
               <div class="setting-info">
                 <h4>Achievement Alerts</h4>

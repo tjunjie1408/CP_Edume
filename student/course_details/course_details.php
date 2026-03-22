@@ -325,9 +325,62 @@ if ($activeChapterId) {
               <button class="btn-start-quiz" id="startQuizBtn">Start Exercises</button>
             </div>
 
-            <!-- Quiz Section (To be implemented securely in next step) -->
+            <!-- Quiz Section -->
             <div class="content-section quiz-wrapper" id="quizWrapper" style="display: none;">
-                <!-- Quiz structure skeleton -->
+                <div class="quiz-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3 id="quizTitle" style="margin: 0;">Chapter Quiz</h3>
+                    <button class="btn-close" id="closeQuizBtn" style="background: none; border: none; cursor: pointer; color: #a0a0b0;"><span class="material-symbols-rounded">close</span></button>
+                </div>
+                
+                <div class="quiz-progress" style="margin-bottom: 2rem;">
+                    <div class="progress-bar" style="height: 8px; background: #e2e6f0; border-radius: 4px; overflow: hidden;">
+                        <div class="progress-fill" id="quizProgressFill" style="height: 100%; background: var(--primary-color); width: 0%; transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+
+                <div id="quizContent">
+                    <div class="question-header" style="margin-bottom: 2rem;">
+                        <span class="question-number" id="questionNumber" style="font-size: 0.9rem; color: #6e7687; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Question 1 of 5</span>
+                        <h4 class="question-text" id="quizQuestion" style="font-size: 1.25rem; color: #2c3e50; margin-top: 0.5rem; line-height: 1.5;">Loading question...</h4>
+                    </div>
+                    
+                    <div class="options-container" id="quizOptions" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
+                        <!-- Options injected by JS -->
+                    </div>
+
+                    <div class="quiz-actions" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e6f0; padding-top: 1.5rem;">
+                        <button class="btn-secondary" id="prevBtn" disabled style="padding: 0.75rem 1.5rem; border: 1px solid #e2e6f0; border-radius: 8px; background: transparent; color: #6e7687; font-weight: 600; cursor: pointer;">Previous</button>
+                        <div style="display: flex; gap: 1rem;">
+                            <button class="btn-primary" id="nextBtn" disabled style="padding: 0.75rem 2rem; border-radius: 8px; background: var(--primary-color); color: white; border: none; font-weight: 600; cursor: pointer;">Next</button>
+                            <button class="btn-success" id="submitBtn" style="display: none; padding: 0.75rem 2rem; border-radius: 8px; background: var(--accent-success); color: white; border: none; font-weight: 600; cursor: pointer;" disabled>Submit Quiz</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quiz-results" style="display: none; text-align: center; padding: 2rem;">
+                    <div class="result-score-circle" style="width: 120px; height: 120px; border-radius: 50%; border: 6px solid var(--primary-color); display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 0 auto 1.5rem auto;">
+                        <span class="score-number" id="finalScore" style="font-size: 1.5rem; font-weight: 700; color: #2c3e50;">0/0</span>
+                        <span class="score-label" id="scorePercentage" style="font-size: 0.9rem; color: #6e7687;">0%</span>
+                    </div>
+                    
+                    <div class="result-stats" style="display: flex; justify-content: center; gap: 2rem; margin-bottom: 1.5rem;">
+                        <div class="result-item correct" style="display: flex; align-items: center; gap: 0.5rem; color: var(--accent-success); font-weight: 600;">
+                            <span class="material-symbols-rounded">check_circle</span>
+                            <span class="result-text">0 Correct</span>
+                        </div>
+                        <div class="result-item incorrect" style="display: flex; align-items: center; gap: 0.5rem; color: var(--accent-warning); font-weight: 600;">
+                            <span class="material-symbols-rounded">cancel</span>
+                            <span class="result-text">0 Incorrect</span>
+                        </div>
+                    </div>
+                    
+                    <p class="performance-text" id="performanceText" style="font-size: 1.1rem; margin-bottom: 2rem;">Performance details...</p>
+                    
+                    <div class="quiz-actions result-actions" style="display: flex; justify-content: center; gap: 1rem;">
+                        <button class="btn-secondary" id="retakeBtn" style="padding: 0.75rem 1.5rem; border: 1px solid #e2e6f0; border-radius: 8px; background: transparent; color: #6e7687; font-weight: 600; cursor: pointer;">Retake Quiz</button>
+                        <button class="btn-primary" id="continueBtn" style="padding: 0.75rem 2rem; border-radius: 8px; background: var(--primary-color); color: white; border: none; font-weight: 600; cursor: pointer;">Continue Learning</button>
+                    </div>
+                </div>
             </div>
             
           </div>

@@ -103,7 +103,7 @@ document
     // In real implementation, this would call your backend API
     // verifyEmailWithBackend(email);
     sendAjax(
-      "/Edume/public/registration/AuthController.php?action=forget_password",
+      "AuthController.php?action=forget_password",
       { email: email },
       function (response) {
         if (response.status === 200) {
@@ -210,7 +210,7 @@ document
         );
     }, 1500);**/
     sendAjax(
-      "/Edume/public/registration/AuthController.php?action=reset_password",
+      "AuthController.php?action=reset_password",
       {
         email: forgotPasswordEmail,
         newPassword: newPassword,
@@ -385,7 +385,7 @@ function sendAjax(url, data, callback) {
 registerForm.addEventListener("submit", function (e) {
   e.preventDefault();
   sendAjax(
-    "/Edume/public/registration/AuthController.php?action=signup",
+    "AuthController.php?action=signup",
     {
       name: document.getElementById("registerName").value,
       email: document.getElementById("registerEmail").value,
@@ -395,7 +395,7 @@ registerForm.addEventListener("submit", function (e) {
       if (response.status === 201) {
         showNotification("Success", response.message, "success", function () {
           // Direct users to the VARK questionnaire immediately after signing up
-          window.location.href = "/Edume/student/questionnaire/questionnaire.php";
+          window.location.href = "../../student/questionnaire/questionnaire.php";
         });
       } else {
         showNotification("Error", response.message, "error");
@@ -408,7 +408,7 @@ registerForm.addEventListener("submit", function (e) {
 loginForm.addEventListener("submit", function (e) {
   e.preventDefault();
   sendAjax(
-    "/Edume/public/registration/AuthController.php?action=login",
+    "AuthController.php?action=login",
     {
       email: document.getElementById("loginEmail").value,
       password: document.getElementById("loginPassword").value,
@@ -418,12 +418,12 @@ loginForm.addEventListener("submit", function (e) {
         showNotification("Success", response.message, "success", function () {
           if (response.role === 1) {
             //Admin
-            window.location.href = "/Edume/admin/dashboard/dashboard.php";
+            window.location.href = "../../admin/dashboard/dashboard.php";
           } else {
             if (response.primary_vark_style !== null && response.primary_vark_style !== undefined) {
-              window.location.href = "/Edume/student/dashboard/dashboard.php";
+              window.location.href = "../../student/dashboard/dashboard.php";
             } else {
-              window.location.href = "/Edume/student/questionnaire/questionnaire.php";
+              window.location.href = "../../student/questionnaire/questionnaire.php";
             }
           }
         });

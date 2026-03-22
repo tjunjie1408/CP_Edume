@@ -251,6 +251,113 @@ try {
 
                 echo json_encode(['success' => true, 'id' => (int) $db->lastInsertId(), 'message' => 'Chapter created']);
 
+            } elseif ($action === 'material') {
+                $chapterId = (int) ($data['chapterId'] ?? 0);
+                $type      = trim($data['type'] ?? '');
+                $title     = trim($data['title'] ?? '');
+                $url       = trim($data['url'] ?? '');
+                $content   = trim($data['content'] ?? '');
+                $desc      = trim($data['description'] ?? '');
+
+                if (!$chapterId || !$type || !$title) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Chapter ID, type, and title are required']);
+                    exit;
+                }
+
+                $contentType = 'text';
+                $varkTag = 'read';
+                $youtubeUrl = null;
+                $textContent = null;
+                $practiceProblem = null;
+
+                if ($type === 'video') {
+                    $contentType = 'video';
+                    $varkTag = 'visual';
+                    $youtubeUrl = $url ?: null;
+                    // Note: You can put description somewhere or append it
+                } elseif ($type === 'exercise') {
+                    $contentType = 'practice';
+                    $varkTag = 'kinesthetic';
+                    $practiceProblem = $content ?: null;
+                } else {
+                    $contentType = 'text';
+                    $varkTag = 'read';
+                    $textContent = $url ?: ($content ?: null); // Front-end uses url for doc link, or content
+                }
+
+                // Determine the course language to set the practice language correctly
+                $stmtLang = $db->prepare("SELECT c.category FROM courses c JOIN chapters ch ON c.id = ch.course_id WHERE ch.id = :cid");
+                $stmtLang->execute([':cid' => $chapterId]);
+                $courseLang = strtolower(trim($stmtLang->fetchColumn() ?: 'python'));
+
+                $stmt = $db->prepare("
+                    INSERT INTO content_materials (chapter_id, content_type, title, youtube_url, text_content, practice_problem, practice_language, vark_tag)
+                    VALUES (:cid, :ctype, :title, :yurl, :tcont, :pprob, :plang, :vtag)
+                ");
+                $stmt->execute([
+                    ':cid'   => $chapterId,
+                    ':ctype' => $contentType,
+                    ':title' => $title,
+                    ':yurl'  => $youtubeUrl,
+                    ':tcont' => $textContent,
+                    ':pprob' => $practiceProblem,
+                    ':plang' => $courseLang,
+                    ':vtag'  => $varkTag
+                ]);
+
+                echo json_encode(['success' => true, 'id' => (int) $db->lastInsertId(), 'message' => 'Resource created']);
+
+            } elseif ($action === 'quiz_question') {
+                $chapterId = (int) ($data['chapterId'] ?? 0);
+                $question  = trim($data['question'] ?? '');
+                $options   = $data['options'] ?? [];
+                $correct   = (int) ($data['correct'] ?? 0);
+                $feedback  = trim($data['feedback'] ?? '');
+
+                if (!$chapterId || !$question || count($options) < 2) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Chapter ID, question, and at least 2 options are required']);
+                    exit;
+                }
+
+                // Find or create quiz for this chapter
+                $stmt = $db->prepare("SELECT id FROM quizzes WHERE chapter_id = :cid LIMIT 1");
+                $stmt->execute([':cid' => $chapterId]);
+                $quizId = $stmt->fetchColumn();
+
+                if (!$quizId) {
+                    $stmt = $db->prepare("INSERT INTO quizzes (chapter_id, title) VALUES (:cid, 'Chapter Quiz')");
+                    $stmt->execute([':cid' => $chapterId]);
+                    $quizId = $db->lastInsertId();
+                }
+
+                // Map options
+                $optA = $options[0] ?? '';
+                $optB = $options[1] ?? '';
+                $optC = $options[2] ?? '';
+                $optD = $options[3] ?? '';
+                
+                $letters = ['A', 'B', 'C', 'D'];
+                $correctOptionLetter = $letters[$correct] ?? 'A';
+
+                $stmt = $db->prepare("
+                    INSERT INTO quiz_questions (quiz_id, question_text, option_a, option_b, option_c, option_d, correct_option, explanation)
+                    VALUES (:qid, :q, :oa, :ob, :oc, :od, :co, :expl)
+                ");
+                $stmt->execute([
+                    ':qid' => $quizId,
+                    ':q'   => $question,
+                    ':oa'  => $optA,
+                    ':ob'  => $optB,
+                    ':oc'  => $optC,
+                    ':od'  => $optD,
+                    ':co'  => $correctOptionLetter,
+                    ':expl'=> $feedback
+                ]);
+
+                echo json_encode(['success' => true, 'id' => (int) $db->lastInsertId(), 'message' => 'Question created']);
+
             } else {
                 http_response_code(400);
                 echo json_encode(['error' => 'Unknown action: ' . $action]);
@@ -324,6 +431,78 @@ try {
 
                 echo json_encode(['success' => true, 'message' => 'Chapter updated']);
 
+            } elseif ($action === 'material') {
+                $id    = (int) ($data['id'] ?? 0);
+                $type  = trim($data['type'] ?? '');
+                $title = trim($data['title'] ?? '');
+                $url   = trim($data['url'] ?? '');
+                $content = trim($data['content'] ?? '');
+
+                if (!$id) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Resource ID is required']);
+                    exit;
+                }
+
+                $fields = [];
+                $params = [':id' => $id];
+                if ($title) { $fields[] = 'title = :title'; $params[':title'] = $title; }
+                
+                if ($type === 'video') {
+                    $fields[] = "content_type = 'video', vark_tag = 'visual', youtube_url = :url ";
+                    $params[':url'] = $url ?: null;
+                } elseif ($type === 'exercise') {
+                    $fields[] = "content_type = 'practice', vark_tag = 'kinesthetic', practice_problem = :prob ";
+                    $params[':prob'] = $content ?: null;
+                } elseif ($type === 'document') {
+                    $fields[] = "content_type = 'text', vark_tag = 'read', text_content = :cont ";
+                    $params[':cont'] = $url ?: ($content ?: null);
+                }
+
+                if (!empty($fields)) {
+                    $sql = "UPDATE content_materials SET " . implode(', ', $fields) . " WHERE id = :id";
+                    $db->prepare($sql)->execute($params);
+                }
+
+                echo json_encode(['success' => true, 'message' => 'Resource updated']);
+
+            } elseif ($action === 'quiz_question') {
+                $id       = (int) ($data['id'] ?? 0);
+                $question = trim($data['question'] ?? '');
+                $options  = $data['options'] ?? [];
+                $correct  = (int) ($data['correct'] ?? 0);
+                $feedback = trim($data['feedback'] ?? '');
+
+                if (!$id) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Question ID is required']);
+                    exit;
+                }
+
+                $fields = [];
+                $params = [':id' => $id];
+                
+                if ($question) { $fields[] = 'question_text = :q'; $params[':q'] = $question; }
+                if ($feedback) { $fields[] = 'explanation = :f'; $params[':f'] = $feedback; }
+                if (count($options) >= 2) {
+                    $fields[] = 'option_a = :oa, option_b = :ob, option_c = :oc, option_d = :od';
+                    $params[':oa'] = $options[0] ?? '';
+                    $params[':ob'] = $options[1] ?? '';
+                    $params[':oc'] = $options[2] ?? '';
+                    $params[':od'] = $options[3] ?? '';
+                    
+                    $letters = ['A', 'B', 'C', 'D'];
+                    $fields[] = 'correct_option = :co';
+                    $params[':co'] = $letters[$correct] ?? 'A';
+                }
+
+                if (!empty($fields)) {
+                    $sql = "UPDATE quiz_questions SET " . implode(', ', $fields) . " WHERE id = :id";
+                    $db->prepare($sql)->execute($params);
+                }
+
+                echo json_encode(['success' => true, 'message' => 'Question updated']);
+
             } else {
                 http_response_code(400);
                 echo json_encode(['error' => 'Unknown action: ' . $action]);
@@ -351,6 +530,16 @@ try {
                 $stmt = $db->prepare("DELETE FROM chapters WHERE id = :id");
                 $stmt->execute([':id' => $id]);
                 echo json_encode(['success' => true, 'message' => 'Chapter deleted']);
+
+            } elseif ($action === 'material') {
+                $stmt = $db->prepare("DELETE FROM content_materials WHERE id = :id");
+                $stmt->execute([':id' => $id]);
+                echo json_encode(['success' => true, 'message' => 'Resource deleted']);
+
+            } elseif ($action === 'quiz_question') {
+                $stmt = $db->prepare("DELETE FROM quiz_questions WHERE id = :id");
+                $stmt->execute([':id' => $id]);
+                echo json_encode(['success' => true, 'message' => 'Question deleted']);
 
             } else {
                 http_response_code(400);

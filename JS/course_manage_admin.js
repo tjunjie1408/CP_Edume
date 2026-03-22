@@ -842,27 +842,36 @@ function editResource(resourceId) {
   document.getElementById('resourceModal').classList.add('active');
 }
 
-function deleteResource(resourceId) {
+async function deleteResource(resourceId) {
   if (confirm('Delete this resource?')) {
-    const subject = getSubject(currentCourseId, currentSubjectId);
-    if (subject) {
-      subject.resources = subject.resources.filter(r => r.id !== resourceId);
-      
-      if (saveToStorage()) {
+    try {
+      const response = await fetch(API_URL() + `?action=material&id=${resourceId}`, {
+        method: 'DELETE'
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to delete resource');
+
+      const subject = getSubject(currentCourseId, currentSubjectId);
+      if (subject) {
+        subject.resources = subject.resources.filter(r => r.id !== resourceId);
         displayResources(subject.resources);
-        alert('✓ Resource deleted successfully');
       }
+      alert('✓ Resource deleted successfully');
+    } catch (error) {
+      console.error('Error deleting resource:', error);
+      alert('Error: ' + error.message);
     }
   }
 }
 
-function handleSaveResource(e) {
+async function handleSaveResource(e) {
   e.preventDefault();
   
   const type = document.getElementById('resourceType').value;
   const title = document.getElementById('resourceTitle').value.trim();
   const url = document.getElementById('resourceUrl').value.trim();
   const description = document.getElementById('resourceDescription').value.trim();
+  const content = document.getElementById('resourceContent') ? document.getElementById('resourceContent').value.trim() : '';
 
   if (!type || !title) {
     alert('Please fill in required fields (Type and Title)');
@@ -875,34 +884,45 @@ function handleSaveResource(e) {
     return;
   }
 
-  if (currentEditingResourceId) {
-    // EDIT MODE: Update existing resource from JSON
-    const resource = subject.resources.find(r => r.id === currentEditingResourceId);
-    if (resource) {
-      resource.type = type;
-      resource.title = title;
-      resource.url = url;
-      resource.description = description;
-      console.log('✓ Resource updated in JSON:', JSON.stringify(resource, null, 2));
-    }
-  } else {
-    // CREATE MODE: Add new resource to JSON
-    const newResource = {
-      id: Date.now(),
+  try {
+    const payload = {
       type,
       title,
       url,
-      description
+      description,
+      content
     };
-    subject.resources.push(newResource);
-    console.log('✓ New resource added to JSON:', JSON.stringify(newResource, null, 2));
-  }
 
-  // Save to localStorage
-  if (saveToStorage()) {
-    displayResources(subject.resources);
+    if (currentEditingResourceId) {
+      // EDIT MODE: Update existing resource
+      payload.id = currentEditingResourceId;
+      const response = await fetch(API_URL() + '?action=material', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to update resource');
+    } else {
+      // CREATE MODE: Add new resource
+      payload.chapterId = currentSubjectId;
+      const response = await fetch(API_URL() + '?action=material', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to create resource');
+    }
+
+    // Refresh subject to get new IDs/Data
+    await selectSubject(currentSubjectId);
     closeResourceModal();
     alert('✓ Resource saved successfully');
+
+  } catch (error) {
+    console.error('Error saving resource:', error);
+    alert('Error: ' + error.message);
   }
 }
 
@@ -987,21 +1007,29 @@ function editQuestion(questionId) {
   document.getElementById('questionModal').classList.add('active');
 }
 
-function deleteQuestion(questionId) {
+async function deleteQuestion(questionId) {
   if (confirm('Delete this question?')) {
-    const subject = getSubject(currentCourseId, currentSubjectId);
-    if (subject) {
-      subject.quiz = subject.quiz.filter(q => q.id !== questionId);
-      
-      if (saveToStorage()) {
+    try {
+      const response = await fetch(API_URL() + `?action=quiz_question&id=${questionId}`, {
+        method: 'DELETE'
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to delete question');
+
+      const subject = getSubject(currentCourseId, currentSubjectId);
+      if (subject) {
+        subject.quiz = subject.quiz.filter(q => q.id !== questionId);
         displayQuiz(subject.quiz);
-        alert('✓ Question deleted successfully');
       }
+      alert('✓ Question deleted successfully');
+    } catch (error) {
+      console.error('Error deleting question:', error);
+      alert('Error: ' + error.message);
     }
   }
 }
 
-function handleSaveQuestion(e) {
+async function handleSaveQuestion(e) {
   e.preventDefault();
   
   const question = document.getElementById('questionText').value.trim();
@@ -1024,34 +1052,44 @@ function handleSaveQuestion(e) {
     return;
   }
 
-  if (currentEditingQuestionId) {
-    // EDIT MODE: Update existing question from JSON
-    const q = subject.quiz.find(qu => qu.id === currentEditingQuestionId);
-    if (q) {
-      q.question = question;
-      q.options = options;
-      q.correct = correctIndex;
-      q.feedback = feedback;
-      console.log('✓ Question updated in JSON:', JSON.stringify(q, null, 2));
-    }
-  } else {
-    // CREATE MODE: Add new question to JSON
-    const newQuestion = {
-      id: Date.now(),
+  try {
+    const payload = {
       question,
       options,
       correct: correctIndex,
       feedback
     };
-    subject.quiz.push(newQuestion);
-    console.log('✓ New question added to JSON:', JSON.stringify(newQuestion, null, 2));
-  }
 
-  // Save to localStorage
-  if (saveToStorage()) {
-    displayQuiz(subject.quiz);
+    if (currentEditingQuestionId) {
+      // EDIT MODE
+      payload.id = currentEditingQuestionId;
+      const response = await fetch(API_URL() + '?action=quiz_question', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to update question');
+    } else {
+      // CREATE MODE
+      payload.chapterId = currentSubjectId;
+      const response = await fetch(API_URL() + '?action=quiz_question', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to create question');
+    }
+
+    // Refresh subject to get new IDs/Data
+    await selectSubject(currentSubjectId);
     closeQuestionModal();
     alert('✓ Question saved successfully');
+
+  } catch (error) {
+    console.error('Error saving question:', error);
+    alert('Error: ' + error.message);
   }
 }
 

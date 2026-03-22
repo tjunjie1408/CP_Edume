@@ -81,6 +81,24 @@ int main() {
     }
     
     return 0;
+}`,
+  
+  golang: `package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, World!")
+    
+    // Variables
+    name := "John"
+    age := 25
+    fmt.Printf("Name: %s, Age: %d\\n", name, age)
+    
+    // Loop
+    for i := 1; i <= 5; i++ {
+        fmt.Printf("Number: %d\\n", i)
+    }
 }`
 };
 
@@ -227,7 +245,8 @@ function updateEditorTitle() {
     javascript: 'JavaScript Editor',
     html: 'HTML Editor',
     css: 'CSS Editor',
-    cpp: 'C++ Editor'
+    cpp: 'C++ Editor',
+    golang: 'Go Editor'
   };
   
   editorTitle.textContent = languageNames[languageSelect.value];

@@ -19,9 +19,10 @@ $db = $database->getConnection();
 
 try {
     // Fetch quiz questions for this chapter
-    $query = "SELECT id, question, option_a, option_b, option_c, option_d 
-              FROM quizzes 
-              WHERE chapter_id = :chapter_id";
+    $query = "SELECT qq.id, qq.question_text AS question, qq.option_a, qq.option_b, qq.option_c, qq.option_d 
+              FROM quiz_questions qq 
+              JOIN quizzes q ON qq.quiz_id = q.id 
+              WHERE q.chapter_id = :chapter_id";
     
     $stmt = $db->prepare($query);
     $stmt->bindParam(':chapter_id', $chapterId, PDO::PARAM_INT);

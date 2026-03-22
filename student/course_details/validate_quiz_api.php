@@ -33,7 +33,10 @@ $userId = $_SESSION['user_id'];
 
 try {
     // 1. Fetch the correct answers from the database
-    $query = "SELECT id, correct_answer, explanation FROM quizzes WHERE chapter_id = :chapter_id";
+    $query = "SELECT qq.id, qq.correct_option AS correct_answer, qq.explanation 
+              FROM quiz_questions qq 
+              JOIN quizzes q ON qq.quiz_id = q.id 
+              WHERE q.chapter_id = :chapter_id";
     $stmt = $db->prepare($query);
     $stmt->bindParam(':chapter_id', $chapterId, PDO::PARAM_INT);
     $stmt->execute();
@@ -88,14 +91,13 @@ try {
         $xpStmt->execute();
         
         // Also log progress (Upsert)
-        $progressSql = "INSERT INTO user_progress (user_id, chapter_id, completed, score, last_accessed) 
-                        VALUES (:uid, :cid, 1, :score, NOW()) 
-                        ON DUPLICATE KEY UPDATE completed = 1, score = :score2, last_accessed = NOW()";
+        $progressSql = "INSERT INTO user_progress (user_id, chapter_id, is_completed, xp_earned, last_accessed) 
+                        VALUES (:uid, :cid, 1, :xp, NOW()) 
+                        ON DUPLICATE KEY UPDATE is_completed = 1, last_accessed = NOW()";
         $progStmt = $db->prepare($progressSql);
         $progStmt->bindParam(':uid', $userId, PDO::PARAM_INT);
         $progStmt->bindParam(':cid', $chapterId, PDO::PARAM_INT);
-        $progStmt->bindParam(':score', $scorePercentage, PDO::PARAM_INT);
-        $progStmt->bindParam(':score2', $scorePercentage, PDO::PARAM_INT);
+        $progStmt->bindParam(':xp', $xpToAward, PDO::PARAM_INT);
         $progStmt->execute();
     }
     

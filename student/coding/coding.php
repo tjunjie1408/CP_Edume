@@ -172,7 +172,8 @@ $gravatarUrl = "https://www.gravatar.com/avatar/" . md5(strtolower(trim($_SESSIO
     window.PracticeData = <?= json_encode([
         'isChallenge' => $practiceData !== null,
         'language' => $practiceData['practice_language'] ?? 'python',
-        'expectedKeys' => $practiceData['practice_solution'] ?? ''
+        'expectedKeys' => $practiceData['practice_solution'] ?? '',
+        'problemContext' => $practiceData['practice_problem'] ?? ''
     ]) ?>;
   </script>
   

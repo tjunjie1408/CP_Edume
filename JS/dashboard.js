@@ -75,7 +75,7 @@ function setupSidebarToggle() {
   const sidebar = document.querySelector('.sidebar');
   const toggleBtn = document.querySelector('.sidebar-toggler');
   
-  if (toggleBtn) {
+  if (toggleBtn && sidebar) {
     toggleBtn.addEventListener('click', function() {
       if (window.innerWidth > 768) {
         sidebar.classList.toggle('collapsed');
@@ -84,7 +84,7 @@ function setupSidebarToggle() {
     });
   }
 
-  if (window.innerWidth > 768 && localStorage.getItem('sidebarCollapsed') === 'true') {
+  if (sidebar && window.innerWidth > 768 && localStorage.getItem('sidebarCollapsed') === 'true') {
     sidebar.classList.add('collapsed');
   }
 }
@@ -94,7 +94,7 @@ function setupMobileMenu() {
   const menuBtn = document.querySelector('.sidebar-menu-button');
   const sidebar = document.querySelector('.sidebar');
   
-  if (menuBtn) {
+  if (menuBtn && sidebar) {
     menuBtn.addEventListener('click', function(e) {
       e.stopPropagation();
       sidebar.classList.toggle('active');
@@ -113,7 +113,7 @@ function setupMobileMenu() {
     const isClickOnSidebar = e.target.closest('.sidebar');
     const isClickOnMenuBtn = e.target.closest('.sidebar-menu-button');
     
-    if (!isClickOnSidebar && !isClickOnMenuBtn && window.innerWidth <= 768) {
+    if (sidebar && !isClickOnSidebar && !isClickOnMenuBtn && window.innerWidth <= 768) {
       sidebar.classList.remove('active');
     }
   });
@@ -222,6 +222,7 @@ function searchCourses(query) {
 // Handle window resize for responsive behavior
 window.addEventListener('resize', function() {
   const sidebar = document.querySelector('.sidebar');
+  if (!sidebar) return;
   if (window.innerWidth > 768) {
     sidebar.classList.remove('active');
     if (localStorage.getItem('sidebarCollapsed') === 'true') {
@@ -235,6 +236,7 @@ window.addEventListener('resize', function() {
 // Initial check on page load
 window.addEventListener('load', function() {
   const sidebar = document.querySelector('.sidebar');
+  if (!sidebar) return;
   if (window.innerWidth > 768) {
     if (localStorage.getItem('sidebarCollapsed') === 'true') {
       sidebar.classList.add('collapsed');

@@ -271,34 +271,67 @@ function runCode() {
   addOutput(`[${new Date().toLocaleTimeString()}] Checking ${language} code...`, 'info');
   addOutput('---', 'info');
 
+  // Extract simulated output to show to the user
+  const extractSimulatedOutput = (codeString, lang) => {
+      let regexList = [];
+      if (lang === 'python') regexList = [/print\s*\(\s*(['"])(.*?)\1\s*\)/g];
+      else if (lang === 'javascript') regexList = [/console\.log\s*\(\s*(['"])(.*?)\1\s*\)/g];
+      else if (lang === 'golang') regexList = [/fmt\.Print(?:ln|f)?\s*\(\s*(['"])(.*?)\1/g];
+      else if (lang === 'cpp') regexList = [/cout\s*<<\s*(['"])(.*?)\1/g];
+
+      let outputs = [];
+      regexList.forEach(regex => {
+          let match;
+          while ((match = regex.exec(codeString)) !== null) {
+              addOutput(`> ${match[2]}`, 'success');
+              outputs.push(match[2]);
+          }
+      });
+      return outputs;
+  };
+
   // Challenge Validation Logic
   if (window.PracticeData && window.PracticeData.isChallenge) {
       const expectedKeys = window.PracticeData.expectedKeys.split(',').map(k => k.trim()).filter(k => k);
       let passed = true;
       let missingKeys = [];
+      
+      const outputs = extractSimulatedOutput(code, language);
+      const combinedOutput = outputs.join(" ");
 
-      // Safe Regex evaluation to check if expected syntax exists in code
+      // 1. Check base keyword presence
       expectedKeys.forEach(key => {
-          // Create basic regex to find the keyword/pattern
-          // Escaping basic regex chars like ( ) for simple matching
-          const safeKey = key.replace(/[.*+?^$()|[\\]\\\\]/g, '\\\\$&');
+          const safeKey = key.replace(/[.*+?^$()|[\]\\]/g, '\\$&');
           const regex = new RegExp(safeKey, 'i');
           if (!regex.test(code)) {
               passed = false;
               missingKeys.push(key);
           }
       });
+      
+      // 2. Strict Quoted Literal Matching: If the problem asks to print "Hello, World!", force exact output match
+      const problemContext = window.PracticeData.problemContext || "";
+      const quoteMatches = problemContext.match(/"([^"]+)"/g);
+      if (quoteMatches) {
+          quoteMatches.forEach(q => {
+              const exactString = q.replace(/"/g, ''); // Strip quotes
+              if (!combinedOutput.includes(exactString)) {
+                  passed = false;
+                  missingKeys.push(`Output missing exact phrase: "${exactString}"`);
+              }
+          });
+      }
 
       if (passed) {
           addOutput('✅ Challenge Passed! Your code contains the required logic.', 'success');
           addOutput('Great job! You can now close this sandbox and continue with the next lesson.', 'success');
       } else {
           addOutput('❌ Challenge Failed.', 'error');
-          addOutput(`Hint: Your code seems to be missing: ${missingKeys.join(', ')}`, 'warning');
+          addOutput(`Hint: Your code seems to be missing: ${missingKeys.join(' | ')}`, 'warning');
       }
   } else {
-      // Sandbox Mode: Just echo the code or do simple feedback since eval is unsafe
-      addOutput('Sandbox mode: Code received.', 'info');
+      // Sandbox Mode
+      extractSimulatedOutput(code, language);
       addOutput('Executing secure regex analysis...', 'info');
       
       try {

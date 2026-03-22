@@ -152,11 +152,20 @@ $skills = $userModel->getUserSkills($_SESSION['user_id']);
                 </div>
                 <div class="info-item">
                   <label>Learning Style</label>
-                  <p id="view-learning-style"><?= htmlspecialchars($userData['learning_style'] ?? 'Not set') ?></p>
+                  <?php
+                    $rawStyle = $userData['learning_style'] ?? '';
+                    $displayStyle = 'Not set';
+                    if ($rawStyle === 'visual' || strtolower($rawStyle) === 'visual') $displayStyle = 'Visual';
+                    elseif ($rawStyle === 'aural' || strtolower($rawStyle) === 'aural') $displayStyle = 'Aural';
+                    elseif ($rawStyle === 'read' || strtolower($rawStyle) === 'reading/writing') $displayStyle = 'Reading/Writing';
+                    elseif ($rawStyle === 'kinesthetic' || strtolower($rawStyle) === 'kinesthetic') $displayStyle = 'Kinesthetic';
+                    elseif (!empty($rawStyle)) $displayStyle = ucfirst($rawStyle);
+                  ?>
+                  <p id="view-learning-style"><?= htmlspecialchars($displayStyle) ?></p>
                 </div>
                 <div class="info-item">
                   <label>Experience Level</label>
-                  <p id="view-experience"><?= htmlspecialchars($userData['experience_level'] ?? 'Not set') ?></p>
+                  <p id="view-experience"><?= htmlspecialchars(ucfirst($userData['experience_level'] ?? 'Not set')) ?></p>
                 </div>
               </div>
             </div>
@@ -175,20 +184,22 @@ $skills = $userModel->getUserSkills($_SESSION['user_id']);
                 <div class="form-group">
                   <label for="e-learning-style">Learning Style</label>
                   <select id="e-learning-style">
-                    <option value="" <?= empty($userData['learning_style']) ? 'selected' : '' ?>>Select learning style</option>
-                    <option value="Visual" <?= ($userData['learning_style'] ?? '') === 'Visual' ? 'selected' : '' ?>>Visual</option>
-                    <option value="Aural" <?= ($userData['learning_style'] ?? '') === 'Aural' ? 'selected' : '' ?>>Aural</option>
-                    <option value="Reading/Writing" <?= ($userData['learning_style'] ?? '') === 'Reading/Writing' ? 'selected' : '' ?>>Reading/Writing</option>
-                    <option value="Kinesthetic" <?= ($userData['learning_style'] ?? '') === 'Kinesthetic' ? 'selected' : '' ?>>Kinesthetic</option>
+                    <?php $ls = strtolower($userData['learning_style'] ?? ''); ?>
+                    <option value="" <?= empty($ls) ? 'selected' : '' ?>>Select learning style</option>
+                    <option value="visual" <?= $ls === 'visual' ? 'selected' : '' ?>>Visual</option>
+                    <option value="aural" <?= $ls === 'aural' ? 'selected' : '' ?>>Aural</option>
+                    <option value="read" <?= ($ls === 'read' || $ls === 'reading/writing') ? 'selected' : '' ?>>Reading/Writing</option>
+                    <option value="kinesthetic" <?= $ls === 'kinesthetic' ? 'selected' : '' ?>>Kinesthetic</option>
                   </select>
                 </div>
                 <div class="form-group">
                   <label for="e-experience">Experience Level</label>
                   <select id="e-experience">
-                    <option value="" <?= empty($userData['experience_level']) ? 'selected' : '' ?>>Select experience level</option>
-                    <option value="Beginner" <?= ($userData['experience_level'] ?? '') === 'Beginner' ? 'selected' : '' ?>>Beginner</option>
-                    <option value="Intermediate" <?= ($userData['experience_level'] ?? '') === 'Intermediate' ? 'selected' : '' ?>>Intermediate</option>
-                    <option value="Advanced" <?= ($userData['experience_level'] ?? '') === 'Advanced' ? 'selected' : '' ?>>Advanced</option>
+                    <?php $ex = strtolower($userData['experience_level'] ?? ''); ?>
+                    <option value="" <?= empty($ex) ? 'selected' : '' ?>>Select experience level</option>
+                    <option value="beginner" <?= $ex === 'beginner' ? 'selected' : '' ?>>Beginner</option>
+                    <option value="intermediate" <?= $ex === 'intermediate' ? 'selected' : '' ?>>Intermediate</option>
+                    <option value="advanced" <?= $ex === 'advanced' ? 'selected' : '' ?>>Advanced</option>
                   </select>
                 </div>
                 <div class="form-actions">

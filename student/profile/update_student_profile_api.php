@@ -19,8 +19,13 @@ try {
     $userId = $_SESSION['user_id'];
     $username = trim($data['username']);
     $email = trim($data['email']);
-    $learningStyle = trim($data['learningStyle'] ?? '');
-    $experience = trim($data['experience'] ?? '');
+    $learningStyle = strtolower(trim($data['learningStyle'] ?? ''));
+    $experience = strtolower(trim($data['experience'] ?? ''));
+
+    // Normalize legacy learning styles
+    if ($learningStyle === 'reading/writing') {
+        $learningStyle = 'read';
+    }
 
     if ($username === '' || $email === '') {
         echo json_encode(["status" => 400, "message" => "Name and email cannot be empty"]);

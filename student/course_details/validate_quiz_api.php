@@ -75,29 +75,18 @@ try {
         }
     }
     
-    // 4. Calculate score and conditionally assign XP
+    // 4. Calculate score
     $scorePercentage = ($correctCount / $totalQuestions) * 100;
-    $passed = $scorePercentage >= 50; // Arbitrary 50% pass mark
+    $passed = $scorePercentage >= 50; // 50% pass mark
     
-    // Note: Assuming User class has an addXP or similar method. 
-    // Implementing a simple direct SQL update for XP here to ensure it works.
     if ($passed) {
-        $xpToAward = 50; // base XP for passing a chapter
-        
-        $updateXpSql = "UPDATE users SET xp = xp + :xp WHERE id = :user_id";
-        $xpStmt = $db->prepare($updateXpSql);
-        $xpStmt->bindParam(':xp', $xpToAward, PDO::PARAM_INT);
-        $xpStmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
-        $xpStmt->execute();
-        
-        // Also log progress (Upsert)
-        $progressSql = "INSERT INTO user_progress (user_id, chapter_id, is_completed, xp_earned, last_accessed) 
-                        VALUES (:uid, :cid, 1, :xp, NOW()) 
+        // Log progress (Upsert)
+        $progressSql = "INSERT INTO user_progress (user_id, chapter_id, is_completed, last_accessed) 
+                        VALUES (:uid, :cid, 1, NOW()) 
                         ON DUPLICATE KEY UPDATE is_completed = 1, last_accessed = NOW()";
         $progStmt = $db->prepare($progressSql);
         $progStmt->bindParam(':uid', $userId, PDO::PARAM_INT);
         $progStmt->bindParam(':cid', $chapterId, PDO::PARAM_INT);
-        $progStmt->bindParam(':xp', $xpToAward, PDO::PARAM_INT);
         $progStmt->execute();
     }
     

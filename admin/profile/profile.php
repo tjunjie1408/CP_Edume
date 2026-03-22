@@ -216,52 +216,61 @@ $displayRole = ucfirst($userData['role']); // e.g., "Admin"
               <h3>Recent Activity</h3>
             </div>
 
+            <?php
+              // Build real activity feed from DB
+              $activities = [];
+
+              // 1. Recent user registrations (last 5)
+              $stmtUsers = $db->query("SELECT username, email, created_at FROM users ORDER BY created_at DESC LIMIT 5");
+              foreach ($stmtUsers->fetchAll(PDO::FETCH_ASSOC) as $u) {
+                  $activities[] = [
+                      'icon' => 'person_add',
+                      'action' => 'New user registered: ' . htmlspecialchars($u['username']),
+                      'time' => $u['created_at']
+                  ];
+              }
+
+              // 2. Recent reports (last 5)
+              $stmtReports = $db->query("SELECT r.content, r.created_at, u.username FROM reports r JOIN users u ON r.user_id = u.id ORDER BY r.created_at DESC LIMIT 5");
+              foreach ($stmtReports->fetchAll(PDO::FETCH_ASSOC) as $r) {
+                  $activities[] = [
+                      'icon' => 'flag',
+                      'action' => 'Report from ' . htmlspecialchars($r['username']) . ': ' . htmlspecialchars(mb_strimwidth($r['content'], 0, 50, '...')),
+                      'time' => $r['created_at']
+                  ];
+              }
+
+              // 3. Admin account creation
+              $activities[] = [
+                  'icon' => 'shield_person',
+                  'action' => 'Admin account created',
+                  'time' => $userData['created_at']
+              ];
+
+              // Sort all by time descending
+              usort($activities, function($a, $b) {
+                  return strtotime($b['time']) - strtotime($a['time']);
+              });
+
+              // Show top 6
+              $activities = array_slice($activities, 0, 6);
+            ?>
             <div class="activity-list">
-              <div class="activity-item">
-                <div class="activity-icon">
-                  <span class="material-symbols-rounded">login</span>
-                </div>
-                <div class="activity-details">
-                  <p class="activity-action">Logged in</p>
-                  <p class="activity-time">Today at 10:30 AM</p>
-                </div>
-              </div>
-              <div class="activity-item">
-                <div class="activity-icon">
-                  <span class="material-symbols-rounded">person_add</span>
-                </div>
-                <div class="activity-details">
-                  <p class="activity-action">Created new user: sarah@example.com</p>
-                  <p class="activity-time">February 20, 2026 at 2:15 PM</p>
-                </div>
-              </div>
-              <div class="activity-item">
-                <div class="activity-icon">
-                  <span class="material-symbols-rounded">edit</span>
-                </div>
-                <div class="activity-details">
-                  <p class="activity-action">Updated course: Python Basics</p>
-                  <p class="activity-time">February 19, 2026 at 11:45 AM</p>
-                </div>
-              </div>
-              <div class="activity-item">
-                <div class="activity-icon">
-                  <span class="material-symbols-rounded">settings</span>
-                </div>
-                <div class="activity-details">
-                  <p class="activity-action">Modified system settings</p>
-                  <p class="activity-time">February 18, 2026 at 3:20 PM</p>
-                </div>
-              </div>
-              <div class="activity-item">
-                <div class="activity-icon">
-                  <span class="material-symbols-rounded">logout</span>
-                </div>
-                <div class="activity-details">
-                  <p class="activity-action">Logged out</p>
-                  <p class="activity-time">February 17, 2026 at 5:00 PM</p>
-                </div>
-              </div>
+              <?php if (empty($activities)): ?>
+                <p style="color: var(--text-light); text-align: center; padding: 2rem;">No recent activity.</p>
+              <?php else: ?>
+                <?php foreach ($activities as $act): ?>
+                  <div class="activity-item">
+                    <div class="activity-icon">
+                      <span class="material-symbols-rounded"><?= $act['icon'] ?></span>
+                    </div>
+                    <div class="activity-details">
+                      <p class="activity-action"><?= $act['action'] ?></p>
+                      <p class="activity-time"><?= date('F j, Y \a\t g:i A', strtotime($act['time'])) ?></p>
+                    </div>
+                  </div>
+                <?php endforeach; ?>
+              <?php endif; ?>
             </div>
           </div>
         </div>

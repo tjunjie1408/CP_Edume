@@ -305,9 +305,9 @@ function setupEventListeners() {
   document.getElementById('btnSaveChanges')?.addEventListener('click', saveCourseChanges);
 
   // Edit Toggles
-  document.getElementById('btnEditOverview')?.addEventListener('click', () => toggleEditMode('overview'));
-  document.getElementById('btnEditObjectives')?.addEventListener('click', handleObjectivesEdit);
-  document.getElementById('btnEditContent')?.addEventListener('click', () => toggleEditMode('content'));
+  document.getElementById('btnEditOverview')?.addEventListener('click', (e) => toggleEditMode('overview', e));
+  document.getElementById('btnEditObjectives')?.addEventListener('click', (e) => handleObjectivesEdit(e));
+  document.getElementById('btnEditContent')?.addEventListener('click', (e) => toggleEditMode('content', e));
 
   // Resources & Quiz
   document.getElementById('btnAddResource')?.addEventListener('click', openResourceModal);
@@ -568,6 +568,23 @@ function displaySubjectEditor(subject) {
   document.getElementById('subjectTitle').textContent = subject.title;
   document.getElementById('subjectsTitle').textContent = `Subjects (${getCourse(currentCourseId).subjects.length})`;
   
+  // Reset all sections back to VIEW mode before populating
+  ['overview', 'content'].forEach(sec => {
+    const d = document.getElementById(`${sec}Display`);
+    const i = document.getElementById(`${sec}Input`);
+    const b = document.getElementById(`btnEdit${sec.charAt(0).toUpperCase() + sec.slice(1)}`);
+    if (d) d.style.display = 'block';
+    if (i) { i.classList.remove('active'); i.style.display = ''; }
+    if (b) b.innerHTML = '<span class="material-symbols-rounded">edit</span>';
+  });
+  // Reset objectives
+  const objDisplay = document.getElementById('objectivesDisplay');
+  const objInput = document.getElementById('objectivesInput');
+  const objBtn = document.getElementById('btnEditObjectives');
+  if (objDisplay) objDisplay.style.display = 'block';
+  if (objInput) { objInput.classList.remove('active'); objInput.style.display = ''; }
+  if (objBtn) objBtn.innerHTML = '<span class="material-symbols-rounded">edit</span>';
+
   // Overview
   document.getElementById('overviewDisplay').innerHTML = subject.overview 
     ? `<p>${subject.overview}</p>` 
@@ -589,12 +606,13 @@ function displaySubjectEditor(subject) {
   document.getElementById('contentInput').value = subject.content || '';
 }
 
-function toggleEditMode(section) {
+function toggleEditMode(section, e) {
   const display = document.getElementById(`${section}Display`);
   const input = document.getElementById(`${section}Input`);
-  const button = event.target.closest('.btn-edit-toggle');
+  const button = (e || window.event).target.closest('.btn-edit-toggle');
 
-  if (display.style.display === 'none') {
+  // Use classList as the reliable state indicator
+  if (input.classList.contains('active')) {
     // SAVE MODE - Hide input, show display
     const newValue = input.value.trim();
     
@@ -630,15 +648,15 @@ function toggleEditMode(section) {
   }
 }
 
-function handleObjectivesEdit() {
+function handleObjectivesEdit(e) {
   const display = document.getElementById('objectivesDisplay');
   const input = document.getElementById('objectivesInput');
-  const button = event.target.closest('.btn-edit-toggle');
+  const button = (e || window.event).target.closest('.btn-edit-toggle');
   
   const subject = getSubject(currentCourseId, currentSubjectId);
   if (!subject) return;
 
-  if (display.style.display === 'none') {
+  if (input.classList.contains('active')) {
     // SAVE MODE - Hide input, show display
     const objectiveInputs = Array.from(document.querySelectorAll('#objectivesEditList input[type="text"]'));
     const objectives = objectiveInputs

@@ -5,6 +5,9 @@
  * Eliminates relative-path hell.
  */
 
+// Set timezone to Malaysia (UTC+8)
+date_default_timezone_set('Asia/Kuala_Lumpur');
+
 // Filesystem root of the project
 define('ROOT_PATH',   dirname(__DIR__));
 

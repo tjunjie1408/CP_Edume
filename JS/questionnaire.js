@@ -157,7 +157,8 @@ function showResults() {
     // Fill progress bar to 100%
     progressBar.style.width = '100%';
 
-    sendAjax("/Edume/student/questionnaire/save_style_api.php", {
+    // Send result to backend
+    sendAjax("save_style_api.php", {
         learnerType: winnerType
     }, function(response){
         if (response.status === 200){

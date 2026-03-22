@@ -3,6 +3,9 @@ require_once __DIR__ . '/../../config/constants.php';
 require_once CONFIG_PATH . '/AdminPage.php';
 $page = new AdminPage();
 $page->requireAuth();
+
+// Calculate gravatar URL
+$gravatarUrl = "https://www.gravatar.com/avatar/" . md5(strtolower(trim($_SESSION['email'] ?? ''))) . "?d=mp";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -89,7 +92,7 @@ $page->requireAuth();
         <p class="hello">Hello, <span id="user-name"><?= htmlspecialchars($_SESSION['username'] ?? 'Admin') ?></span></p>
       </div>
       <a href="<?= BASE_URL ?>/admin/profile/profile.php" class="user-avatar-link">
-        <img src="https://via.placeholder.com/50" alt="Admin Avatar" class="user-avatar" id="userAvatar">
+        <img src="<?= htmlspecialchars($gravatarUrl) ?>" alt="Admin Avatar" class="user-avatar" id="userAvatar">
       </a>
     </div>
   </header>

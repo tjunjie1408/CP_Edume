@@ -20,6 +20,9 @@ if ($materialId && is_numeric($materialId)) {
         $practiceData = $material;
     }
 }
+
+// Calculate gravatar URL
+$gravatarUrl = "https://www.gravatar.com/avatar/" . md5(strtolower(trim($_SESSION['email'] ?? ''))) . "?d=mp";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -47,7 +50,7 @@ if ($materialId && is_numeric($materialId)) {
         <p class="hello">Hello, <span id="user-name"><?= htmlspecialchars($_SESSION['username'] ?? 'Student') ?></span></p>
       </div>
       <a href="<?= BASE_URL ?>/student/profile/profile.php" class="user-avatar-link">
-        <img src="https://via.placeholder.com/50" alt="User Avatar" class="user-avatar" id="userAvatar">
+        <img src="<?= htmlspecialchars($gravatarUrl) ?>" alt="User Avatar" class="user-avatar" id="userAvatar">
       </a>
     </div>
   </header>

@@ -31,7 +31,18 @@ if (!in_array($userStyle, ['visual', 'read', 'kinesthetic', 'aural'])) {
     $userStyle = 'visual';
 }
 $styleColumn = 'has_' . $userStyle;
-$stmtRec = $db->prepare("SELECT id, title, description, difficulty FROM courses WHERE is_published = 1 AND {$styleColumn} = 1 AND id NOT IN (SELECT course_id FROM user_progress WHERE user_id = ?) LIMIT 2");
+$stmtRec = $db->prepare("
+    SELECT id, title, description, difficulty 
+    FROM courses 
+    WHERE is_published = 1 AND {$styleColumn} = 1 
+      AND id NOT IN (
+          SELECT DISTINCT c.course_id 
+          FROM chapters c 
+          JOIN user_progress up ON c.id = up.chapter_id 
+          WHERE up.user_id = ?
+      ) 
+    LIMIT 2
+");
 $stmtRec->execute([$userId]);
 $recommendedCourses = $stmtRec->fetchAll(PDO::FETCH_ASSOC);
 

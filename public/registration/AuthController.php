@@ -83,7 +83,16 @@ class AuthController
         // Create
         $hash = password_hash($password, PASSWORD_BCRYPT);
         if ($this->user->create($name, $email, $hash)) {
-            $this->respond(201, 'User registered successfully');
+            // Auto login the user immediately after creation
+            $user = $this->user->findByEmail($email);
+            if ($user) {
+                $_SESSION['user_id']  = $user['id'];
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['role']     = $user['role'];
+                $_SESSION['primary_vark_style'] = $user['primary_vark_style'];
+                $this->user->updateLoginStreak((int)$user['id']);
+            }
+            $this->respond(201, 'User registered successfully. Redirecting...');
         } else {
             $this->respond(500, 'Failed to register user');
         }

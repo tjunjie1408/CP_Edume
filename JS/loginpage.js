@@ -394,8 +394,8 @@ registerForm.addEventListener("submit", function (e) {
     function (response) {
       if (response.status === 201) {
         showNotification("Success", response.message, "success", function () {
-          registerForm.reset();
-          login();
+          // Direct users to the VARK questionnaire immediately after signing up
+          window.location.href = "/Edume/student/questionnaire/questionnaire.php";
         });
       } else {
         showNotification("Error", response.message, "error");

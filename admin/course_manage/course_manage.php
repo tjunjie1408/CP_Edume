@@ -173,38 +173,6 @@ $gravatarUrl = "https://www.gravatar.com/avatar/" . md5(strtolower(trim($_SESSIO
                 <textarea id="overviewInput" class="editor-input hidden" placeholder="Enter subject overview..."></textarea>
               </div>
 
-              <!-- Learning Objectives Section -->
-              <div class="editor-section">
-                <div class="section-header">
-                  <h3>Learning Objectives</h3>
-                  <button class="btn-edit-toggle" id="btnEditObjectives">
-                    <span class="material-symbols-rounded">edit</span>
-                  </button>
-                </div>
-                <div id="objectivesDisplay" class="editor-display">
-                  <ul id="objectivesList">
-                    <!-- Objectives will be populated here -->
-                  </ul>
-                </div>
-                <div id="objectivesInput" class="editor-input hidden">
-                  <div id="objectivesEditList"></div>
-                </div>
-              </div>
-
-              <!-- Main Lesson Content Section -->
-              <div class="editor-section">
-                <div class="section-header">
-                  <h3>Lesson Content</h3>
-                  <button class="btn-edit-toggle" id="btnEditContent">
-                    <span class="material-symbols-rounded">edit</span>
-                  </button>
-                </div>
-                <div id="contentDisplay" class="editor-display">
-                  <p>No content set</p>
-                </div>
-                <textarea id="contentInput" class="editor-input hidden" placeholder="Enter lesson content (supports HTML)..."></textarea>
-              </div>
-
               <!-- Tabs for Resources and Quiz -->
               <div class="resource-quiz-tabs">
                 <div class="tab-buttons">

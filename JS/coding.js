@@ -118,7 +118,7 @@ function initializeCodeEditor() {
   // Apply Practice Challenge Data if it exists
   if (window.PracticeData && window.PracticeData.isChallenge) {
       languageSelect.value = window.PracticeData.language;
-      languageSelect.disabled = true; // Lock the language for specific challenges
+      // languageSelect.disabled = true; // Removed language lock to allow users to switch languages
       codeEditor.value = `# Write your ${window.PracticeData.language} code below to solve the challenge:\n\n`;
   } else {
       // Set initial code for sandbox mode

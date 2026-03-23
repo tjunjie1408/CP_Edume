@@ -81,9 +81,9 @@ try {
     
     if ($passed) {
         // Log progress (Upsert)
-        $progressSql = "INSERT INTO user_progress (user_id, chapter_id, is_completed, last_accessed) 
+        $progressSql = "INSERT INTO user_progress (user_id, chapter_id, is_completed, completed_at) 
                         VALUES (:uid, :cid, 1, NOW()) 
-                        ON DUPLICATE KEY UPDATE is_completed = 1, last_accessed = NOW()";
+                        ON DUPLICATE KEY UPDATE is_completed = 1, completed_at = NOW()";
         $progStmt = $db->prepare($progressSql);
         $progStmt->bindParam(':uid', $userId, PDO::PARAM_INT);
         $progStmt->bindParam(':cid', $chapterId, PDO::PARAM_INT);

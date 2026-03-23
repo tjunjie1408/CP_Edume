@@ -23,6 +23,9 @@ class Database
             PDO::ATTR_EMULATE_PREPARES   => false,
         ]);
 
+        // Set MySQL session timezone to match PHP (Asia/Kuala_Lumpur = UTC+8)
+        $pdo->exec("SET time_zone = '+08:00'");
+
         return $pdo;
     }
 }

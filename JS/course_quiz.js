@@ -36,7 +36,7 @@ class CourseQuizManager {
         if(this.submitBtn) this.submitBtn.addEventListener('click', () => this.submitQuiz());
         if(this.closeQuizBtn) this.closeQuizBtn.addEventListener('click', () => this.closeQuiz());
         if(this.retakeBtn) this.retakeBtn.addEventListener('click', () => this.startQuiz());
-        if(this.continueBtn) this.continueBtn.addEventListener('click', () => this.closeQuiz());
+        if(this.continueBtn) this.continueBtn.addEventListener('click', () => this.navigateToNextChapter());
     }
 
     async startQuiz() {
@@ -198,11 +198,15 @@ class CourseQuizManager {
 
         const perfText = document.getElementById('performanceText');
         if (result.passed) {
-            perfText.textContent = '🎉 Excellent work! You passed this chapter. +50 XP awarded!';
-            perfText.style.color = 'var(--accent-success)';
+            perfText.textContent = '🎉 Excellent work! You passed this chapter!';
+            perfText.style.color = '#2ecc71';
+            // Update continue button text
+            if (this.continueBtn) this.continueBtn.textContent = 'Next Chapter →';
         } else {
             perfText.textContent = '💪 Keep learning! Review the material and try again. You need 50% to pass.';
-            perfText.style.color = 'var(--accent-warning)';
+            perfText.style.color = '#f39c12';
+            // Change continue to "Review Material"
+            if (this.continueBtn) this.continueBtn.textContent = 'Review Material';
         }
     }
 
@@ -215,6 +219,33 @@ class CourseQuizManager {
         // Reload page to reflect new progress if they completed it
         if(this.quizResults.style.display === 'block') {
              window.location.reload();
+        }
+    }
+
+    navigateToNextChapter() {
+        const chapters = window.AppConfig?.chapters || [];
+        const currentId = this.chapterId;
+        const courseId = window.AppConfig?.courseId;
+        
+        // Find the current chapter's order
+        const currentChapter = chapters.find(ch => ch.id == currentId);
+        if (!currentChapter || !courseId) {
+            window.location.reload();
+            return;
+        }
+        
+        // Find the next chapter by order
+        const nextChapter = chapters
+            .filter(ch => ch.order > currentChapter.order)
+            .sort((a, b) => a.order - b.order)[0];
+        
+        if (nextChapter) {
+            // Navigate to next chapter
+            window.location.href = `${window.AppConfig.baseUrl}/student/course_details/course_details.php?id=${courseId}&chapter=${nextChapter.id}`;
+        } else {
+            // Last chapter — go back to course page
+            alert('🎉 Congratulations! You have completed all chapters!');
+            window.location.href = `${window.AppConfig.baseUrl}/student/course/course.php`;
         }
     }
 }

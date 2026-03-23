@@ -41,6 +41,18 @@ $gravatarUrl = "https://www.gravatar.com/avatar/" . md5(strtolower(trim($userDat
 // Fetch Chapters
 $chapters = $chapterModel->getChaptersByCourseId($courseId);
 
+// Fetch user progress for all chapters in this course
+$progressMap = [];
+if (!empty($chapters)) {
+    $chapterIds = array_column($chapters, 'id');
+    $placeholders = implode(',', array_fill(0, count($chapterIds), '?'));
+    $progStmt = $db->prepare("SELECT chapter_id, is_completed FROM user_progress WHERE user_id = ? AND chapter_id IN ($placeholders)");
+    $progStmt->execute(array_merge([$_SESSION['user_id']], $chapterIds));
+    foreach ($progStmt->fetchAll(PDO::FETCH_ASSOC) as $prog) {
+        $progressMap[$prog['chapter_id']] = (int)$prog['is_completed'];
+    }
+}
+
 // Inject initial progress record so they appear in 'Enrolled Courses'
 if (!empty($chapters)) {
     try {
@@ -187,6 +199,8 @@ if ($activeChapterId) {
             <?php else: ?>
                <?php foreach ($chapters as $index => $chapter): 
                     $isActive = ($chapter['id'] === $activeChapterId) ? 'active' : '';
+                    $isCompleted = isset($progressMap[$chapter['id']]) && $progressMap[$chapter['id']] === 1;
+                    $progressPct = $isCompleted ? 100 : 0;
                ?>
                 <a href="?id=<?= $courseId ?>&chapter=<?= $chapter['id'] ?>" style="text-decoration:none; color:inherit;">
                   <div class="subject-item <?= $isActive ?>" data-subject="<?= $chapter['id'] ?>">
@@ -196,13 +210,16 @@ if ($activeChapterId) {
                     </div>
                     <div class="progress-container">
                       <div class="progress-bar">
-                        <!-- Progress logic will be added here later -->
-                        <div class="progress-fill" style="width: 0%;"></div>
+                        <div class="progress-fill" style="width: <?= $progressPct ?>%;"></div>
                       </div>
-                      <span class="progress-text">0%</span>
+                      <span class="progress-text"><?= $progressPct ?>%</span>
                     </div>
                     <div class="quiz-status">
-                      <span class="status-badge not-started">○ Not Started</span>
+                      <?php if ($isCompleted): ?>
+                        <span class="status-badge completed" style="color: #2ecc71;">✓ Completed</span>
+                      <?php else: ?>
+                        <span class="status-badge not-started">○ Not Started</span>
+                      <?php endif; ?>
                     </div>
                   </div>
                 </a>
@@ -352,7 +369,7 @@ if ($activeChapterId) {
                         <button class="btn-secondary" id="prevBtn" disabled style="padding: 0.75rem 1.5rem; border: 1px solid #e2e6f0; border-radius: 8px; background: transparent; color: #6e7687; font-weight: 600; cursor: pointer;">Previous</button>
                         <div style="display: flex; gap: 1rem;">
                             <button class="btn-primary" id="nextBtn" disabled style="padding: 0.75rem 2rem; border-radius: 8px; background: var(--primary-color); color: white; border: none; font-weight: 600; cursor: pointer;">Next</button>
-                            <button class="btn-success" id="submitBtn" style="display: none; padding: 0.75rem 2rem; border-radius: 8px; background: var(--accent-success); color: white; border: none; font-weight: 600; cursor: pointer;" disabled>Submit Quiz</button>
+                            <button class="btn-success" id="submitBtn" style="display: none; padding: 0.75rem 2rem; border-radius: 8px; background: #2ecc71; color: white; border: none; font-weight: 600; cursor: pointer; font-size: 1rem;" disabled>Submit Quiz</button>
                         </div>
                     </div>
                 </div>
@@ -391,7 +408,10 @@ if ($activeChapterId) {
   <script>
     // Global Config for APIs
     window.AppConfig = {
-      baseUrl: '<?= BASE_URL ?>'
+      baseUrl: '<?= BASE_URL ?>',
+      courseId: <?= (int)$courseId ?>,
+      activeChapterId: <?= (int)$activeChapterId ?>,
+      chapters: <?= json_encode(array_map(function($ch) { return ['id' => $ch['id'], 'order' => $ch['chapter_order']]; }, $chapters)) ?>
     };
   </script>
   <script src="<?= BASE_URL ?>/JS/dashboard.js"></script>

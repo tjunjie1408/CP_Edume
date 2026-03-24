@@ -253,16 +253,22 @@ function updateTopCourses(courses) {
   }
 
   courses.forEach((course, index) => {
+    const enrollText = course.enrollments > 0
+      ? `<strong>${course.enrollments}</strong> enrollment${course.enrollments > 1 ? 's' : ''}`
+      : '<em style="color: var(--text-light);">No enrollments yet</em>';
+    const chapterText = course.chapterCount != null
+      ? ` • ${course.chapterCount} chapter${course.chapterCount !== 1 ? 's' : ''}`
+      : '';
+
     const courseElement = document.createElement('div');
     courseElement.className = 'course-item';
     courseElement.innerHTML = `
       <div class="course-item-header">
         <span class="course-item-name">${index + 1}. ${course.name}</span>
-        <span class="course-item-badge">#${course.id}</span>
+        <span class="course-item-badge">#${index + 1}</span>
       </div>
       <div class="course-item-stats">
-        <span><strong>${course.enrollments}</strong> enrollments</span>
-        <span>⭐ ${course.rating}/5</span>
+        <span>${enrollText}${chapterText}</span>
       </div>
     `;
     coursesList.appendChild(courseElement);

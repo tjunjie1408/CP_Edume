@@ -119,7 +119,8 @@ try {
 
     $stmt = $db->query("
         SELECT c.id, c.title as name,
-               COUNT(DISTINCT up.user_id) as enrollments
+               COUNT(DISTINCT up.user_id) as enrollments,
+               COUNT(DISTINCT ch.id) as chapter_count
         FROM courses c
         LEFT JOIN chapters ch ON ch.course_id = c.id
         LEFT JOIN user_progress up ON up.chapter_id = ch.id
@@ -130,10 +131,10 @@ try {
     $topCourses = [];
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $topCourses[] = [
-            'id'          => (int) $row['id'],
-            'name'        => htmlspecialchars($row['name'], ENT_QUOTES, 'UTF-8'),
-            'enrollments' => (int) $row['enrollments'],
-            'rating'      => 0 // No ratings table yet
+            'id'           => (int) $row['id'],
+            'name'         => htmlspecialchars($row['name'], ENT_QUOTES, 'UTF-8'),
+            'enrollments'  => (int) $row['enrollments'],
+            'chapterCount' => (int) $row['chapter_count']
         ];
     }
 

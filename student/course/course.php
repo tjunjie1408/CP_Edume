@@ -117,17 +117,42 @@ $gravatarUrl = "https://www.gravatar.com/avatar/" . md5(strtolower(trim($userDat
           <p>No courses available at the moment.</p>
         <?php else: ?>
           <?php foreach ($courses as $course): 
+            // Determine "Recommended" from actual content materials' vark_tag instead of course-level flags
             $isRecommended = false;
-            // Check if course supports student's style
-            if ($studentVark === 'visual' && $course['has_visual']) $isRecommended = true;
-            if ($studentVark === 'read' && $course['has_read']) $isRecommended = true;
-            if ($studentVark === 'kinesthetic' && $course['has_kinesthetic']) $isRecommended = true;
-            if ($studentVark === 'aural' && $course['has_aural']) $isRecommended = true;
+            if ($studentVark) {
+              $varkCheck = $db->prepare("
+                SELECT COUNT(*) FROM content_materials cm
+                JOIN chapters ch ON cm.chapter_id = ch.id
+                WHERE ch.course_id = :cid AND cm.vark_tag = :vtag
+              ");
+              $varkTagMap = ['visual' => 'visual', 'aural' => 'visual', 'read' => 'read', 'kinesthetic' => 'kinesthetic'];
+              $mappedTag = $varkTagMap[$studentVark] ?? null;
+              if ($mappedTag) {
+                $varkCheck->execute([':cid' => $course['id'], ':vtag' => $mappedTag]);
+                $isRecommended = (int) $varkCheck->fetchColumn() > 0;
+              }
+            }
+
+            // Image: detect base64 data URI vs relative path vs empty
+            $coverImage = $course['cover_image'] ?? '';
+            if (str_starts_with($coverImage, 'data:')) {
+              $imgSrc = $coverImage; // base64 data URI from admin upload
+            } elseif (!empty($coverImage)) {
+              $imgSrc = BASE_URL . $coverImage; // relative path from seed data
+            } else {
+              $imgSrc = ''; // no image
+            }
           ?>
             <div class="course-card" data-course-id="<?= htmlspecialchars($course['id']) ?>">
               <div class="card-inner">
                 <div class="card-image">
-                  <img src="<?= htmlspecialchars(BASE_URL . $course['cover_image']) ?>" alt="<?= htmlspecialchars($course['title']) ?>">
+                  <?php if ($imgSrc): ?>
+                    <img src="<?= htmlspecialchars($imgSrc) ?>" alt="<?= htmlspecialchars($course['title']) ?>">
+                  <?php else: ?>
+                    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:white;font-size:1.5rem;font-weight:bold;text-align:center;padding:1rem;">
+                      <?= htmlspecialchars($course['title']) ?>
+                    </div>
+                  <?php endif; ?>
                 </div>
                 <div class="card-content">
                   <?php if ($isRecommended): ?>

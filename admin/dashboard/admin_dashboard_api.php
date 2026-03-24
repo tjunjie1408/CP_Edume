@@ -148,10 +148,12 @@ try {
     ");
     $recentUsers = [];
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $gravatarHash = md5(strtolower(trim($row['email'])));
         $recentUsers[] = [
             'id'       => (int) $row['id'],
             'name'     => htmlspecialchars($row['username'], ENT_QUOTES, 'UTF-8'),
             'email'    => htmlspecialchars($row['email'], ENT_QUOTES, 'UTF-8'),
+            'avatar'   => "https://www.gravatar.com/avatar/{$gravatarHash}?d=mp&s=40",
             'joinDate' => $row['created_at']
         ];
     }

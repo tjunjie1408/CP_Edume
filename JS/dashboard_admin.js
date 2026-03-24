@@ -291,7 +291,7 @@ function updateRecentUsers(users) {
     const userElement = document.createElement('div');
     userElement.className = 'user-item';
     userElement.innerHTML = `
-      <img src="https://via.placeholder.com/40?text=${user.name[0]}" alt="${user.name}" class="user-avatar-small">
+      <img src="${user.avatar}" alt="${user.name}" class="user-avatar-small">
       <div class="user-info-content">
         <span class="user-name">${user.name}</span>
         <span class="user-email">${user.email}</span>

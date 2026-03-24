@@ -603,7 +603,7 @@ function displaySubjectEditor(subject) {
   const i = document.getElementById('overviewInput');
   const b = document.getElementById('btnEditOverview');
   if (d) d.style.display = 'block';
-  if (i) { i.classList.remove('active'); i.style.display = ''; }
+  if (i) { i.classList.remove('active'); i.classList.add('hidden'); }
   if (b) b.innerHTML = '<span class="material-symbols-rounded">edit</span>';
 
   // Overview
@@ -629,6 +629,7 @@ async function toggleEditMode(section, e) {
       : '<p style="color: var(--text-light); font-style: italic;">No overview set. Click edit to add one.</p>';
     display.style.display = 'block';
     input.classList.remove('active');
+    input.classList.add('hidden');
     button.innerHTML = '<span class="material-symbols-rounded">edit</span>';
 
     // Persist via API
@@ -671,6 +672,7 @@ async function toggleEditMode(section, e) {
   } else {
     // EDIT MODE - Show input, hide display
     display.style.display = 'none';
+    input.classList.remove('hidden');
     input.classList.add('active');
     button.innerHTML = '<span class="material-symbols-rounded">check</span>';
     input.focus();
@@ -844,6 +846,7 @@ function editResource(resourceId) {
   document.getElementById('resourceType').value = resource.type;
   document.getElementById('resourceTitle').value = resource.title;
   document.getElementById('resourceUrl').value = resource.url || '';
+  document.getElementById('resourceContent').value = resource.content || '';
   document.getElementById('resourceDescription').value = resource.description || '';
 
   // Update modal title
@@ -1194,18 +1197,20 @@ function updateResourceForm() {
   const urlGroup = document.getElementById('resourceUrlGroup');
   const contentGroup = document.getElementById('resourceContentGroup');
   const urlLabel = document.querySelector('label[for="resourceUrl"]');
+  const contentLabel = document.querySelector('label[for="resourceContent"]');
 
   if (type === 'video') {
     urlGroup.style.display = 'block';
     contentGroup.style.display = 'none';
     urlLabel.textContent = 'Video URL (YouTube embed link)';
+  } else if (type === 'document') {
+    urlGroup.style.display = 'none';
+    contentGroup.style.display = 'block';
+    if (contentLabel) contentLabel.textContent = 'Document / Article Content';
   } else if (type === 'exercise') {
     urlGroup.style.display = 'none';
     contentGroup.style.display = 'block';
-  } else if (type === 'document') {
-    urlGroup.style.display = 'block';
-    contentGroup.style.display = 'none';
-    urlLabel.textContent = 'Document Link';
+    if (contentLabel) contentLabel.textContent = 'Practice Problem';
   } else {
     urlGroup.style.display = 'block';
     contentGroup.style.display = 'none';

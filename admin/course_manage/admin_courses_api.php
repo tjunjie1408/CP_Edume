@@ -75,9 +75,10 @@ try {
                 foreach ($materials as $m) {
                     $resources[] = [
                         'id'          => (int) $m['id'],
-                        'type'        => $m['content_type'],
+                        'type'        => ($m['content_type'] === 'text' ? 'document' : ($m['content_type'] === 'practice' ? 'exercise' : $m['content_type'])),
                         'title'       => esc($m['title']),
                         'url'         => $m['youtube_url'] ?? '',
+                        'content'     => $m['text_content'] ?? $m['practice_problem'] ?? '',
                         'description' => esc(mb_substr($m['text_content'] ?? $m['practice_problem'] ?? '', 0, 100)),
                         'vark_tag'    => $m['vark_tag']
                     ];
@@ -275,15 +276,16 @@ try {
                     $contentType = 'video';
                     $varkTag = 'visual';
                     $youtubeUrl = $url ?: null;
-                    // Note: You can put description somewhere or append it
+                    $textContent = $desc ?: null; // Store description in text_content for videos
                 } elseif ($type === 'exercise') {
                     $contentType = 'practice';
                     $varkTag = 'kinesthetic';
                     $practiceProblem = $content ?: null;
                 } else {
+                    // document / text type
                     $contentType = 'text';
                     $varkTag = 'read';
-                    $textContent = $url ?: ($content ?: null); // Front-end uses url for doc link, or content
+                    $textContent = $content ?: null; // Document content goes into text_content
                 }
 
                 // Determine the course language to set the practice language correctly
@@ -456,7 +458,7 @@ try {
                     $params[':prob'] = $content ?: null;
                 } elseif ($type === 'document') {
                     $fields[] = "content_type = 'text', vark_tag = 'read', text_content = :cont ";
-                    $params[':cont'] = $url ?: ($content ?: null);
+                    $params[':cont'] = $content ?: null;
                 }
 
                 if (!empty($fields)) {

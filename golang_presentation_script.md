@@ -85,6 +85,16 @@ Write a Go program that prints exactly "Welcome to EduMe!" to the console. Make 
 - **Correct Answer**: `Option D` (Check the 4th radio button)
 - **Feedback**: `You must import the 'fmt' package and call fmt.Println to print to standard output in Go.`
 
+**Question 3:**
+- **Question**: `Which of the following describes the difference between var and := in Go?`
+- **Options**:
+  - `Option A`: `var is used for constants, := is used for variables`
+  - `Option B`: `:= can only be used inside functions, while var can be used anywhere`
+  - `Option C`: `var requires a type declaration, := does not`
+  - `Option D`: `There is no difference between them`
+- **Correct Answer**: `Option B`
+- **Feedback**: `The short declaration operator := can only be used inside function bodies, whereas var can be used at the package level as well.`
+
 ---
 
 ## 📘 CHAPTER 2: Control Structures
@@ -156,11 +166,46 @@ Write a Go program using a 'for' loop that iterates from 1 to 5. Inside the loop
 - **Correct Answer**: `Option B` 
 - **Feedback**: `Unlike Java or C++, Go removes the need for surrounding parentheses in conditional statements.`
 
+**Question 3:**
+- **Question**: `Which keyword is used in Go to skip the current iteration of a loop and proceed to the next one?`
+- **Options**:
+  - `Option A`: `continue`
+  - `Option B`: `break`
+  - `Option C`: `pass`
+  - `Option D`: `next`
+- **Correct Answer**: `Option A`
+- **Feedback**: `The 'continue' keyword is used to skip the rest of the current loop iteration and move to the next iteration.`
+
 ---
 
-### 🎤 Presentation Demo Flow Suggestion
-1. **Admin View**: Show the panel. Copy-paste these details to create the Golang course live. Highlights the robust 3-layer CMS (Course > Chapter > Resources).
-2. **Student View**: Log in as a student with a specific VARK style (e.g., Visual).
-3. **VARK Demonstration**: Show how the student's Course Details page automatically puts the YouTube Video at the very top because they are a Visual learner.
-4. **Code Sandbox**: Click the "Open Sandbox" button. Show how the environment instantly adapts to "Go", loads the Go code snippet gracefully, and runs it right in the browser.
-5. **Assessment**: Take the Quiz at the end of the chapter and show the live scoring updating on the Dashboard.
+### 🎤 Presentation Demo Flow & Script (演讲流程与讲稿)
+
+**Step 1. Course Creation (Admin Dashboard)**
+- **操作 (Action)**: Log in as Admin -> Go to Course Management -> Create New Course.
+- **讲稿 (Script)**: 
+  > "Hello everyone, today we will demonstrate the EduMe Learning System. Let's start by creating a brand new course from the Admin Dashboard. As you can see, I am filling in the course details for 'Go Programming Masterclass'. Notice that I set the language exactly as 'golang'. This triggers our dynamic Content Management System to automatically configure the code sandbox later. Let's save the course."
+
+**Step 2. Adding Chapters and Resources (VARK & Multi-media)**
+- **操作 (Action)**: Add "Chapter 1" -> Add Video, Article, and Code Exercise.
+- **讲稿 (Script)**: 
+  > "Next, we structure our course by adding a Subject: Chapter 1. The power of EduMe's CMS is our multi-layered resource system. For this chapter, I will upload a YouTube video, a text document, and an interactive coding exercise. This variety is crucial because our system adapts to the student's VARK learning style—Visual, Aural, Read/Write, or Kinesthetic. By providing different formats, the platform intelligently re-prioritizes content to suit each individual learner's needs."
+
+**Step 3. Creating Quizzes**
+- **操作 (Action)**: Go to the Quiz tab and add the listed questions.
+- **讲稿 (Script)**: 
+  > "To assess learning, we can instantly create quizzes for each chapter. Here, I'm adding multiple-choice questions with customized feedback. Real-time assessments ensure students actively evaluate their understanding immediately after learning."
+
+**Step 4. Student View & VARK Personalization**
+- **操作 (Action)**: Switch to a Student account (e.g., a "Visual" learner) and open the Go course.
+- **讲稿 (Script)**: 
+  > "Now, let's switch perspectives. I am logging in as a student whose onboarding assessment identified them as a 'Visual' learner. When they open the Go course, observe how the system dynamically personalizes the layout. The Video Tutorial is placed at the very top of their resources list. If they were a 'Read/Write' learner, the text documentation would appear first. This adaptive learning environment significantly boosts engagement and comprehension."
+
+**Step 5. Integrated Code Sandbox**
+- **操作 (Action)**: Click "Open Sandbox" or go to the code exercise. Run the Go code.
+- **讲稿 (Script)**: 
+  > "For programming courses, hands-on practice is essential. Notice this sandbox feature. Because we tagged this course as 'golang', the sandbox environment instantly initializes a Go workspace. The student can write, compile, and run Go code securely directly within the browser—no local setup or software installation required. Let's run a quick 'Hello World' to see the instant output."
+
+**Step 6. Taking the Assessment & Dashboard Update**
+- **操作 (Action)**: Complete the Chapter Quiz and return to the Student Dashboard.
+- **讲稿 (Script)**: 
+  > "Finally, let's take the quiz we just created. As I select the answers, you'll see instant feedback which is great for continuous learning. Once completed, the student's progress, EXP points, and quiz scores are immediately synced back to their Dashboard in real-time. Thank you for watching this demonstration of EduMe!"

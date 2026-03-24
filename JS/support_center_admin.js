@@ -313,13 +313,24 @@ function closeDeleteModal() {
 
 // Utility Functions
 function formatDate(dateString) {
-  const date = new Date(dateString);
+  // Replace SQL timestamp hyphen with slash for broader browser compatibility (Safari)
+  const safeDateString = dateString.replace(/-/g, '/');
+  const date = new Date(safeDateString);
   const today = new Date();
+  
+  const dateStr = date.toDateString();
+  const todayStr = today.toDateString();
+  
+  if (dateStr === todayStr) return 'Today';
+  
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (dateStr === yesterday.toDateString()) return 'Yesterday';
+  
+  // Approximate days ago for older items
   const diffTime = Math.abs(today - date);
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Yesterday';
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
   if (diffDays < 7) return `${diffDays}d ago`;
   if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
   

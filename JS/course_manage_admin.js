@@ -9,6 +9,16 @@ let coursesData = {};
 let changesMode = false;
 let isSaving = false;
 
+// --------------------------------------------
+// UTILITY: Decode HTML entities sent from API
+// --------------------------------------------
+function decodeHtml(html) {
+  if (!html) return '';
+  const txt = document.createElement("textarea");
+  txt.innerHTML = html;
+  return txt.value;
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
   initializeApp();
@@ -334,7 +344,7 @@ function setupEventListeners() {
   document.getElementById('btnAddSubject')?.addEventListener('click', openSubjectModal);
   document.getElementById('btnEditSubject')?.addEventListener('click', toggleEditSubject);
   document.getElementById('btnDeleteSubject')?.addEventListener('click', deleteSubject);
-  document.getElementById('btnSaveChanges')?.addEventListener('click', saveCourseChanges);
+  document.getElementById('btnSaveChanges')?.addEventListener('click', saveSubjectChanges);
 
   // Edit Toggles (only Overview remains)
   document.getElementById('btnEditOverview')?.addEventListener('click', (e) => toggleEditMode('overview', e));
@@ -595,35 +605,41 @@ async function selectSubject(subjectId) {
 }
 
 function displaySubjectEditor(subject) {
-  document.getElementById('subjectTitle').textContent = subject.title;
+  const decodedTitle = decodeHtml(subject.title);
+  const decodedOverview = decodeHtml(subject.overview);
+
+  document.getElementById('subjectTitle').textContent = decodedTitle;
   document.getElementById('subjectsTitle').textContent = `Subjects (${getCourse(currentCourseId).subjects.length})`;
   
+  // Reset Subject title edit mode
+  document.getElementById('subjectTitle').style.display = 'block';
+  document.getElementById('subjectTitleInput').classList.add('hidden');
+  document.getElementById('subjectTitleInput').value = decodedTitle;
+  const btnEditSubj = document.getElementById('btnEditSubject');
+  if (btnEditSubj) btnEditSubj.innerHTML = '<span class="material-symbols-rounded">edit</span>';
+
   // Reset Overview section back to VIEW mode
   const d = document.getElementById('overviewDisplay');
   const i = document.getElementById('overviewInput');
   const b = document.getElementById('btnEditOverview');
   if (d) d.style.display = 'block';
-  if (i) { i.classList.remove('active'); i.classList.add('hidden'); }
+  if (i) { i.classList.remove('active'); i.classList.add('hidden'); i.value = decodedOverview; }
   if (b) b.innerHTML = '<span class="material-symbols-rounded">edit</span>';
 
   // Overview
-  document.getElementById('overviewDisplay').innerHTML = subject.overview 
-    ? `<p>${subject.overview}</p>` 
+  document.getElementById('overviewDisplay').innerHTML = decodedOverview 
+    ? `<p>${decodedOverview}</p>` 
     : '<p style="color: var(--text-light); font-style: italic;">No overview set. Click edit to add one.</p>';
-  document.getElementById('overviewInput').value = subject.overview || '';
 }
 
-async function toggleEditMode(section, e) {
+function toggleEditMode(section, e) {
   const display = document.getElementById(`${section}Display`);
   const input = document.getElementById(`${section}Input`);
   const button = (e || window.event).target.closest('.btn-edit-toggle');
 
   if (input.classList.contains('active')) {
-    // SAVE MODE - persist to API
-    if (isSaving) return;
+    // LOCK UI MODE (Awaiting global save)
     const newValue = input.value.trim();
-
-    // Optimistically update display
     display.innerHTML = newValue 
       ? `<p>${newValue}</p>` 
       : '<p style="color: var(--text-light); font-style: italic;">No overview set. Click edit to add one.</p>';
@@ -631,46 +647,8 @@ async function toggleEditMode(section, e) {
     input.classList.remove('active');
     input.classList.add('hidden');
     button.innerHTML = '<span class="material-symbols-rounded">edit</span>';
-
-    // Persist via API
-    isSaving = true;
-    input.disabled = true;
-    try {
-      const payload = { id: currentSubjectId };
-      if (section === 'overview') payload.overview = newValue;
-
-      const response = await fetch(API_URL() + '?action=chapter', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const result = await response.json();
-
-      if (response.ok) {
-        showNotification('Overview saved successfully!', 'success');
-        // Update local cache
-        const subject = getSubject(currentCourseId, currentSubjectId);
-        if (subject) subject.overview = newValue;
-      } else {
-        showNotification('Failed to save: ' + (result.error || result.message || 'Unknown error'), 'error');
-        // Revert display to old data
-        const subject = getSubject(currentCourseId, currentSubjectId);
-        if (subject) {
-          display.innerHTML = subject.overview
-            ? `<p>${subject.overview}</p>`
-            : '<p style="color: var(--text-light); font-style: italic;">No overview set. Click edit to add one.</p>';
-          input.value = subject.overview || '';
-        }
-      }
-    } catch (error) {
-      console.error('Auto-save error:', error);
-      showNotification('Network error, please try again.', 'error');
-    } finally {
-      isSaving = false;
-      input.disabled = false;
-    }
   } else {
-    // EDIT MODE - Show input, hide display
+    // EDIT MODE
     display.style.display = 'none';
     input.classList.remove('hidden');
     input.classList.add('active');
@@ -679,61 +657,93 @@ async function toggleEditMode(section, e) {
   }
 }
 
-async function toggleEditSubject() {
+function toggleEditSubject(e) {
   const title = document.getElementById('subjectTitle');
   const input = document.getElementById('subjectTitleInput');
-  const button = event.target.closest('.btn-icon');
+  const button = (e || window.event).target.closest('.btn-icon');
 
   if (title.style.display === 'none') {
-    // SAVE MODE — persist title via API
-    if (isSaving) return;
+    // LOCK UI MODE (Awaiting global save)
     const newTitle = input.value.trim();
     if (!newTitle) {
       showNotification('Title cannot be empty.', 'error');
       return;
     }
-
-    isSaving = true;
-    input.disabled = true;
-
-    try {
-      const response = await fetch(API_URL() + '?action=chapter', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: currentSubjectId, title: newTitle })
-      });
-      const result = await response.json();
-
-      if (response.ok) {
-        showNotification('Title saved successfully!', 'success');
-        // Update display
-        title.textContent = newTitle;
-        title.style.display = 'block';
-        input.classList.add('hidden');
-
-        // Reload course to refresh sidebar
-        const courseResp = await fetch(API_URL() + `?course_id=${currentCourseId}`);
-        const course = await courseResp.json();
-        coursesData[currentCourseId] = course;
-        displaySubjects(course.subjects);
-      } else {
-        showNotification('Failed to save title: ' + (result.error || 'Unknown error'), 'error');
-      }
-    } catch (error) {
-      console.error('Edit title error:', error);
-      showNotification('Network error, please try again.', 'error');
-    } finally {
-      isSaving = false;
-      input.disabled = false;
-    }
+    title.textContent = newTitle;
+    title.style.display = 'block';
+    input.classList.add('hidden');
+    button.innerHTML = '<span class="material-symbols-rounded">edit</span>';
   } else {
     // EDIT MODE
     input.value = title.textContent;
     title.style.display = 'none';
     input.classList.remove('hidden');
+    button.innerHTML = '<span class="material-symbols-rounded">check</span>';
     input.focus();
   }
 }
+
+async function saveSubjectChanges() {
+  if (!currentSubjectId) return;
+  const btn = document.getElementById('btnSaveChanges');
+  
+  // Grab Title safely
+  let newTitle = document.getElementById('subjectTitleInput').value.trim();
+  if (document.getElementById('subjectTitleInput').classList.contains('hidden')) {
+      newTitle = document.getElementById('subjectTitle').textContent.trim();
+  }
+  
+  // Grab Overview safely
+  let newOverview = document.getElementById('overviewInput').value.trim();
+  if (document.getElementById('overviewInput').classList.contains('hidden')) {
+      const p = document.querySelector('#overviewDisplay p');
+      newOverview = p ? p.textContent.trim() : '';
+      if (newOverview === 'No overview set. Click edit to add one.') newOverview = '';
+  }
+
+  if (!newTitle) {
+    showNotification('Subject title cannot be empty.', 'error');
+    return;
+  }
+
+  const originalText = btn.innerHTML;
+  btn.innerHTML = 'Saving...';
+  btn.disabled = true;
+
+  try {
+    const payload = { 
+      id: currentSubjectId,
+      title: newTitle,
+      overview: newOverview
+    };
+
+    const response = await fetch(API_URL() + '?action=chapter', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    
+    if (!response.ok) throw new Error('Failed to save subject changes');
+
+    // Reload course exactly requested to deeply load active course and subjects cache
+    const courseResp = await fetch(API_URL() + `?course_id=${currentCourseId}`);
+    const course = await courseResp.json();
+    coursesData[currentCourseId] = course;
+    displaySubjects(course.subjects);
+    
+    // Attempt to re-select the subject after reload so UI completely refreshes
+    selectSubject(currentSubjectId);
+    
+    showNotification('Saved successfully!', 'success');
+  } catch (error) {
+    console.error('Save changes error:', error);
+    showNotification('Error saving: ' + error.message, 'error');
+  } finally {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+}
+
 
 async function deleteSubject() {
   if (!confirm('Delete this subject and all its content?')) return;

@@ -28,8 +28,8 @@
 #### 1. Video Tutorial
 - **Resource Type**: `Video Tutorial`
 - **Title**: `Go Crash Course - First Steps`
-- **Video URL**: `https://www.youtube.com/embed/un6ZyFkqFKo`
-- **Description**: `A quick 10-minute introduction to Go syntax by FreeCodeCamp.`
+- **Video URL**: `https://www.youtube.com/embed/un6ZyFkqFKo?start=0&end=900`
+- **Description**: `A quick 15-minute introduction to Go syntax by FreeCodeCamp.`
 
 #### 2. Document/Article
 - **Resource Type**: `Document/Article`
@@ -112,8 +112,8 @@ Write a Go program that prints exactly "Welcome to EduMe!" to the console. Make 
 #### 1. Video Tutorial
 - **Resource Type**: `Video Tutorial`
 - **Title**: `Go Loops & Conditionals Explained`
-- **Video URL**: `https://www.youtube.com/embed/YS4e4q9oBaU`
-- **Description**: `Master the flow control in Go.`
+- **Video URL**: `https://www.youtube.com/embed/YS4e4q9oBaU?start=900&end=1500`
+- **Description**: `A 10-minute segment to master flow control in Go.`
 
 #### 2. Document/Article
 - **Resource Type**: `Document/Article`

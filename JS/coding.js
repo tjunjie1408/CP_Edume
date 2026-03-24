@@ -299,6 +299,44 @@ function runCode() {
       const outputs = extractSimulatedOutput(code, language);
       const combinedOutput = outputs.join(" ");
 
+      // 0. Smart Syntax & Structural Validation
+      const openBrace = (code.match(/\{/g) || []).length;
+      const closeBrace = (code.match(/\}/g) || []).length;
+      if (openBrace !== closeBrace) {
+          addOutput('❌ Syntax Error: Mismatched curly braces { }. Check your functions and loops.', 'error');
+          passed = false;
+      }
+      
+      const openParen = (code.match(/\(/g) || []).length;
+      const closeParen = (code.match(/\)/g) || []).length;
+      if (openParen !== closeParen) {
+          addOutput('❌ Syntax Error: Mismatched parentheses ( ). Did you forget to close a function call?', 'error');
+          passed = false;
+      }
+
+      const quotesMatch = code.match(/"/g);
+      if (quotesMatch && quotesMatch.length % 2 !== 0) {
+          addOutput('❌ Syntax Error: Missing a closing double quote (") somewhere in your code.', 'error');
+          passed = false;
+      }
+
+      // Language Specific Rules
+      if (language === 'golang') {
+          if (!code.includes('package main')) {
+              addOutput('❌ Golang Structure Error: Every executable Go program must start with "package main".', 'error');
+              passed = false;
+          }
+          if (!code.includes('func main()')) {
+              addOutput('❌ Golang Structure Error: Execution strictly starts from "func main()". Please define it.', 'error');
+              passed = false;
+          }
+      } else if (language === 'cpp') {
+          if (!code.includes('main()')) {
+              addOutput('❌ C++ Structure Error: Program requires "int main()" entry point.', 'error');
+              passed = false;
+          }
+      }
+
       // 1. Check base keyword presence
       expectedKeys.forEach(key => {
           const safeKey = key.replace(/[.*+?^$()|[\]\\]/g, '\\$&');

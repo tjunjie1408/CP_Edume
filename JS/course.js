@@ -1,26 +1,9 @@
 // Initialize Course Page
 document.addEventListener('DOMContentLoaded', function() {
-  loadUserData();
   setupCourseEventListeners();
 });
 
-// Load User Data
-function loadUserData() {
-  const userData = {
-    name: 'John Doe',
-    email: 'john@example.com',
-    learningStyle: 'Visual',
-    profilePicture: 'https://via.placeholder.com/50'
-  };
-
-  const userNameEl = document.getElementById('user-name');
-  const userAvatarEl = document.getElementById('userAvatar');
-
-  if (userNameEl) userNameEl.textContent = userData.name;
-  if (userAvatarEl) userAvatarEl.src = userData.profilePicture;
-
-  sessionStorage.setItem('userData', JSON.stringify(userData));
-}
+// User data is now loaded dynamically via PHP in course.php
 
 // Setup Course Event Listeners
 function setupCourseEventListeners() {
@@ -28,45 +11,18 @@ function setupCourseEventListeners() {
 
   courseCards.forEach(card => {
     card.addEventListener('click', function() {
-      const language = this.getAttribute('data-language');
-      enrollCourse(language);
+      const courseId = this.getAttribute('data-course-id');
+      if (courseId) {
+        enrollCourse(courseId);
+      }
     });
   });
 }
 
-// Course page mapping
-const coursePageMap = {
-  'Python': 'python.html',
-  'PHP': 'php.html',
-  'JavaScript': 'javascript.html',
-  'Docker': 'docker.html',
-  'C++': 'cpp.html',
-  'CSS': 'css.html',
-  'Rust': 'rust.html',
-  'Golang': 'golang.html',
-  'HTML': 'html.html',
-  'TailWind': 'tailwind.html',
-  'NextJS': 'nextjs.html',
-  'Networking': 'networking.html'
-};
-
 // Enroll Course Function
-function enrollCourse(courseName) {
-  // Get enrolled courses from localStorage
-  const enrolledCourses = JSON.parse(localStorage.getItem('enrolledCourses')) || [];
-
-  // Check if already enrolled
-  const isAlreadyEnrolled = enrolledCourses.includes(courseName);
-  
-  if (!isAlreadyEnrolled) {
-    // Add to enrolled courses only if not already enrolled
-    enrolledCourses.push(courseName);
-    localStorage.setItem('enrolledCourses', JSON.stringify(enrolledCourses));
-    console.log('Enrolled courses:', enrolledCourses);
-  }
-
+function enrollCourse(courseId) {
   // Add visual feedback
-  const card = document.querySelector(`[data-language="${courseName}"]`);
+  const card = document.querySelector(`[data-course-id="${courseId}"]`);
   if (card) {
     card.style.animation = 'pulse 0.6s ease';
     setTimeout(() => {
@@ -74,20 +30,20 @@ function enrollCourse(courseName) {
     }, 600);
   }
 
-  // Navigate to course page
-  if (coursePageMap[courseName]) {
-    window.location.href = coursePageMap[courseName];
-  }
+  // Navigate to dynamic course detail page
+  // Using the global AppConfig.baseUrl defined in course.php
+  const baseUrl = window.AppConfig ? window.AppConfig.baseUrl : '';
+  window.location.href = `${baseUrl}/student/course_details/course_details.php?id=${courseId}`;
 }
 
-// Get enrolled courses
+// Get enrolled courses via API (to be implemented)
 function getEnrolledCourses() {
-  return JSON.parse(localStorage.getItem('enrolledCourses')) || [];
+  return []; // Placeholder until database progress tracking is integrated
 }
 
-// Check if user is enrolled in a course
-function isEnrolled(courseName) {
-  return getEnrolledCourses().includes(courseName);
+// Check if user is enrolled in a course (to be implemented)
+function isEnrolled(courseId) {
+  return false; // Placeholder
 }
 
 // Logout handler (from dashboard.js)
@@ -96,7 +52,7 @@ function handleLogout() {
   localStorage.removeItem('enrolledCourses');
   sessionStorage.clear();
   alert('You have been logged out');
-  window.location.href = 'loginpage.html';
+  window.location.href = 'registration/login.php';
 }
 
 // Pulse animation for enrollment feedback

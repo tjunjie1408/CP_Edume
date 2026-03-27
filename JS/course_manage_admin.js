@@ -7,36 +7,39 @@ let currentEditingQuestionId = null;
 let currentCourseImageBase64 = null;
 let coursesData = {};
 let changesMode = false;
+let isSaving = false;
+
+// --------------------------------------------
+// UTILITY: Decode HTML entities sent from API
+// --------------------------------------------
+function decodeHtml(html) {
+  if (!html) return '';
+  const txt = document.createElement("textarea");
+  txt.innerHTML = html;
+  return txt.value;
+}
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
   initializeApp();
 });
 
-function initializeApp() {
-  loadCoursesData();
+async function initializeApp() {
   setupEventListeners();
+  await loadCoursesData();
   displayCoursesList();
 }
 
-// ============================================
-// LOAD & SAVE DATA - Using JSON Storage
-// ============================================
+const API_URL = () => (window.AppConfig?.baseUrl || '') + '/admin/course_manage/admin_courses_api.php';
 
-const STORAGE_KEY = 'coursesDataAdmin';
-
-function loadCoursesData() {
-  // Try to load from localStorage first
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    try {
-      coursesData = JSON.parse(saved);
-      console.log('✓ Loaded courses from storage:', Object.keys(coursesData).length, 'courses');
-    } catch (error) {
-      console.error('Error parsing stored data:', error);
-      initializeDefaultData();
-    }
-  } else {
+async function loadCoursesData() {
+  try {
+    const response = await fetch(API_URL());
+    if (!response.ok) throw new Error('Failed to load courses');
+    coursesData = await response.json();
+    console.log('✓ Loaded courses from API:', Object.keys(coursesData).length, 'courses');
+  } catch (error) {
+    console.error('Error loading courses:', error);
     initializeDefaultData();
   }
 }
@@ -117,20 +120,12 @@ function initializeDefaultData() {
 }
 
 /**
- * CORE JSON SAVE FUNCTION - All changes go through here
+ * LOCAL-ONLY save — real persistence happens in individual API calls.
+ * This function just dispatches the update event for UI sync.
  */
 function saveToStorage() {
-  try {
-    const jsonString = JSON.stringify(coursesData, null, 2);
-    localStorage.setItem(STORAGE_KEY, jsonString);
-    console.log('✓ Data saved to localStorage');
-    notifyCoursesUpdated();
-    return true;
-  } catch (error) {
-    console.error('Error saving to localStorage:', error);
-    alert('Error saving data. Please try again.');
-    return false;
-  }
+  notifyCoursesUpdated();
+  return true;
 }
 
 /**
@@ -164,29 +159,60 @@ function getQuestion(courseId, subjectId, questionId) {
   return subject ? subject.quiz.find(q => q.id === questionId) : null;
 }
 
-function saveCourseChanges() {
+async function saveCourseChanges() {
   if (!currentSubjectId || !currentCourseId) return;
+  if (isSaving) return;
 
   const subject = getSubject(currentCourseId, currentSubjectId);
   if (!subject) return;
 
-  // Get updated values from display (if they're in edit mode)
+  // Collect current values
+  const titleEl = document.getElementById('subjectTitle');
+  const titleInput = document.getElementById('subjectTitleInput');
   const overviewInput = document.getElementById('overviewInput');
-  const contentInput = document.getElementById('contentInput');
-  
-  if (overviewInput.classList.contains('active')) {
-    subject.overview = overviewInput.value;
+
+  // Use input value if in edit mode, otherwise existing value
+  const newTitle = (titleEl.style.display === 'none' && titleInput)
+    ? titleInput.value.trim()
+    : subject.title;
+  const newOverview = overviewInput.classList.contains('active')
+    ? overviewInput.value.trim()
+    : (overviewInput.value.trim() || subject.overview || '');
+
+  if (!newTitle) {
+    showNotification('Title cannot be empty.', 'error');
+    return;
   }
-  
-  if (contentInput.classList.contains('active')) {
-    subject.content = contentInput.value;
-  }
-  
-  if (saveToStorage()) {
-    alert('✓ All changes saved successfully!');
-    changesMode = false;
-    // Refresh display
-    displaySubjectEditor(subject);
+
+  isSaving = true;
+  const saveBtn = document.getElementById('btnSaveChanges');
+  if (saveBtn) { saveBtn.textContent = 'Saving...'; saveBtn.disabled = true; }
+
+  try {
+    const response = await fetch(API_URL() + '?action=chapter', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: currentSubjectId, title: newTitle, overview: newOverview })
+    });
+    const result = await response.json();
+
+    if (response.ok) {
+      showNotification('✓ Saved successfully!', 'success');
+      changesMode = false;
+      // Reload course to refresh sidebar + content
+      const courseResp = await fetch(API_URL() + `?course_id=${currentCourseId}`);
+      const course = await courseResp.json();
+      coursesData[currentCourseId] = course;
+      displaySubjects(course.subjects);
+    } else {
+      showNotification('Failed to save: ' + (result.error || result.message || 'Unknown error'), 'error');
+    }
+  } catch (error) {
+    console.error('Save error:', error);
+    showNotification('Network error, please try again.', 'error');
+  } finally {
+    isSaving = false;
+    if (saveBtn) { saveBtn.textContent = 'Save Changes'; saveBtn.disabled = false; }
   }
 }
 
@@ -318,12 +344,10 @@ function setupEventListeners() {
   document.getElementById('btnAddSubject')?.addEventListener('click', openSubjectModal);
   document.getElementById('btnEditSubject')?.addEventListener('click', toggleEditSubject);
   document.getElementById('btnDeleteSubject')?.addEventListener('click', deleteSubject);
-  document.getElementById('btnSaveChanges')?.addEventListener('click', saveCourseChanges);
+  document.getElementById('btnSaveChanges')?.addEventListener('click', saveSubjectChanges);
 
-  // Edit Toggles
-  document.getElementById('btnEditOverview')?.addEventListener('click', () => toggleEditMode('overview'));
-  document.getElementById('btnEditObjectives')?.addEventListener('click', handleObjectivesEdit);
-  document.getElementById('btnEditContent')?.addEventListener('click', () => toggleEditMode('content'));
+  // Edit Toggles (only Overview remains)
+  document.getElementById('btnEditOverview')?.addEventListener('click', (e) => toggleEditMode('overview', e));
 
   // Resources & Quiz
   document.getElementById('btnAddResource')?.addEventListener('click', openResourceModal);
@@ -373,8 +397,14 @@ function displayCoursesList() {
     const isBase64 = course.image && course.image.startsWith('data:');
     let imageSrc = course.image;
     
+    if (imageSrc && !imageSrc.startsWith('data:') && !imageSrc.startsWith('http')) {
+       const imgPath = imageSrc.startsWith('/') ? imageSrc : '/' + imageSrc;
+       const baseUrl = window.AppConfig.baseUrl ? window.AppConfig.baseUrl.replace(/\/$/, '') : '';
+       imageSrc = baseUrl + imgPath;
+    }
+    
     // Log image info for debugging
-    console.log('Course:', course.name, 'Image:', course.image, 'Is Base64:', isBase64);
+    console.log('Course:', course.name, 'Image:', course.image, 'ParsedSrc:', imageSrc);
     
     return `
       <div class="course-card-admin">
@@ -388,7 +418,7 @@ function displayCoursesList() {
         </div>
         <div class="course-card-content">
           <h3>${course.name}</h3>
-          <p class="course-card-meta">${course.language} • ${course.subjects.length} subjects</p>
+          <p class="course-card-meta">${course.language} • ${course.subjectCount ?? course.subjects?.length ?? 0} subjects</p>
           <div class="course-card-actions">
             <button class="btn-edit-course" onclick="editCourse(${course.id})">
               <span class="material-symbols-rounded">edit</span>
@@ -405,25 +435,27 @@ function displayCoursesList() {
   }).join('');
 }
 
-function editCourse(courseId) {
-  const course = getCourse(courseId);
-  if (!course) {
-    alert('Course not found');
-    return;
+async function editCourse(courseId) {
+  try {
+    // Lazy load: fetch course + chapters from API
+    const response = await fetch(API_URL() + `?course_id=${courseId}`);
+    if (!response.ok) throw new Error('Failed to load course');
+    const course = await response.json();
+
+    // Store in local cache
+    coursesData[courseId] = course;
+    currentCourseId = courseId;
+
+    document.getElementById('courseBreadcrumbName').textContent = `${course.name} (${course.language})`;
+    document.getElementById('pageTitle').textContent = `${course.name}`;
+    displaySubjects(course.subjects);
+
+    document.getElementById('coursesListView').classList.add('hidden');
+    document.getElementById('courseEditorView').classList.remove('hidden');
+  } catch (error) {
+    console.error('Error loading course:', error);
+    alert('Error: ' + error.message);
   }
-
-  currentCourseId = courseId;
-
-  // Update header with course name and language
-  document.getElementById('courseBreadcrumbName').textContent = `${course.name} (${course.language})`;
-  document.getElementById('pageTitle').textContent = `${course.name}`;
-
-  // Display subjects
-  displaySubjects(course.subjects);
-
-  // Switch views
-  document.getElementById('coursesListView').classList.add('hidden');
-  document.getElementById('courseEditorView').classList.remove('hidden');
 }
 
 function backToCoursesList() {
@@ -434,17 +466,26 @@ function backToCoursesList() {
   currentSubjectId = null;
 }
 
-function deleteCourse(courseId) {
+async function deleteCourse(courseId) {
   if (confirm('Are you sure you want to delete this course? This cannot be undone.')) {
-    delete coursesData[courseId];
-    if (saveToStorage()) {
+    try {
+      const response = await fetch(API_URL() + `?action=course&id=${courseId}`, {
+        method: 'DELETE'
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to delete course');
+
+      delete coursesData[courseId];
       displayCoursesList();
       alert('✓ Course deleted successfully');
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      alert('Error: ' + error.message);
     }
   }
 }
 
-function handleSaveCourse(e) {
+async function handleSaveCourse(e) {
   e.preventDefault();
   
   const name = document.getElementById('courseName').value.trim();
@@ -458,37 +499,26 @@ function handleSaveCourse(e) {
 
   if (!currentCourseImageBase64) {
     alert('Please upload a course logo image');
-    console.warn('No image selected');
     return;
   }
 
-  if (currentCourseImageBase64.length < 100) {
-    alert('Image data is too small. Please try uploading again.');
-    console.warn('Image data too small:', currentCourseImageBase64.length);
-    return;
-  }
+  try {
+    const response = await fetch(API_URL() + '?action=course', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, language, description, image: currentCourseImageBase64 })
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Failed to create course');
 
-  const newCourse = {
-    id: Date.now(),
-    name,
-    language,
-    description,
-    image: currentCourseImageBase64,
-    subjects: []
-  };
-
-  console.log('Creating new course with compressed image size:', (currentCourseImageBase64.length / 1024).toFixed(2), 'KB');
-
-  coursesData[newCourse.id] = newCourse;
-  
-  if (saveToStorage()) {
-    console.log('✓ Course saved to storage successfully');
+    // Reload courses from API
+    await loadCoursesData();
     closeCourseModal();
     displayCoursesList();
     alert('✓ Course created successfully!');
-  } else {
-    console.error('Failed to save course to storage');
-    alert('Error saving course. Please check console and try again.');
+  } catch (error) {
+    console.error('Error creating course:', error);
+    alert('Error: ' + error.message);
   }
 }
 
@@ -500,10 +530,31 @@ function displaySubjects(subjects) {
   const subjectsList = document.getElementById('subjectsList');
   if (!subjectsList) return;
 
+  const subjectEditorBody = document.getElementById('subjectEditorBody');
+  
   if (subjects.length === 0) {
     subjectsList.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 1rem;">No subjects yet</p>';
-    document.getElementById('subjectEditorBody').innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 2rem;">Click "+" to add a subject</p>';
+    
+    // Hide the editor body instead of destroying its HTML
+    if (subjectEditorBody) subjectEditorBody.style.display = 'none';
+    
+    // Show or create empty state message
+    let emptyMsg = document.getElementById('subjectEmptyStateMsg');
+    if (!emptyMsg) {
+      emptyMsg = document.createElement('div');
+      emptyMsg.id = 'subjectEmptyStateMsg';
+      emptyMsg.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 2rem;">Click "+" to add a subject</p>';
+      subjectEditorBody.parentNode.appendChild(emptyMsg);
+    }
+    emptyMsg.style.display = 'block';
+    
+    document.getElementById('subjectTitle').textContent = 'No Subjects';
+    
     return;
+  } else {
+    if (subjectEditorBody) subjectEditorBody.style.display = 'block';
+    const emptyMsg = document.getElementById('subjectEmptyStateMsg');
+    if (emptyMsg) emptyMsg.style.display = 'none';
   }
 
   subjectsList.innerHTML = subjects.map((subject, index) => `
@@ -520,215 +571,209 @@ function displaySubjects(subjects) {
   }
 }
 
-function selectSubject(subjectId) {
+async function selectSubject(subjectId) {
   currentSubjectId = subjectId;
-  const subject = getSubject(currentCourseId, subjectId);
 
-  if (!subject) {
-    console.error('Subject not found:', subjectId);
-    return;
-  }
+  // Lazy load: fetch chapter details from API
+  try {
+    const response = await fetch(API_URL() + `?chapter_id=${subjectId}`);
+    if (!response.ok) throw new Error('Failed to load chapter');
+    const subject = await response.json();
 
-  // Update active state
-  document.querySelectorAll('.subject-item-admin').forEach(item => {
-    item.classList.remove('active');
-    if (item.dataset.subjectId === String(subjectId)) {
-      item.classList.add('active');
+    // Update local cache
+    const course = getCourse(currentCourseId);
+    if (course) {
+      const idx = course.subjects.findIndex(s => s.id === subjectId);
+      if (idx !== -1) course.subjects[idx] = subject;
     }
-  });
 
-  // Display subject details
-  displaySubjectEditor(subject);
-  displayResources(subject.resources || []);
-  displayQuiz(subject.quiz || []);
+    // Update active state
+    document.querySelectorAll('.subject-item-admin').forEach(item => {
+      item.classList.remove('active');
+      if (item.dataset.subjectId === String(subjectId)) {
+        item.classList.add('active');
+      }
+    });
+
+    displaySubjectEditor(subject);
+    displayResources(subject.resources || []);
+    displayQuiz(subject.quiz || []);
+  } catch (error) {
+    console.error('Error loading chapter details:', error);
+    alert('Error: ' + error.message);
+  }
 }
 
 function displaySubjectEditor(subject) {
-  document.getElementById('subjectTitle').textContent = subject.title;
+  const decodedTitle = decodeHtml(subject.title);
+  const decodedOverview = decodeHtml(subject.overview);
+
+  document.getElementById('subjectTitle').textContent = decodedTitle;
   document.getElementById('subjectsTitle').textContent = `Subjects (${getCourse(currentCourseId).subjects.length})`;
   
+  // Reset Subject title edit mode
+  document.getElementById('subjectTitle').style.display = 'block';
+  document.getElementById('subjectTitleInput').classList.add('hidden');
+  document.getElementById('subjectTitleInput').value = decodedTitle;
+  const btnEditSubj = document.getElementById('btnEditSubject');
+  if (btnEditSubj) btnEditSubj.innerHTML = '<span class="material-symbols-rounded">edit</span>';
+
+  // Reset Overview section back to VIEW mode
+  const d = document.getElementById('overviewDisplay');
+  const i = document.getElementById('overviewInput');
+  const b = document.getElementById('btnEditOverview');
+  if (d) d.style.display = 'block';
+  if (i) { i.classList.remove('active'); i.classList.add('hidden'); i.value = decodedOverview; }
+  if (b) b.innerHTML = '<span class="material-symbols-rounded">edit</span>';
+
   // Overview
-  document.getElementById('overviewDisplay').innerHTML = subject.overview 
-    ? `<p>${subject.overview}</p>` 
+  document.getElementById('overviewDisplay').innerHTML = decodedOverview 
+    ? `<p>${decodedOverview}</p>` 
     : '<p style="color: var(--text-light); font-style: italic;">No overview set. Click edit to add one.</p>';
-  document.getElementById('overviewInput').value = subject.overview || '';
-
-  // Objectives
-  const objectivesList = document.getElementById('objectivesList');
-  if ((subject.objectives || []).length > 0) {
-    objectivesList.innerHTML = subject.objectives.map(obj => `<li>${obj}</li>`).join('');
-  } else {
-    objectivesList.innerHTML = '<li style="color: var(--text-light); font-style: italic;">No objectives set. Click edit to add some.</li>';
-  }
-
-  // Content
-  document.getElementById('contentDisplay').innerHTML = subject.content 
-    ? subject.content 
-    : '<p style="color: var(--text-light); font-style: italic;">No content set. Click edit to add content.</p>';
-  document.getElementById('contentInput').value = subject.content || '';
 }
 
-function toggleEditMode(section) {
+function toggleEditMode(section, e) {
   const display = document.getElementById(`${section}Display`);
   const input = document.getElementById(`${section}Input`);
-  const button = event.target.closest('.btn-edit-toggle');
+  const button = (e || window.event).target.closest('.btn-edit-toggle');
 
-  if (display.style.display === 'none') {
-    // SAVE MODE - Hide input, show display
+  if (input.classList.contains('active')) {
+    // LOCK UI MODE (Awaiting global save)
     const newValue = input.value.trim();
-    
-    if (section === 'overview') {
-      display.innerHTML = newValue 
-        ? `<p>${newValue}</p>` 
-        : '<p style="color: var(--text-light); font-style: italic;">No overview set. Click edit to add one.</p>';
-    } else if (section === 'content') {
-      display.innerHTML = newValue 
-        ? newValue 
-        : '<p style="color: var(--text-light); font-style: italic;">No content set. Click edit to add content.</p>';
-    }
+    display.innerHTML = newValue 
+      ? `<p>${newValue}</p>` 
+      : '<p style="color: var(--text-light); font-style: italic;">No overview set. Click edit to add one.</p>';
     display.style.display = 'block';
     input.classList.remove('active');
+    input.classList.add('hidden');
     button.innerHTML = '<span class="material-symbols-rounded">edit</span>';
-    
-    // Save the changes
-    const subject = getSubject(currentCourseId, currentSubjectId);
-    if (subject) {
-      if (section === 'overview') {
-        subject.overview = newValue;
-      } else if (section === 'content') {
-        subject.content = newValue;
-      }
-      saveToStorage();
-    }
   } else {
-    // EDIT MODE - Show input, hide display
+    // EDIT MODE
     display.style.display = 'none';
+    input.classList.remove('hidden');
     input.classList.add('active');
     button.innerHTML = '<span class="material-symbols-rounded">check</span>';
     input.focus();
   }
 }
 
-function handleObjectivesEdit() {
-  const display = document.getElementById('objectivesDisplay');
-  const input = document.getElementById('objectivesInput');
-  const button = event.target.closest('.btn-edit-toggle');
-  
-  const subject = getSubject(currentCourseId, currentSubjectId);
-  if (!subject) return;
-
-  if (display.style.display === 'none') {
-    // SAVE MODE - Hide input, show display
-    const objectiveInputs = Array.from(document.querySelectorAll('#objectivesEditList input[type="text"]'));
-    const objectives = objectiveInputs
-      .map(input => input.value.trim())
-      .filter(val => val !== '');
-    
-    subject.objectives = objectives;
-    saveToStorage();
-    
-    const objectivesList = document.getElementById('objectivesList');
-    if (objectives.length > 0) {
-      objectivesList.innerHTML = objectives.map(obj => `<li>${obj}</li>`).join('');
-    } else {
-      objectivesList.innerHTML = '<li style="color: var(--text-light); font-style: italic;">No objectives set. Click edit to add some.</li>';
-    }
-    
-    display.style.display = 'block';
-    input.classList.remove('active');
-    button.innerHTML = '<span class="material-symbols-rounded">edit</span>';
-  } else {
-    // EDIT MODE - Show input, hide display
-    const objectivesEditList = document.getElementById('objectivesEditList');
-    objectivesEditList.innerHTML = '';
-    
-    // Create input fields for existing objectives
-    (subject.objectives || []).forEach((obj, index) => {
-      const inputDiv = document.createElement('div');
-      inputDiv.style.display = 'flex';
-      inputDiv.style.gap = '0.5rem';
-      inputDiv.style.marginBottom = '0.5rem';
-      inputDiv.innerHTML = `
-        <input type="text" class="form-input" value="${obj}" placeholder="Objective ${index + 1}" style="flex: 1; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
-        <button type="button" class="btn-remove" onclick="this.parentElement.remove()" style="padding: 0.5rem 1rem; background: #f5576c; color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>
-      `;
-      objectivesEditList.appendChild(inputDiv);
-    });
-    
-    // Add button for new objective
-    const addBtn = document.createElement('button');
-    addBtn.type = 'button';
-    addBtn.textContent = '+ Add Objective';
-    addBtn.style.padding = '0.5rem 1rem';
-    addBtn.style.background = 'var(--primary-color)';
-    addBtn.style.color = 'white';
-    addBtn.style.border = 'none';
-    addBtn.style.borderRadius = '4px';
-    addBtn.style.cursor = 'pointer';
-    addBtn.style.marginTop = '0.5rem';
-    addBtn.onclick = function(e) {
-      e.preventDefault();
-      const inputDiv = document.createElement('div');
-      inputDiv.style.display = 'flex';
-      inputDiv.style.gap = '0.5rem';
-      inputDiv.style.marginBottom = '0.5rem';
-      inputDiv.innerHTML = `
-        <input type="text" class="form-input" placeholder="New Objective" style="flex: 1; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 4px;">
-        <button type="button" class="btn-remove" onclick="this.parentElement.remove()" style="padding: 0.5rem 1rem; background: #f5576c; color: white; border: none; border-radius: 4px; cursor: pointer;">Remove</button>
-      `;
-      objectivesEditList.insertBefore(inputDiv, addBtn);
-    };
-    objectivesEditList.appendChild(addBtn);
-    
-    display.style.display = 'none';
-    input.classList.add('active');
-    button.innerHTML = '<span class="material-symbols-rounded">check</span>';
-  }
-}
-
-function toggleEditSubject() {
+function toggleEditSubject(e) {
   const title = document.getElementById('subjectTitle');
   const input = document.getElementById('subjectTitleInput');
-  const button = event.target.closest('.btn-icon');
+  const button = (e || window.event).target.closest('.btn-icon');
 
   if (title.style.display === 'none') {
-    // SAVE MODE
-    const subject = getSubject(currentCourseId, currentSubjectId);
-    if (subject && input.value.trim()) {
-      subject.title = input.value.trim();
-      title.textContent = input.value.trim();
-      title.style.display = 'block';
-      input.classList.add('hidden');
-      
-      if (saveToStorage()) {
-        displaySubjects(getCourse(currentCourseId).subjects);
-      }
+    // LOCK UI MODE (Awaiting global save)
+    const newTitle = input.value.trim();
+    if (!newTitle) {
+      showNotification('Title cannot be empty.', 'error');
+      return;
     }
+    title.textContent = newTitle;
+    title.style.display = 'block';
+    input.classList.add('hidden');
+    button.innerHTML = '<span class="material-symbols-rounded">edit</span>';
   } else {
     // EDIT MODE
     input.value = title.textContent;
     title.style.display = 'none';
     input.classList.remove('hidden');
+    button.innerHTML = '<span class="material-symbols-rounded">check</span>';
     input.focus();
   }
 }
 
-function deleteSubject() {
-  if (confirm('Delete this subject and all its content?')) {
-    const course = getCourse(currentCourseId);
-    if (course) {
-      course.subjects = course.subjects.filter(s => s.id !== currentSubjectId);
-      
-      if (saveToStorage()) {
-        displaySubjects(course.subjects);
-        currentSubjectId = null;
-        alert('✓ Subject deleted successfully');
-      }
-    }
+async function saveSubjectChanges() {
+  if (!currentSubjectId) return;
+  const btn = document.getElementById('btnSaveChanges');
+  
+  // Grab Title safely
+  let newTitle = document.getElementById('subjectTitleInput').value.trim();
+  if (document.getElementById('subjectTitleInput').classList.contains('hidden')) {
+      newTitle = document.getElementById('subjectTitle').textContent.trim();
+  }
+  
+  // Grab Overview safely
+  let newOverview = document.getElementById('overviewInput').value.trim();
+  if (document.getElementById('overviewInput').classList.contains('hidden')) {
+      const p = document.querySelector('#overviewDisplay p');
+      newOverview = p ? p.textContent.trim() : '';
+      if (newOverview === 'No overview set. Click edit to add one.') newOverview = '';
+  }
+
+  if (!newTitle) {
+    showNotification('Subject title cannot be empty.', 'error');
+    return;
+  }
+
+  const originalText = btn.innerHTML;
+  btn.innerHTML = 'Saving...';
+  btn.disabled = true;
+
+  try {
+    const payload = { 
+      id: currentSubjectId,
+      title: newTitle,
+      overview: newOverview
+    };
+
+    const response = await fetch(API_URL() + '?action=chapter', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    
+    if (!response.ok) throw new Error('Failed to save subject changes');
+
+    // Reload course exactly requested to deeply load active course and subjects cache
+    const courseResp = await fetch(API_URL() + `?course_id=${currentCourseId}`);
+    const course = await courseResp.json();
+    coursesData[currentCourseId] = course;
+    displaySubjects(course.subjects);
+    
+    // Attempt to re-select the subject after reload so UI completely refreshes
+    selectSubject(currentSubjectId);
+    
+    showNotification('Saved successfully!', 'success');
+  } catch (error) {
+    console.error('Save changes error:', error);
+    showNotification('Error saving: ' + error.message, 'error');
+  } finally {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
   }
 }
 
-function handleSaveSubject(e) {
+
+async function deleteSubject() {
+  if (!confirm('Delete this subject and all its content?')) return;
+  if (isSaving) return;
+
+  isSaving = true;
+  try {
+    const response = await fetch(API_URL() + `?action=chapter&id=${currentSubjectId}`, {
+      method: 'DELETE'
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Failed to delete subject');
+
+    showNotification('✓ Subject deleted successfully', 'success');
+
+    // Reload course to refresh sidebar
+    const courseResp = await fetch(API_URL() + `?course_id=${currentCourseId}`);
+    const course = await courseResp.json();
+    coursesData[currentCourseId] = course;
+    currentSubjectId = null;
+    displaySubjects(course.subjects);
+  } catch (error) {
+    console.error('Delete subject error:', error);
+    showNotification('Error: ' + error.message, 'error');
+  } finally {
+    isSaving = false;
+  }
+}
+
+async function handleSaveSubject(e) {
   e.preventDefault();
   
   const name = document.getElementById('subjectName').value.trim();
@@ -739,28 +784,26 @@ function handleSaveSubject(e) {
     return;
   }
 
-  const newSubject = {
-    id: Date.now(),
-    title: name,
-    level,
-    overview: '',
-    objectives: [],
-    content: '',
-    resources: [],
-    quiz: []
-  };
+  try {
+    const response = await fetch(API_URL() + '?action=chapter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ courseId: currentCourseId, title: name, level })
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Failed to create chapter');
 
-  const course = getCourse(currentCourseId);
-  if (course) {
-    course.subjects.push(newSubject);
-    
-    if (saveToStorage()) {
-      closeSubjectModal();
-      displaySubjects(course.subjects);
-      // Automatically select the newly created subject
-      selectSubject(newSubject.id);
-      alert('✓ Subject created successfully. You can now add content!');
-    }
+    // Reload course to get updated chapters
+    const courseResp = await fetch(API_URL() + `?course_id=${currentCourseId}`);
+    const course = await courseResp.json();
+    coursesData[currentCourseId] = course;
+
+    closeSubjectModal();
+    displaySubjects(course.subjects);
+    alert('✓ Subject created successfully. You can now add content!');
+  } catch (error) {
+    console.error('Error creating subject:', error);
+    alert('Error: ' + error.message);
   }
 }
 
@@ -813,6 +856,7 @@ function editResource(resourceId) {
   document.getElementById('resourceType').value = resource.type;
   document.getElementById('resourceTitle').value = resource.title;
   document.getElementById('resourceUrl').value = resource.url || '';
+  document.getElementById('resourceContent').value = resource.content || '';
   document.getElementById('resourceDescription').value = resource.description || '';
 
   // Update modal title
@@ -823,27 +867,36 @@ function editResource(resourceId) {
   document.getElementById('resourceModal').classList.add('active');
 }
 
-function deleteResource(resourceId) {
+async function deleteResource(resourceId) {
   if (confirm('Delete this resource?')) {
-    const subject = getSubject(currentCourseId, currentSubjectId);
-    if (subject) {
-      subject.resources = subject.resources.filter(r => r.id !== resourceId);
-      
-      if (saveToStorage()) {
+    try {
+      const response = await fetch(API_URL() + `?action=material&id=${resourceId}`, {
+        method: 'DELETE'
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to delete resource');
+
+      const subject = getSubject(currentCourseId, currentSubjectId);
+      if (subject) {
+        subject.resources = subject.resources.filter(r => r.id !== resourceId);
         displayResources(subject.resources);
-        alert('✓ Resource deleted successfully');
       }
+      alert('✓ Resource deleted successfully');
+    } catch (error) {
+      console.error('Error deleting resource:', error);
+      alert('Error: ' + error.message);
     }
   }
 }
 
-function handleSaveResource(e) {
+async function handleSaveResource(e) {
   e.preventDefault();
   
   const type = document.getElementById('resourceType').value;
   const title = document.getElementById('resourceTitle').value.trim();
   const url = document.getElementById('resourceUrl').value.trim();
   const description = document.getElementById('resourceDescription').value.trim();
+  const content = document.getElementById('resourceContent') ? document.getElementById('resourceContent').value.trim() : '';
 
   if (!type || !title) {
     alert('Please fill in required fields (Type and Title)');
@@ -856,34 +909,45 @@ function handleSaveResource(e) {
     return;
   }
 
-  if (currentEditingResourceId) {
-    // EDIT MODE: Update existing resource from JSON
-    const resource = subject.resources.find(r => r.id === currentEditingResourceId);
-    if (resource) {
-      resource.type = type;
-      resource.title = title;
-      resource.url = url;
-      resource.description = description;
-      console.log('✓ Resource updated in JSON:', JSON.stringify(resource, null, 2));
-    }
-  } else {
-    // CREATE MODE: Add new resource to JSON
-    const newResource = {
-      id: Date.now(),
+  try {
+    const payload = {
       type,
       title,
       url,
-      description
+      description,
+      content
     };
-    subject.resources.push(newResource);
-    console.log('✓ New resource added to JSON:', JSON.stringify(newResource, null, 2));
-  }
 
-  // Save to localStorage
-  if (saveToStorage()) {
-    displayResources(subject.resources);
+    if (currentEditingResourceId) {
+      // EDIT MODE: Update existing resource
+      payload.id = currentEditingResourceId;
+      const response = await fetch(API_URL() + '?action=material', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to update resource');
+    } else {
+      // CREATE MODE: Add new resource
+      payload.chapterId = currentSubjectId;
+      const response = await fetch(API_URL() + '?action=material', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to create resource');
+    }
+
+    // Refresh subject to get new IDs/Data
+    await selectSubject(currentSubjectId);
     closeResourceModal();
     alert('✓ Resource saved successfully');
+
+  } catch (error) {
+    console.error('Error saving resource:', error);
+    alert('Error: ' + error.message);
   }
 }
 
@@ -968,21 +1032,29 @@ function editQuestion(questionId) {
   document.getElementById('questionModal').classList.add('active');
 }
 
-function deleteQuestion(questionId) {
+async function deleteQuestion(questionId) {
   if (confirm('Delete this question?')) {
-    const subject = getSubject(currentCourseId, currentSubjectId);
-    if (subject) {
-      subject.quiz = subject.quiz.filter(q => q.id !== questionId);
-      
-      if (saveToStorage()) {
+    try {
+      const response = await fetch(API_URL() + `?action=quiz_question&id=${questionId}`, {
+        method: 'DELETE'
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to delete question');
+
+      const subject = getSubject(currentCourseId, currentSubjectId);
+      if (subject) {
+        subject.quiz = subject.quiz.filter(q => q.id !== questionId);
         displayQuiz(subject.quiz);
-        alert('✓ Question deleted successfully');
       }
+      alert('✓ Question deleted successfully');
+    } catch (error) {
+      console.error('Error deleting question:', error);
+      alert('Error: ' + error.message);
     }
   }
 }
 
-function handleSaveQuestion(e) {
+async function handleSaveQuestion(e) {
   e.preventDefault();
   
   const question = document.getElementById('questionText').value.trim();
@@ -1005,34 +1077,44 @@ function handleSaveQuestion(e) {
     return;
   }
 
-  if (currentEditingQuestionId) {
-    // EDIT MODE: Update existing question from JSON
-    const q = subject.quiz.find(qu => qu.id === currentEditingQuestionId);
-    if (q) {
-      q.question = question;
-      q.options = options;
-      q.correct = correctIndex;
-      q.feedback = feedback;
-      console.log('✓ Question updated in JSON:', JSON.stringify(q, null, 2));
-    }
-  } else {
-    // CREATE MODE: Add new question to JSON
-    const newQuestion = {
-      id: Date.now(),
+  try {
+    const payload = {
       question,
       options,
       correct: correctIndex,
       feedback
     };
-    subject.quiz.push(newQuestion);
-    console.log('✓ New question added to JSON:', JSON.stringify(newQuestion, null, 2));
-  }
 
-  // Save to localStorage
-  if (saveToStorage()) {
-    displayQuiz(subject.quiz);
+    if (currentEditingQuestionId) {
+      // EDIT MODE
+      payload.id = currentEditingQuestionId;
+      const response = await fetch(API_URL() + '?action=quiz_question', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to update question');
+    } else {
+      // CREATE MODE
+      payload.chapterId = currentSubjectId;
+      const response = await fetch(API_URL() + '?action=quiz_question', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to create question');
+    }
+
+    // Refresh subject to get new IDs/Data
+    await selectSubject(currentSubjectId);
     closeQuestionModal();
     alert('✓ Question saved successfully');
+
+  } catch (error) {
+    console.error('Error saving question:', error);
+    alert('Error: ' + error.message);
   }
 }
 
@@ -1125,18 +1207,20 @@ function updateResourceForm() {
   const urlGroup = document.getElementById('resourceUrlGroup');
   const contentGroup = document.getElementById('resourceContentGroup');
   const urlLabel = document.querySelector('label[for="resourceUrl"]');
+  const contentLabel = document.querySelector('label[for="resourceContent"]');
 
   if (type === 'video') {
     urlGroup.style.display = 'block';
     contentGroup.style.display = 'none';
     urlLabel.textContent = 'Video URL (YouTube embed link)';
+  } else if (type === 'document') {
+    urlGroup.style.display = 'none';
+    contentGroup.style.display = 'block';
+    if (contentLabel) contentLabel.textContent = 'Document / Article Content';
   } else if (type === 'exercise') {
     urlGroup.style.display = 'none';
     contentGroup.style.display = 'block';
-  } else if (type === 'document') {
-    urlGroup.style.display = 'block';
-    contentGroup.style.display = 'none';
-    urlLabel.textContent = 'Document Link';
+    if (contentLabel) contentLabel.textContent = 'Practice Problem';
   } else {
     urlGroup.style.display = 'block';
     contentGroup.style.display = 'none';
@@ -1179,9 +1263,17 @@ function closeQuestionModal() {
 // UTILITY FUNCTIONS
 // ============================================
 
-function discardChanges() {
-  if (confirm('Discard all changes?')) {
-    selectSubject(currentSubjectId);
+async function discardChanges() {
+  if (!confirm('Are you sure you want to discard your unsaved changes?')) return;
+  if (!currentSubjectId) return;
+
+  try {
+    // Re-fetch from API to discard local dirty data
+    await selectSubject(currentSubjectId);
+    showNotification('Changes discarded.', 'info');
+  } catch (error) {
+    console.error('Discard error:', error);
+    showNotification('Error refreshing data.', 'error');
   }
 }
 

@@ -1,0 +1,414 @@
+<?php
+require_once __DIR__ . '/../../config/constants.php';
+require_once CONFIG_PATH . '/AdminPage.php';
+$page = new AdminPage();
+$page->requireAuth();
+
+// Calculate gravatar URL
+$gravatarUrl = "https://www.gravatar.com/avatar/" . md5(strtolower(trim($_SESSION['email'] ?? ''))) . "?d=mp";
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Course Management - EduMe</title>
+  <link rel="stylesheet" href="<?= BASE_URL ?>/CSS/dashboard.css">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/CSS/dashboard_admin.css">
+  <link rel="stylesheet" href="<?= BASE_URL ?>/CSS/course_manage_admin.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" type="image/png" href="<?= BASE_URL ?>/image/Edume.png?v=1.0">
+</head>
+<body>
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <nav class="sidebar-header">
+      <a href="<?= BASE_URL ?>/admin/dashboard/dashboard.php" class="header-logo">
+        <img src="<?= BASE_URL ?>/image/Edume.png" alt="EduMe Logo" class="logo-image">
+        <span class="logo-text">EduMe</span>
+      </a>
+      <button class="sidebar-toggler">
+        <span class="material-symbols-rounded">chevron_left</span>
+      </button>
+    </nav>
+
+    <nav class="sidebar-nav">
+      <ul class="nav-list primary-nav">
+        <li class="nav-item">
+          <a href="<?= BASE_URL ?>/admin/dashboard/dashboard.php" class="nav-link">
+            <span class="material-symbols-rounded">dashboard</span>
+            <span class="nav-label">Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="<?= BASE_URL ?>/admin/course_manage/course_manage.php" class="nav-link active">
+            <span class="material-symbols-rounded">library_books</span>
+            <span class="nav-label">Course Manage</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="<?= BASE_URL ?>/admin/user_manage/user_manage.php" class="nav-link">
+            <span class="material-symbols-rounded">people</span>
+            <span class="nav-label">User Manage</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="<?= BASE_URL ?>/admin/support_center/support_center.php" class="nav-link">
+            <span class="material-symbols-rounded">support_agent</span>
+            <span class="nav-label">Support Center</span>
+          </a>
+        </li>
+      </ul>
+
+      <ul class="nav-list secondary-nav">
+        <li class="nav-item">
+          <a href="<?= BASE_URL ?>/public/registration/login.php" class="nav-link">
+            <span class="material-symbols-rounded">logout</span>
+            <span class="nav-label">Logout</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Header -->
+  <header class="top-header">
+    <button class="sidebar-menu-button">
+      <span class="material-symbols-rounded">menu</span>
+    </button>
+
+    <div class="header-left">
+      <h1 id="pageTitle">Course Management</h1>
+    </div>
+    <div class="header-right">
+      <div class="user-info" id="username">
+        <p class="hello">Hello, <span id="user-name"><?= htmlspecialchars($_SESSION['username'] ?? 'Admin') ?></span></p>
+      </div>
+      <a href="<?= BASE_URL ?>/admin/profile/profile.php" class="user-avatar-link">
+        <img src="<?= htmlspecialchars($gravatarUrl) ?>" alt="User Avatar" class="user-avatar" id="userAvatar">
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="admin-course-content">
+    <div class="admin-course-container">
+
+      <!-- ============================================
+           LEVEL 1: COURSES LIST VIEW
+           ============================================ -->
+      <div class="view-section" id="coursesListView">
+        <div class="view-header">
+          <h2>All Courses</h2>
+          <button class="btn-primary" id="btnAddNewCourse">
+            <span class="material-symbols-rounded">add</span>
+            Create New Course
+          </button>
+        </div>
+
+        <div class="courses-grid" id="coursesGrid">
+          <!-- Courses will be populated here -->
+        </div>
+      </div>
+
+      <!-- ============================================
+           LEVEL 2: COURSE EDITOR (Subjects List)
+           ============================================ -->
+      <div class="view-section hidden" id="courseEditorView">
+        <div class="breadcrumb">
+          <button class="breadcrumb-link" onclick="backToCoursesList()">
+            <span class="material-symbols-rounded">arrow_back</span>
+            All Courses
+          </button>
+          <span class="breadcrumb-separator">/</span>
+          <span id="courseBreadcrumbName">Course Name</span>
+        </div>
+
+        <div class="course-editor-container">
+          <!-- Left Sidebar - Subjects List (Like python.html) -->
+          <aside class="subjects-sidebar">
+            <div class="subjects-header">
+              <h2 id="subjectsTitle">Subjects</h2>
+              <button class="btn-icon-small" id="btnAddSubject" title="Add Subject">
+                <span class="material-symbols-rounded">add</span>
+              </button>
+            </div>
+
+            <div class="subjects-list" id="subjectsList">
+              <!-- Subjects will be populated here -->
+            </div>
+          </aside>
+
+          <!-- Center Section - Subject Editor (Like python.html content area) -->
+          <section class="subject-editor">
+            <div class="subject-editor-header">
+              <div class="subject-header-info">
+                <h2 id="subjectTitle">Select a Subject</h2>
+                <input type="text" id="subjectTitleInput" class="hidden" placeholder="Subject Title">
+              </div>
+              <div class="subject-header-actions">
+                <button class="btn-icon" id="btnEditSubject" title="Edit Subject">
+                  <span class="material-symbols-rounded">edit</span>
+                </button>
+                <button class="btn-icon btn-delete" id="btnDeleteSubject" title="Delete Subject">
+                  <span class="material-symbols-rounded">delete</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Subject Content Editor -->
+            <div class="subject-editor-body" id="subjectEditorBody">
+              <!-- Overview Section -->
+              <div class="editor-section">
+                <div class="section-header">
+                  <h3>Overview</h3>
+                  <button class="btn-edit-toggle" id="btnEditOverview">
+                    <span class="material-symbols-rounded">edit</span>
+                  </button>
+                </div>
+                <div id="overviewDisplay" class="editor-display">
+                  <p>No overview set</p>
+                </div>
+                <textarea id="overviewInput" class="editor-input hidden" placeholder="Enter subject overview..."></textarea>
+              </div>
+
+              <!-- Tabs for Resources and Quiz -->
+              <div class="resource-quiz-tabs">
+                <div class="tab-buttons">
+                  <button class="tab-btn active" data-tab="resources">
+                    <span class="material-symbols-rounded">folder_open</span>
+                    Learning Resources
+                  </button>
+                  <button class="tab-btn" data-tab="quiz">
+                    <span class="material-symbols-rounded">quiz</span>
+                    Quiz Questions
+                  </button>
+                </div>
+
+                <!-- RESOURCES TAB -->
+                <div class="tab-panel active" id="resourcesPanel">
+                  <div class="tab-header">
+                    <h3>Learning Resources</h3>
+                    <button class="btn-primary btn-sm" id="btnAddResource">
+                      <span class="material-symbols-rounded">add</span>
+                      Add Resource
+                    </button>
+                  </div>
+
+                  <div class="resources-list" id="resourcesList">
+                    <!-- Resources will be populated here -->
+                  </div>
+                </div>
+
+                <!-- QUIZ TAB -->
+                <div class="tab-panel" id="quizPanel">
+                  <div class="tab-header">
+                    <h3>Quiz Questions</h3>
+                    <button class="btn-primary btn-sm" id="btnAddQuestion">
+                      <span class="material-symbols-rounded">add</span>
+                      Add Question
+                    </button>
+                  </div>
+
+                  <div class="quiz-list" id="quizList">
+                    <!-- Questions will be populated here -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Save Changes Section -->
+              <div class="editor-footer">
+                <button class="btn-secondary" onclick="discardChanges()">Discard</button>
+                <button class="btn-primary" id="btnSaveChanges">Save Changes</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal: Add/Edit Course -->
+  <div class="modal" id="courseModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="courseModalTitle">Create New Course</h2>
+        <button class="modal-close" onclick="closeCourseModal()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <form id="courseForm" class="form-grid">
+        <div class="form-group">
+          <label for="courseName">Course Name *</label>
+          <input type="text" id="courseName" placeholder="e.g., Python Programming" required>
+        </div>
+        <div class="form-group">
+          <label for="courseLanguage">Programming Language *</label>
+          <input type="text" id="courseLanguage" placeholder="e.g., Python, JavaScript, PHP, C++" required>
+        </div>
+        <div class="form-group">
+          <label for="courseDescription">Description *</label>
+          <textarea id="courseDescription" placeholder="Enter course description..." rows="4" required></textarea>
+        </div>
+
+        <!-- IMAGE UPLOAD SECTION -->
+        <div class="form-group">
+          <label>Course Logo *</label>
+          <div class="image-upload-container">
+            <div id="imagePreview" class="image-preview-box" onclick="document.getElementById('courseImageUpload').click()">
+              <span class="material-symbols-rounded">image</span>
+              <p>Click to upload course logo</p>
+            </div>
+            <input type="file" id="courseImageUpload" accept="image/*" style="display: none;" onchange="previewCourseImage(event)">
+          </div>
+          <small style="color: var(--text-light);">Upload a PNG, JPG, or GIF image (recommended: 300x300px, max 2MB)</small>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Save Course</button>
+          <button type="button" class="btn-secondary" onclick="closeCourseModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add/Edit Subject -->
+  <div class="modal" id="subjectModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="subjectModalTitle">Add New Subject</h2>
+        <button class="modal-close" onclick="closeSubjectModal()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <form id="subjectForm" class="form-grid">
+        <div class="form-group">
+          <label for="subjectName">Subject Title *</label>
+          <input type="text" id="subjectName" placeholder="e.g., Python Basics" required>
+        </div>
+        <div class="form-group">
+          <label for="subjectLevel">Level *</label>
+          <select id="subjectLevel" required>
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Save Subject</button>
+          <button type="button" class="btn-secondary" onclick="closeSubjectModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add/Edit Resource -->
+  <div class="modal" id="resourceModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="resourceModalTitle">Add Learning Resource</h2>
+        <button class="modal-close" onclick="closeResourceModal()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <form id="resourceForm" class="form-grid">
+        <div class="form-group">
+          <label for="resourceType">Resource Type *</label>
+          <select id="resourceType" onchange="updateResourceForm()" required>
+            <option value="">Select Type</option>
+            <option value="video">Video Tutorial</option>
+            <option value="document">Document/Article</option>
+            <option value="exercise">Exercise/Code</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="resourceTitle">Title *</label>
+          <input type="text" id="resourceTitle" placeholder="Resource title" required>
+        </div>
+        <div class="form-group" id="resourceUrlGroup">
+          <label for="resourceUrl">Video URL / Link</label>
+          <input type="url" id="resourceUrl" placeholder="https://...">
+        </div>
+        <div class="form-group" id="resourceContentGroup" style="display:none;">
+          <label for="resourceContent">Content</label>
+          <textarea id="resourceContent" placeholder="Resource content" rows="4"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="resourceDescription">Description</label>
+          <textarea id="resourceDescription" placeholder="Describe this resource..." rows="3"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Save Resource</button>
+          <button type="button" class="btn-secondary" onclick="closeResourceModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add/Edit Quiz Question -->
+  <div class="modal" id="questionModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="questionModalTitle">Add Quiz Question</h2>
+        <button class="modal-close" onclick="closeQuestionModal()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <form id="questionForm" class="form-grid">
+        <div class="form-group">
+          <label for="questionText">Question *</label>
+          <textarea id="questionText" placeholder="Enter question text..." rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+          <label>Answer Options *</label>
+          <div id="optionsContainer">
+            <div class="option-input-group">
+              <input type="text" class="option-input" placeholder="Option A" required>
+              <label class="radio-label">
+                <input type="radio" name="correctAnswer" value="0">
+                Correct
+              </label>
+            </div>
+            <div class="option-input-group">
+              <input type="text" class="option-input" placeholder="Option B" required>
+              <label class="radio-label">
+                <input type="radio" name="correctAnswer" value="1">
+                Correct
+              </label>
+            </div>
+            <div class="option-input-group">
+              <input type="text" class="option-input" placeholder="Option C" required>
+              <label class="radio-label">
+                <input type="radio" name="correctAnswer" value="2">
+                Correct
+              </label>
+            </div>
+            <div class="option-input-group">
+              <input type="text" class="option-input" placeholder="Option D" required>
+              <label class="radio-label">
+                <input type="radio" name="correctAnswer" value="3">
+                Correct
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="questionFeedback">Explanation/Feedback</label>
+          <textarea id="questionFeedback" placeholder="Explain why this is correct..." rows="3"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Save Question</button>
+          <button type="button" class="btn-secondary" onclick="closeQuestionModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    window.AppConfig = { baseUrl: '<?= BASE_URL ?>' };
+  </script>
+  <script src="<?= BASE_URL ?>/JS/dashboard.js"></script>
+  <script src="<?= BASE_URL ?>/JS/course_manage_admin.js"></script>
+</body>
+</html>

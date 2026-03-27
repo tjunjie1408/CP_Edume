@@ -712,15 +712,24 @@ header ul a:hover::after {
     gap: 15px;
 }
 
-.footer-socials img {
-    width: 25px;
+.footer-socials a {
+    color: #a0a0a0;
     transition: 0.3s;
-    filter: invert(1) brightness(0.8);
 }
 
-.footer-socials a:hover img {
+.footer-socials svg {
+    width: 25px;
+    height: 25px;
+    transition: 0.3s;
+}
+
+.footer-socials a:hover {
+    color: #72a1de;
+}
+
+.footer-socials a:hover svg {
     transform: scale(1.2);
-    filter: invert(1) drop-shadow(0 0 5px #72a1de);
+    filter: drop-shadow(0 0 5px #72a1de);
 }
 
 .footer-bottom {

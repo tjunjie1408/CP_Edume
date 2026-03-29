@@ -9,9 +9,7 @@ let coursesData = {};
 let changesMode = false;
 let isSaving = false;
 
-// --------------------------------------------
 // UTILITY: Decode HTML entities sent from API
-// --------------------------------------------
 function decodeHtml(html) {
   if (!html) return '';
   const txt = document.createElement("textarea");
@@ -228,9 +226,7 @@ function notifyCoursesUpdated() {
   console.log('📢 Courses update event dispatched');
 }
 
-// ============================================
 // IMAGE UPLOAD HANDLING WITH COMPRESSION
-// ============================================
 
 /**
  * Compress image using Canvas API
@@ -332,9 +328,7 @@ function previewCourseImage(event) {
   });
 }
 
-// ============================================
 // EVENT LISTENERS
-// ============================================
 
 function setupEventListeners() {
   // Course List View
@@ -377,9 +371,7 @@ function setupEventListeners() {
   });
 }
 
-// ============================================
 // LEVEL 1: COURSES LIST VIEW
-// ============================================
 
 function displayCoursesList() {
   const coursesGrid = document.getElementById('coursesGrid');
@@ -522,9 +514,7 @@ async function handleSaveCourse(e) {
   }
 }
 
-// ============================================
 // LEVEL 2: SUBJECT MANAGEMENT
-// ============================================
 
 function displaySubjects(subjects) {
   const subjectsList = document.getElementById('subjectsList');
@@ -807,9 +797,7 @@ async function handleSaveSubject(e) {
   }
 }
 
-// ============================================
 // RESOURCES MANAGEMENT - With JSON
-// ============================================
 
 function displayResources(resources) {
   const resourcesList = document.getElementById('resourcesList');
@@ -951,9 +939,7 @@ async function handleSaveResource(e) {
   }
 }
 
-// ============================================
 // QUIZ MANAGEMENT - With JSON
-// ============================================
 
 function displayQuiz(quizzes) {
   const quizList = document.getElementById('quizList');
@@ -1118,9 +1104,7 @@ async function handleSaveQuestion(e) {
   }
 }
 
-// ============================================
 // TAB SWITCHING
-// ============================================
 
 function switchTab(tabName) {
   // Update buttons
@@ -1138,9 +1122,7 @@ function switchTab(tabName) {
   document.getElementById(`${tabName}Panel`).classList.add('active');
 }
 
-// ============================================
 // MODALS
-// ============================================
 
 function openCourseModal() {
   // Reset form
@@ -1259,9 +1241,7 @@ function closeQuestionModal() {
   currentEditingQuestionId = null;
 }
 
-// ============================================
 // UTILITY FUNCTIONS
-// ============================================
 
 async function discardChanges() {
   if (!confirm('Are you sure you want to discard your unsaved changes?')) return;

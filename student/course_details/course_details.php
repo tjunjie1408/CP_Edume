@@ -75,7 +75,7 @@ $activeChapterData = null;
 if ($activeChapterId) {
     $materials = $materialModel->getMaterialsByChapterId($activeChapterId);
 
-    // ── VARK-based content reordering ──
+    // VARK-based content reordering
     // Move materials matching the student's VARK style to the front
     $varkTagMap = [
         'visual'      => 'visual',

@@ -1,14 +1,10 @@
-// ============================================
 // COURSE DETAILS - MAIN SCRIPT WITH REPORT
-// ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
     setupReportForm();
 });
 
-// ============================================
 // REPORT FORM FUNCTIONS
-// ============================================
 
 function setupReportForm() {
     const reportForm = document.getElementById('reportForm');

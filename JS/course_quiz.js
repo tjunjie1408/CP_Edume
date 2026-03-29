@@ -256,7 +256,7 @@ class CourseQuizManager {
 document.addEventListener('DOMContentLoaded', () => {
     // Get chapter ID from URL params
     const urlParams = new URLSearchParams(window.location.search);
-    const chapterId = urlParams.get('chapter');
+    const chapterId = urlParams.get('chapter') || (window.AppConfig && window.AppConfig.activeChapterId);
     
     if (chapterId) {
         window.courseQuiz = new CourseQuizManager(chapterId);

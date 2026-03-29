@@ -13,16 +13,16 @@ var formBox = document.querySelector(".form-box");
 // Store the email for forgot password flow
 var forgotPasswordEmail = "";
 
-// 切换到注册的函数
+// Switch to the registered function
 function register() {
-  // 1. 移动表单
-  loginForm.style.left = "-400px"; // 登录表单移到左侧屏幕外
-  registerForm.style.left = "50px"; // 注册表单移入可视区域
+  // 1. Move the form
+  loginForm.style.left = "-400px"; // Login form moves to the left side of the screen
+  registerForm.style.left = "50px"; // Register form moves into the visible area
 
-  // 2. 移动顶部高亮条
-  indicator.style.left = "130px"; // 移动到右侧按钮位置
+  // 2. Move the top highlight bar
+  indicator.style.left = "130px"; // Move to the right button position
 
-  // 3. 切换按钮文字激活状态
+  // 3. Switch button text active state
   toggleBtns[0].classList.remove("active");
   toggleBtns[1].classList.add("active");
 
@@ -30,16 +30,16 @@ function register() {
   formBox.classList.remove("forgot-password-mode");
 }
 
-// 切换到登录的函数
+// Switch to the login function
 function login() {
-  // 1. 移动表单
-  loginForm.style.left = "50px"; // 登录表单移回可视区域
-  registerForm.style.left = "450px"; // 注册表单移到右侧屏幕外
+  // 1. Move the form
+  loginForm.style.left = "50px"; // Login form moves back to the visible area
+  registerForm.style.left = "450px"; // Register form moves to the right side of the screen
 
-  // 2. 移动顶部高亮条
-  indicator.style.left = "0px"; // 移动回左侧按钮位置
+  // 2. Move the top highlight bar
+  indicator.style.left = "0px"; // Move back to the left button position
 
-  // 3. 切换按钮文字激活状态
+  // 3. Switch button text active state
   toggleBtns[1].classList.remove("active");
   toggleBtns[0].classList.add("active");
 

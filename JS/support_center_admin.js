@@ -1,6 +1,4 @@
-// ============================================
 // SUPPORT CENTER ADMIN - Main Logic
-// ============================================
 
 // Global Variables
 let allReports = [];

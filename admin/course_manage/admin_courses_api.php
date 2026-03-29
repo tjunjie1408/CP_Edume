@@ -1,20 +1,10 @@
 <?php
 /**
- * Admin Course Management API (Lazy Loading)
+ * Admin Course Management API
  * 
- * GET endpoints:
- *   (no params)          → list all courses with chapter counts
- *   ?course_id=X         → single course + its chapters
- *   ?chapter_id=X        → chapter + content_materials + quiz_questions
- * 
- * POST: ?action=course|chapter|material|quiz_question
- * PUT:  ?action=course|chapter
- * DELETE: ?action=course|chapter&id=X
- * 
- * Security: Auth guard, htmlspecialchars, php://input + ?? []
- */
-
-require_once __DIR__ . '/../../config/constants.php';
+ * Handles CRUD operations for courses, chapters, materials, and quizzes.
+ * Uses lazy loading for nested relationships to optimize payload size.
+ */require_once __DIR__ . '/../../config/constants.php';
 require_once CONFIG_PATH . '/AdminPage.php';
 require_once CONFIG_PATH . '/Database.php';
 
@@ -36,13 +26,11 @@ function esc($val) {
 
 try {
     switch ($method) {
-
-        // ══════════════════════════════════════════════
-        // GET — Lazy Loading
-        // ══════════════════════════════════════════════
+        /* --- Request Routing --- */
+        
         case 'GET':
 
-            // ── Level 3: Get chapter details (materials + quiz) ──
+            // Fetch complete chapter details including materials and quiz questions
             if (!empty($_GET['chapter_id'])) {
                 $chapterId = (int) $_GET['chapter_id'];
 
@@ -121,7 +109,7 @@ try {
                 break;
             }
 
-            // ── Level 2: Get course with chapters ──
+            // Fetch course details and its associated chapters
             if (!empty($_GET['course_id'])) {
                 $courseId = (int) $_GET['course_id'];
 
@@ -173,7 +161,7 @@ try {
                 break;
             }
 
-            // ── Level 1: List all courses ──
+            // Fetch high-level courses list (optimization: omit chapter details)
             $stmt = $db->query("
                 SELECT c.id, c.title, c.description, c.category, c.cover_image, c.difficulty,
                        (SELECT COUNT(*) FROM chapters ch WHERE ch.course_id = c.id) as chapter_count
@@ -195,9 +183,7 @@ try {
             echo json_encode($courses);
             break;
 
-        // ══════════════════════════════════════════════
-        // POST — Create
-        // ══════════════════════════════════════════════
+        /* --- Resource Creation --- */
         case 'POST':
             if ($action === 'course') {
                 $title    = trim($data['name'] ?? '');
@@ -366,9 +352,7 @@ try {
             }
             break;
 
-        // ══════════════════════════════════════════════
-        // PUT — Update
-        // ══════════════════════════════════════════════
+        /* --- Resource Updates --- */
         case 'PUT':
             if ($action === 'course') {
                 $id    = (int) ($data['id'] ?? 0);
@@ -511,9 +495,7 @@ try {
             }
             break;
 
-        // ══════════════════════════════════════════════
-        // DELETE
-        // ══════════════════════════════════════════════
+        /* --- Resource Deletion --- */
         case 'DELETE':
             $id = (int) ($_GET['id'] ?? $data['id'] ?? 0);
             if (!$id) {

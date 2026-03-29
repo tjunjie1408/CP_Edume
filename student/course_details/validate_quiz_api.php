@@ -3,8 +3,14 @@ header("Content-Type: application/json");
 require_once __DIR__ . '/../../config/constants.php';
 require_once CONFIG_PATH . '/StudentPage.php';
 require_once CONFIG_PATH . '/Database.php';
+/**
+ * Quiz Validation API
+ * 
+ * Receives the student's selected answers, compares them against the database truth,
+ * calculates the percentage score, and updates their course progress if they pass.
+ * Requires an active student session.
+ */
 require_once __DIR__ . '/../../public/registration/User.php';
-
 $page = new StudentPage();
 $page->requireAuth();
 
@@ -13,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     exit();
 }
 
-// Get the raw POST data
+// Parse JSON payload containing user's answer mapping
 $rawData = file_get_contents("php://input");
 $data = json_decode($rawData, true);
 
@@ -32,7 +38,7 @@ $userModel = new User($db);
 $userId = $_SESSION['user_id'];
 
 try {
-    // 1. Fetch the correct answers from the database
+    // Retrieve the authoritative correct options and feedback from the database
     $query = "SELECT qq.id, qq.correct_option AS correct_answer, qq.explanation 
               FROM quiz_questions qq 
               JOIN quizzes q ON qq.quiz_id = q.id 
@@ -47,7 +53,7 @@ try {
         exit();
     }
     
-    // 2. Map correct answers by question ID
+    // Restructure DB rows into an easily searchable associative array by question ID
     $correctAnswersMap = [];
     foreach ($quizData as $qd) {
         $correctAnswersMap[$qd['id']] = [
@@ -56,7 +62,7 @@ try {
         ];
     }
     
-    // 3. Evaluate the student's submission
+    // Compare submitted answers against the authoritative map
     $totalQuestions = count($correctAnswersMap);
     $correctCount = 0;
     $results = []; // Detailed feedback to send back
@@ -75,12 +81,12 @@ try {
         }
     }
     
-    // 4. Calculate score
+    // Determine pass/fail thresholds
     $scorePercentage = ($correctCount / $totalQuestions) * 100;
     $passed = $scorePercentage >= 50; // 50% pass mark
     
     if ($passed) {
-        // Log progress (Upsert)
+        // Persist completion status using an UPSERT to handle retakes cleanly
         $progressSql = "INSERT INTO user_progress (user_id, chapter_id, is_completed, completed_at) 
                         VALUES (:uid, :cid, 1, NOW()) 
                         ON DUPLICATE KEY UPDATE is_completed = 1, completed_at = NOW()";
@@ -90,7 +96,7 @@ try {
         $progStmt->execute();
     }
     
-    // 5. Return success and the results mapping (explanations)
+    // Dispatch detailed validation packet to the frontend UI
     echo json_encode([
         'status' => 200,
         'passed' => $passed,

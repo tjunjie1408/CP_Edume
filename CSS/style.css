@@ -64,7 +64,7 @@ header ul {
     padding: 12px 40px;
     margin: 0;
    
-    /* 玻璃拟态背景 */
+    /* Glassmorphism background */
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
@@ -72,7 +72,7 @@ header ul {
     border-radius: 50px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 
-    /* 移除之前的固定宽度，让内容决定宽度 */
+    /* Remove previous fixed width, let content determine the width */
     width: auto;
 
 }
@@ -81,7 +81,7 @@ header ul li {
     list-style: none;
 }
 
-/* 2. 链接样式 */
+/* Link style */
 header ul a {
     text-decoration: none;
     color: #fff;
@@ -94,7 +94,7 @@ header ul a {
 
 
 
-/* 3. 悬停效果：文字发光 + 底部光条 */
+/* Hover effect: text glowing + bottom light bar */
 header ul a:hover {
     color: #fff;
     text-shadow: 0 0 12px rgba(114, 161, 222, 0.8);
@@ -119,7 +119,7 @@ header ul a:hover::after {
 
 .auth-buttons {
     display: flex;
-    gap: 15px; /* 两个按钮之间的间距 */
+    gap: 15px; /* The distance between the two buttons */
     align-items: center;
 }
 
@@ -130,10 +130,10 @@ header ul a:hover::after {
     font-weight: bold;
     font-size: 15px;
     transition: 0.3s ease;
-    white-space: nowrap; /* 防止文字换行 */
+    white-space: nowrap; /* Prevent text from wrapping */
 }
 
-/* Login 按钮 - 描边风格 */
+/* Login button - outline style */
 .btn-login {
     color: #c0c0c0;
     border: 1px solid rgba(114, 161, 222, 0.5);
@@ -146,7 +146,7 @@ header ul a:hover::after {
     box-shadow: 0 0 10px rgba(114, 161, 222, 0.3);
 }
 
-/* Signup 按钮 - 渐变填充风格 */
+/* Signup button - gradient fill style */
 .btn-signup {
     color: #fff;
     background: linear-gradient(90deg, #6070fd, #00aaa7);
@@ -155,9 +155,9 @@ header ul a:hover::after {
 }
 
 .btn-signup:hover {
-    background: linear-gradient(90deg, #00aaa7, #6070fd); /* 悬停反转渐变 */
+    background: linear-gradient(90deg, #00aaa7, #6070fd); /* Hover reverse gradient */
     box-shadow: 0 0 15px rgba(96, 112, 253, 0.8);
-    transform: scale(1.05); /* 微微放大 */
+    transform: scale(1.05); /* Slightly enlarge */
 }
 
 .blackhole-box{
@@ -609,21 +609,21 @@ header ul a:hover::after {
     font-size: 16px;
 }
 
-/* --- Active State (JS控制) --- */
+/* Active State (JS control) */
 .faq-item.active .faq-question {
-    color: #72a1de; /* 展开时标题变蓝 */
+    color: #72a1de; /* Title turns blue when expanded */
 }
 
 .faq-item.active .icon {
-    transform: rotate(45deg); /* 加号变成叉号 */
+    transform: rotate(45deg); /* Plus sign becomes a cross */
     color: #ff4d4d;
 }
 
 .faq-item.active .faq-answer {
-    max-height: 200px; /* 足够展示文字的高度 */
+    max-height: 200px; /* Enough to display the text height */
 }
 
-/* --- Footer Styling --- */
+/* Footer Styling */
 .footer {
     width: 100%;
     margin-top: -20px;
@@ -826,17 +826,17 @@ header ul a:hover::after {
     .autoBlur,
     .autoDisplay,
     .fadeInRight {
-        /* 1. 彻底移除动画 */
+        /* 1. Completely remove animation */
         animation: none !important;
         animation-timeline: auto !important;
 
-        /* 2. 强制回归到“最终可见”的状态 */
+        /* 2. Force a return to the "final visible" state */
         opacity: 1 !important;
         filter: blur(0) !important;
         transform: translate(0, 0) scale(1) !important;
     }
 
-    /* 1. Header 调整 */
+    /* 1. Header adjustment */
     header {
         padding: 0 20px;
     }
@@ -850,20 +850,20 @@ header ul a:hover::after {
         font-size: 12px;
     }
 
-    /* 2. Hero 区域压缩 */
+    /* 2. Hero compression */
     .hero-info h1 {
         font-size: 45px;
         line-height: 55px;
     }
 
     .hero-vid-box video {
-        height: 600px; /* 减小视频高度 */
+        height: 600px; /* Reduce video height */
     }
 
-    /* 3. 项目展示区调整 */
+    /* 3. Project display area adjustment */
     .VARK-card {
         gap: 5%;
-        height: auto; /* 移除固定高度 */
+        height: auto; /* Remove fixed height */
         margin-bottom: 50px;
     }
 
@@ -872,10 +872,10 @@ header ul a:hover::after {
     }
 
     .VARK-vidbox {
-        min-width: 300px; /* 允许视频框变小 */
+        min-width: 300px; /* Allow video box to shrink */
     }
 
-    /* 4. 技能区域调整 */
+    /* 4. Skill area adjustment */
     .mission-box h1 {
         font-size: 40px;
         margin-top: -20px;
@@ -888,9 +888,9 @@ header ul a:hover::after {
 
 /*- Mobile Responsive Design*/
 @media screen and (max-width: 768px) {
-    /* --- 全局设置 --- */
+    /* Global settings */
     body {
-        overflow-x: hidden; /* 防止任何横向滚动条 */
+        overflow-x: hidden; /* Prevent any horizontal scrollbars */
     }
 
     .section-title {
@@ -913,7 +913,7 @@ header ul a:hover::after {
     }
 
     .blackhole-box {
-        display: none; /* 手机屏幕有限，隐藏背景黑洞视频 */
+        display: none; /* Limited screen space on mobile, hide background black hole video */
     }
     
     .hero-vid-box video {
@@ -947,9 +947,9 @@ header ul a:hover::after {
         padding: 10px 0;
     }
 
-    /* --- Hero Section (核心重构) --- */
+    /* Hero Section (core reconstruction) */
     .hero {
-        flex-direction: column-reverse; /* 视频在下，文字在上 */
+        flex-direction: column-reverse; /* Video at the bottom, text at the top */
         height: auto;
         padding-top: 200px;
         padding-bottom: 50px;
@@ -958,7 +958,7 @@ header ul a:hover::after {
     }
 
     .hero-info {
-        position: relative; /* 取消绝对定位 */
+        position: relative; /* Cancel absolute positioning */
         left: 0;
         width: 90%;
         margin: 0 auto;
@@ -985,13 +985,13 @@ header ul a:hover::after {
     }
 
     .hero-vid-box {
-        position: relative; /* 取消绝对定位 */
+        position: relative; /* Cancel absolute positioning */
         right: 0;
         width: 100%;
         display: flex;
         justify-content: center;
-        margin-top: -50px; /* 稍微向上重叠一点，制造层次感 */
-        opacity: 0.6; /* 稍微变淡，不要抢文字视觉 */
+        margin-top: -50px; /* Slightly overlap upwards to create a sense of hierarchy */
+        opacity: 0.6; /* Slightly faded, don't抢文字视觉 */
     }
 
     .hero-vid-box video {
@@ -1001,10 +1001,10 @@ header ul a:hover::after {
     }
 
     .scroll-down {
-        display: none; /* 手机屏幕高度宝贵，隐藏此元素 */
+        display: none; /* Limited screen height on mobile, hide this element */
     }
 
-    /* --- VARKs Section (垂直卡片) --- */
+    /* VARKs Section (Vertical Cards) */
     .VARK-section {
         height: auto;
         width: 90%;
@@ -1013,25 +1013,25 @@ header ul a:hover::after {
     }
 
     .VARK-card {
-        flex-direction: column; /* 上下排列 */
+        flex-direction: column; /* Vertical arrangement */
         gap: 20px;
     }
 
     .VARK-vidbox {
         width: 100%;
-        min-width: 0; /* 强制覆盖之前的 min-width */
+        min-width: 0; /* Force override previous min-width */
     }
 
     .VARK-info {
         width: 100%;
-        align-items: center; /* 文字居中 */
+        align-items: center; /* Text centered */
         text-align: center;
         padding: 0;
     }
 
     .VARK-info h1 {
         font-size: 22px;
-        text-wrap: balance; /* 更好的换行效果 */
+        text-wrap: balance; /* Better line break effect */
         width: 100%;
         max-width: none;
     }
@@ -1043,11 +1043,11 @@ header ul a:hover::after {
         margin-bottom: 10px;
     }
 
-    /* --- mission Section (布局重构) --- */
+    /* --- mission Section (layout reconstruction) --- */
     .mission-box {
         height: auto;
         flex-direction: column;
-        padding-bottom: 100px; /* 为 Slider 留位置 */
+        padding-bottom: 100px; /* Leave space for Slider */
     }
 
     .mission-image {
@@ -1064,7 +1064,7 @@ header ul a:hover::after {
         margin: 20px auto;
         text-align: center;
         align-items: center;
-        background: rgba(0,0,0,0.3); /* 增加背景增加可读性 */
+        background: rgba(0,0,0,0.3); /* Add background to increase readability */
         padding: 20px;
         border-radius: 15px;
         backdrop-filter: blur(5px);
@@ -1109,7 +1109,7 @@ header ul a:hover::after {
 
     .footer-column h3::after {
         left: 50%;
-        transform: translateX(-50%); /* 标题下划线居中 */
+        transform: translateX(-50%); /* Title underline centered */
     }
 
     .footer-socials {

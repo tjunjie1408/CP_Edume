@@ -1,6 +1,4 @@
-// ============================================
 // USER MANAGEMENT ADMIN DASHBOARD
-// ============================================
 
 // Store for current edit data
 let currentEditingUser = null;
@@ -21,9 +19,7 @@ function initializeUserManagement() {
   setupAutoRefresh();
 }
 
-// ============================================
 // LOAD USERS DATA
-// ============================================
 
 async function loadUsers() {
   try {
@@ -90,9 +86,7 @@ function displayUsers(users) {
   });
 }
 
-// ============================================
 // USER STATISTICS
-// ============================================
 
 async function loadUserStatistics() {
   try {
@@ -114,9 +108,7 @@ async function loadUserStatistics() {
   }
 }
 
-// ============================================
 // USER MODAL FUNCTIONS
-// ============================================
 
 async function openUserModal(userID) {
   try {
@@ -177,9 +169,7 @@ function closeUserModal() {
   document.body.style.overflow = 'auto';
 }
 
-// ============================================
 // DETECT CHANGES
-// ============================================
 
 function getChangedFields() {
   const changes = {};
@@ -273,9 +263,7 @@ function displayChangesSummary(changes) {
   }
 }
 
-// ============================================
 // SAVE/UPDATE USER
-// ============================================
 
 async function saveUserChanges() {
   try {
@@ -342,9 +330,7 @@ async function saveUserChanges() {
   }
 }
 
-// ============================================
 // DELETE USER
-// ============================================
 
 async function deleteUser(userID) {
   if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
@@ -380,10 +366,7 @@ async function deleteUser(userID) {
   }
 }
 
-// ============================================
 // SEARCH AND FILTER
-// ============================================
-
 function setupSearchAndFilters() {
   const searchInput = document.getElementById('search-users');
   const learningStyleFilter = document.getElementById('filter-learning-style');
@@ -433,9 +416,7 @@ function updateUserCount(count) {
   document.getElementById('user-count').textContent = `Showing ${count} ${users}`;
 }
 
-// ============================================
 // EVENT LISTENERS
-// ============================================
 
 function setupEventListeners() {
   // Modal close button
@@ -505,9 +486,7 @@ function setupEventListeners() {
   });
 }
 
-// ============================================
 // EXPORT FUNCTIONALITY
-// ============================================
 
 async function exportUsersToCSV() {
   try {
@@ -555,9 +534,7 @@ async function exportUsersToCSV() {
   }
 }
 
-// ============================================
 // AUTO-REFRESH
-// ============================================
 
 function setupAutoRefresh() {
   // Auto-refresh data every 10 minutes
@@ -567,9 +544,7 @@ function setupAutoRefresh() {
   }, 10 * 60 * 1000);
 }
 
-// ============================================
 // NOTIFICATION SYSTEM
-// ============================================
 
 function showToast(message, type = 'info') {
   const toast = document.getElementById('toast-notification');

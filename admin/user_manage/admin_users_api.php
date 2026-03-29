@@ -27,7 +27,7 @@ $db = $database->getConnection();
 try {
     switch ($method) {
 
-        // ── GET: List all users ─────────────────────────────
+        // GET: List all users
         case 'GET':
             $stmt = $db->query("
                 SELECT id, username, email, role, primary_vark_style, created_at
@@ -58,7 +58,7 @@ try {
             echo json_encode($users);
             break;
 
-        // ── PUT: Update user ────────────────────────────────
+        // PUT: Update user
         case 'PUT':
             if (empty($data['dbId'])) {
                 http_response_code(400);
@@ -115,7 +115,7 @@ try {
             echo json_encode(['success' => true, 'message' => 'User updated successfully']);
             break;
 
-        // ── DELETE: Delete user ──────────────────────────────
+        // DELETE: Delete user
         case 'DELETE':
             $targetId = $data['dbId'] ?? $_GET['id'] ?? null;
             if (!$targetId) {

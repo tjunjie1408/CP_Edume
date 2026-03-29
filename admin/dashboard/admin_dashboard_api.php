@@ -28,8 +28,7 @@ try {
     $database = new Database();
     $db = $database->getConnection();
 
-    // ── 1. Statistics ──────────────────────────────────────
-
+    // 1. Statistics ────────────────────────────────────
     // Total users (students only)
     $stmt = $db->query("SELECT COUNT(*) FROM users WHERE role = 'student'");
     $totalUsers = (int) $stmt->fetchColumn();
@@ -64,8 +63,7 @@ try {
         'completionRateChange' => ''
     ];
 
-    // ── 2. VARK Distribution ───────────────────────────────
-
+    // 2. VARK Distribution ─────────────────────────────
     $stmt = $db->query("
         SELECT primary_vark_style, COUNT(*) as cnt
         FROM users
@@ -89,7 +87,7 @@ try {
         }
     }
 
-    // ── 3. User Activity (Last 7 Days) ─────────────────────
+    // 3. User Activity (Last 7 Days) ───────────────────
     // Classic time-series gap fix: generate all 7 dates in PHP, fill SQL data in
 
     $stmt = $db->query("
@@ -115,8 +113,7 @@ try {
         'data'   => $activityData
     ];
 
-    // ── 4. Top Performing Courses ──────────────────────────
-
+    // 4. Top Performing Courses ────────────────────────
     $stmt = $db->query("
         SELECT c.id, c.title as name,
                COUNT(DISTINCT up.user_id) as enrollments,
@@ -138,8 +135,7 @@ try {
         ];
     }
 
-    // ── 5. Recent Sign-ups ─────────────────────────────────
-
+    // 5. Recent Sign-ups ───────────────────────────────
     $stmt = $db->query("
         SELECT id, username, email, created_at
         FROM users
@@ -158,7 +154,7 @@ try {
         ];
     }
 
-    // ── 6. System Health ───────────────────────────────────
+    // 6. System Health ─────────────────────────────────
     // DB is already connected if we got here
 
     $systemHealth = [
@@ -168,8 +164,7 @@ try {
         'storage'  => ['status' => 'online', 'usage'  => 'Available']
     ];
 
-    // ── Response ───────────────────────────────────────────
-
+    // Response ─────────────────────────────────────────
     echo json_encode([
         'statistics'       => $statistics,
         'varkDistribution' => $varkDistribution,

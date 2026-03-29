@@ -65,7 +65,7 @@ body {
     }
 }
 
-/* 返回主页链接 */
+/* Link to the homepage */
 .back-to-home {
     position: absolute;
     top: 30px;
@@ -84,26 +84,26 @@ body {
     font-size: 20px;
 }
 
-/* --- 玻璃拟态表单容器 --- */
+/* Glassmorphism form container */
 .form-box {
     width: 380px;
-    height: 550px; /* 固定高度用于滑动动画 */
+    height: 550px; /* Fixed height for sliding animation */
     position: relative;
     margin-top: 100px;
     margin-left: auto;
     margin-right: auto;
     padding: 10px;
-    /* 核心玻璃效果 */
+    /* Core glass effect */
     background: #fff;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 20px;
     box-shadow: 0 0 30px rgba(97, 152, 224, 0.742);
-    overflow: hidden; /* 隐藏滑出去的表单 */
+    overflow: hidden; /* Hide the form that slides out */
 }
 
-/* --- 顶部切换按钮区域 --- */
+/* Top switching button area */
 .button-box {
     width: 260px;
     margin: 35px auto;
@@ -143,7 +143,7 @@ body {
     transition: 0.5s;
 }
 
-/* 隐藏 button-box 在忘记密码流程中 */
+/* Hide button-box in forgot password process */
 .form-box.forgot-password-mode .button-box {
     display: none;
 }
@@ -160,7 +160,7 @@ body {
     border-radius: 50%;
 }
 
-/* --- 表单输入组 --- */
+/* Form input group */
 .input-group {
     position: absolute;
     width: 280px;

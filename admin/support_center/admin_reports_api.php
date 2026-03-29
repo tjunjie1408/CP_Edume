@@ -25,7 +25,7 @@ $data = json_decode(file_get_contents('php://input'), true) ?? [];
 $database = new Database();
 $db = $database->getConnection();
 
-// ── Auto-create reports table if not exists ──
+// Auto-create reports table if not exists
 $db->exec("
     CREATE TABLE IF NOT EXISTS `reports` (
         `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -44,7 +44,7 @@ $db->exec("
 try {
     switch ($method) {
 
-        // ── GET: List all reports ──
+        // GET: List all reports
         case 'GET':
             $stmt = $db->query("
                 SELECT r.id, r.report_type, r.content, r.status, r.admin_notes, r.created_at,
@@ -74,7 +74,7 @@ try {
             echo json_encode($reports);
             break;
 
-        // ── PUT: Update report status/notes ──
+        // PUT: Update report status/notes
         case 'PUT':
             $id     = (int) ($data['id'] ?? 0);
             $status = $data['status'] ?? null;
@@ -110,7 +110,7 @@ try {
             echo json_encode(['success' => true, 'message' => 'Report updated']);
             break;
 
-        // ── DELETE: Delete report ──
+        // DELETE: Delete report
         case 'DELETE':
             $id = (int) ($_GET['id'] ?? $data['id'] ?? 0);
             if (!$id) {

@@ -65,9 +65,7 @@ function setupTabNavigation() {
   });
 }
 
-// ============================================
 // AVATAR UPLOAD FEATURE 
-// ============================================
 
 function setupAvatarUpload() {
   // Avatar uploading is now disabled from the frontend logic since
@@ -127,9 +125,7 @@ function showNotification(message, type = 'info') {
   }, 3000);
 }
 
-// ============================================
 // SETTINGS EVENT LISTENERS
-// ============================================
 
 function setupSettingsEventListeners() {
   const darkModeToggle = document.getElementById('dark-mode-toggle');
@@ -178,9 +174,7 @@ function setupSettingsEventListeners() {
   }
 }
 
-// ============================================
 // PROFILE EDITING FUNCTIONS
-// ============================================
 
 // Switch to Edit Mode - Personal Information
 function switchToEdit() {

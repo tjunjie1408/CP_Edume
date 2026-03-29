@@ -1,16 +1,10 @@
 <?php
 session_start();
-header('Content-Type: application/json');
 
-require_once __DIR__ . '/../../config/constants.php';
-require_once CONFIG_PATH . '/Database.php';
+require_once __DIR__ . '/../../config/Database.php';
+require_once __DIR__ . '/UserInterface.php';
 require_once __DIR__ . '/User.php';
 
-/**
- * AuthController
- * Thin routing layer: validate input → call User method → return JSON.
- * No SQL in this file.
- */
 class AuthController
 {
     private UserInterface $user;
@@ -46,17 +40,14 @@ class AuthController
         }
     }
 
-    // ──────────────────────────────────────────────
-    //  Handlers (one per action)
-    // ──────────────────────────────────────────────
-
-    private function handleSignup(array $data): void
+        /* --- Request Handlers --- */
+        private function handleSignup(array $data): void
     {
         $name     = trim($data['name']     ?? '');
         $email    = trim($data['email']    ?? '');
         $password = $data['password']      ?? '';
 
-        // Validate
+        // Enforce required fields validation
         if ($name === '' || $email === '' || $password === '') {
             $this->respond(422, 'All fields are required');
             return;
@@ -70,7 +61,7 @@ class AuthController
             return;
         }
 
-        // Uniqueness
+        // Prevent duplicate registrations by verifying uniqueness
         if ($this->user->isUsernameTaken($name)) {
             $this->respond(422, 'Username already exists');
             return;
@@ -80,7 +71,7 @@ class AuthController
             return;
         }
 
-        // Create
+        // Persist new user securely with bcrypt hashing
         $hash = password_hash($password, PASSWORD_BCRYPT);
         if ($this->user->create($name, $email, $hash)) {
             // Auto login the user immediately after creation
@@ -104,7 +95,7 @@ class AuthController
         $email    = trim($data['email']    ?? '');
         $password = trim($data['password'] ?? '');
 
-        // Validate
+        // Ensure payload requirements are met before querying the database
         if ($email === '' || $password === '') {
             $this->respond(422, 'All fields are required');
             return;
@@ -121,13 +112,13 @@ class AuthController
             return;
         }
 
-        // Verify password
+        // Verify password hash against the stored database hash
         if (!password_verify($password, $user['password_hash'])) {
             $this->respond(422, 'Incorrect password');
             return;
         }
 
-        // Session
+        // Initialize secure session state for the authenticated user
         $_SESSION['user_id']  = $user['id'];
         $_SESSION['username'] = $user['username'];
         $_SESSION['email']    = $user['email'];
@@ -181,7 +172,7 @@ class AuthController
             return;
         }
 
-        // Check old password
+        // Ensure safety check against current active password before overwriting
         $oldHash = $this->user->getPasswordHash($email);
         if ($oldHash === null) {
             $this->respond(422, 'Email does not exist');
@@ -192,7 +183,7 @@ class AuthController
             return;
         }
 
-        // Update
+        // Proceed explicitly with updating the persistence layer
         $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
         if ($this->user->updatePassword($email, $newHash)) {
             $this->respond(200, 'Password reset successfully');
@@ -201,17 +192,14 @@ class AuthController
         }
     }
 
-    // ──────────────────────────────────────────────
-    //  Helper
-    // ──────────────────────────────────────────────
-
-    private function respond(int $status, string $message): void
+        /* --- Private Helpers --- */
+        private function respond(int $status, string $message): void
     {
         echo json_encode(['status' => $status, 'message' => $message]);
     }
 }
 
-// ── Bootstrap ──────────────────────────────────────
+// --- Script Bootstrap Initialization ---
 $database   = new Database();
 $connection = $database->getConnection();
 $user       = new User($connection);

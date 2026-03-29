@@ -1,6 +1,4 @@
-/* ============================================
-   CODING EDITOR STYLES
-   ============================================ */
+/* CODING EDITOR STYLES*/
 
 /* Override dashboard styles for coding page */
 .coding-header {
@@ -405,13 +403,16 @@ kbd {
   background: #5a5a5a;
 }
 
-/* ============================================
-   RESPONSIVE DESIGN
-   ============================================ */
+/* RESPONSIVE DESIGN */
 
 @media (max-width: 1024px) {
   .editor-container {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .editor-panel,
+  .output-panel {
     min-height: 400px;
   }
 

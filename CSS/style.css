@@ -991,7 +991,7 @@ header ul a:hover::after {
         display: flex;
         justify-content: center;
         margin-top: -50px; /* Slightly overlap upwards to create a sense of hierarchy */
-        opacity: 0.6; /* Slightly faded, don't抢文字视觉 */
+        opacity: 0.6; /* Slightly faded, don't distract from the text */
     }
 
     .hero-vid-box video {

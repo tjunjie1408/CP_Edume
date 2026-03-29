@@ -298,7 +298,7 @@ function isValidEmail(email) {
   return emailRegex.test(email);
 }
 
-// 响应式修正 (确保在手机上也能正确对齐)
+// Responsive adjustment (ensure proper alignment on mobile)
 function responsiveAdjust() {
   var screenWidth = window.innerWidth;
   if (screenWidth <= 480) {
@@ -308,20 +308,20 @@ function responsiveAdjust() {
       loginForm.style.left = "7.5%";
     }
   } else {
-    // PC端重置
+    // Reset for PC
     if (loginForm.style.left !== "-400px") loginForm.style.left = "50px";
     if (registerForm.style.left !== "450px") registerForm.style.left = "50px";
   }
 }
 
-// 监听窗口大小变化 (可选，为了更完美的体��)
+// Listen for window resize (optional, for a better experience)
 window.addEventListener("resize", responsiveAdjust);
 
-// 把这段加在 login-app.js 的最后面
+// Load correct tab based on URL hash
 window.onload = function () {
-  // 检查网址有没有带 #register
+  // Check if URL contains #register
   if (window.location.hash === "#register") {
-    register(); // 调用切换函数
+    register(); // Call toggle function
   }
 };
 

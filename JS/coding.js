@@ -81,6 +81,24 @@ int main() {
     }
     
     return 0;
+}`,
+  
+  golang: `package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, World!")
+    
+    // Variables
+    name := "John"
+    age := 25
+    fmt.Printf("Name: %s, Age: %d\\n", name, age)
+    
+    // Loop
+    for i := 1; i <= 5; i++ {
+        fmt.Printf("Number: %d\\n", i)
+    }
 }`
 };
 
@@ -97,11 +115,17 @@ function initializeCodeEditor() {
   const languageSelect = document.getElementById('language-select');
   const codeEditor = document.getElementById('code-editor');
   
-  // Set initial code
-  codeEditor.value = codeExamples.python;
-  updateLineNumbers();
+  // Apply Practice Challenge Data if it exists
+  if (window.PracticeData && window.PracticeData.isChallenge) {
+      languageSelect.value = window.PracticeData.language;
+      // languageSelect.disabled = true; // Removed language lock to allow users to switch languages
+      codeEditor.value = `# Write your ${window.PracticeData.language} code below to solve the challenge:\n\n`;
+  } else {
+      // Set initial code for sandbox mode
+      codeEditor.value = codeExamples.python;
+  }
   
-  // Update editor title
+  updateLineNumbers();
   updateEditorTitle();
 }
 
@@ -221,13 +245,14 @@ function updateEditorTitle() {
     javascript: 'JavaScript Editor',
     html: 'HTML Editor',
     css: 'CSS Editor',
-    cpp: 'C++ Editor'
+    cpp: 'C++ Editor',
+    golang: 'Go Editor'
   };
   
   editorTitle.textContent = languageNames[languageSelect.value];
 }
 
-// Run code (simulated execution)
+// Run code (simulated execution / challenge validation)
 function runCode() {
   const codeEditor = document.getElementById('code-editor');
   const languageSelect = document.getElementById('language-select');
@@ -237,53 +262,137 @@ function runCode() {
   const language = languageSelect.value;
   
   if (!code.trim()) {
+    clearOutput();
     addOutput('Please write some code first!', 'warning');
     return;
   }
 
   clearOutput();
-  addOutput(`[${new Date().toLocaleTimeString()}] Executing ${language} code...`, 'info');
+  addOutput(`[${new Date().toLocaleTimeString()}] Checking ${language} code...`, 'info');
   addOutput('---', 'info');
 
-  // Simulate different language executions
-  try {
-    if (language === 'python') {
-      executePythonSimulation(code);
-    } else if (language === 'javascript') {
-      executeJavaScript(code);
-    } else if (language === 'html') {
-      executeHTML(code);
-    } else if (language === 'css') {
-      executeCSS(code);
-    } else if (language === 'cpp') {
-      executeCPPSimulation(code);
-    }
-  } catch (error) {
-    addOutput(`Error: ${error.message}`, 'error');
+  // Extract simulated output to show to the user
+  const extractSimulatedOutput = (codeString, lang) => {
+      let regexList = [];
+      if (lang === 'python') regexList = [/print\s*\(\s*(['"])(.*?)\1\s*\)/g];
+      else if (lang === 'javascript') regexList = [/console\.log\s*\(\s*(['"])(.*?)\1\s*\)/g];
+      else if (lang === 'golang') regexList = [/fmt\.Print(?:ln|f)?\s*\(\s*(['"])(.*?)\1/g];
+      else if (lang === 'cpp') regexList = [/cout\s*<<\s*(['"])(.*?)\1/g];
+
+      let outputs = [];
+      regexList.forEach(regex => {
+          let match;
+          while ((match = regex.exec(codeString)) !== null) {
+              addOutput(`> ${match[2]}`, 'success');
+              outputs.push(match[2]);
+          }
+      });
+      return outputs;
+  };
+
+  // Challenge Validation Logic
+  if (window.PracticeData && window.PracticeData.isChallenge) {
+      const expectedKeys = window.PracticeData.expectedKeys.split(',').map(k => k.trim()).filter(k => k);
+      let passed = true;
+      let missingKeys = [];
+      
+      const outputs = extractSimulatedOutput(code, language);
+      const combinedOutput = outputs.join(" ");
+
+      // 0. Smart Syntax & Structural Validation
+      const openBrace = (code.match(/\{/g) || []).length;
+      const closeBrace = (code.match(/\}/g) || []).length;
+      if (openBrace !== closeBrace) {
+          addOutput('❌ Syntax Error: Mismatched curly braces { }. Check your functions and loops.', 'error');
+          passed = false;
+      }
+      
+      const openParen = (code.match(/\(/g) || []).length;
+      const closeParen = (code.match(/\)/g) || []).length;
+      if (openParen !== closeParen) {
+          addOutput('❌ Syntax Error: Mismatched parentheses ( ). Did you forget to close a function call?', 'error');
+          passed = false;
+      }
+
+      const quotesMatch = code.match(/"/g);
+      if (quotesMatch && quotesMatch.length % 2 !== 0) {
+          addOutput('❌ Syntax Error: Missing a closing double quote (") somewhere in your code.', 'error');
+          passed = false;
+      }
+
+      // Language Specific Rules
+      if (language === 'golang') {
+          if (!code.includes('package main')) {
+              addOutput('❌ Golang Structure Error: Every executable Go program must start with "package main".', 'error');
+              passed = false;
+          }
+          if (!code.includes('func main()')) {
+              addOutput('❌ Golang Structure Error: Execution strictly starts from "func main()". Please define it.', 'error');
+              passed = false;
+          }
+      } else if (language === 'cpp') {
+          if (!code.includes('main()')) {
+              addOutput('❌ C++ Structure Error: Program requires "int main()" entry point.', 'error');
+              passed = false;
+          }
+      }
+
+      // 1. Check base keyword presence
+      expectedKeys.forEach(key => {
+          const safeKey = key.replace(/[.*+?^$()|[\]\\]/g, '\\$&');
+          const regex = new RegExp(safeKey, 'i');
+          if (!regex.test(code)) {
+              passed = false;
+              missingKeys.push(key);
+          }
+      });
+      
+      // 2. Strict Quoted Literal Matching: If the problem asks to print "Hello, World!", force exact output match
+      const problemContext = window.PracticeData.problemContext || "";
+      const quoteMatches = problemContext.match(/"([^"]+)"/g);
+      if (quoteMatches) {
+          quoteMatches.forEach(q => {
+              const exactString = q.replace(/"/g, ''); // Strip quotes
+              if (!combinedOutput.includes(exactString)) {
+                  passed = false;
+                  missingKeys.push(`Output missing exact phrase: "${exactString}"`);
+              }
+          });
+      }
+
+      if (passed) {
+          addOutput('✅ Challenge Passed! Your code contains the required logic.', 'success');
+          addOutput('Great job! You can now close this sandbox and continue with the next lesson.', 'success');
+      } else {
+          addOutput('❌ Challenge Failed.', 'error');
+          addOutput(`Hint: Your code seems to be missing: ${missingKeys.join(' | ')}`, 'warning');
+      }
+  } else {
+      // Sandbox Mode
+      extractSimulatedOutput(code, language);
+      addOutput('Executing secure regex analysis...', 'info');
+      
+      try {
+        if (language === 'javascript') {
+          // Super safe basic eval ONLY for javascript sandbox, though regex is better
+          executeJavaScript(code);
+        } else if (language === 'html' || language === 'css') {
+          if (language === 'html') executeHTML(code);
+          if (language === 'css') executeCSS(code);
+        } else {
+          addOutput(`Your ${language} code looks conceptually correct. (Backend compilation disabled in sandbox mode)`, 'success');
+        }
+      } catch (error) {
+        addOutput(`Error: ${error.message}`, 'error');
+      }
   }
 
   updateFileStatus(true);
 }
 
-// Python simulation
+// Python simulation (Removed unsafe eval)
 function executePythonSimulation(code) {
-  // Simple Python simulation - look for print statements
-  const printMatches = code.match(/print\([^)]*\)/g);
-  
-  if (printMatches) {
-    printMatches.forEach(match => {
-      const content = match.replace(/print\(/, '').replace(/\)$/, '');
-      try {
-        // Simple evaluation
-        const result = eval(content.replace(/f"/g, '`').replace(/f'/g, '`'));
-        addOutput(result.toString(), 'success');
-      } catch (e) {
-        addOutput('Python: ' + match, 'info');
-      }
-    });
-  } else {
-    addOutput('Python code executed successfully', 'success');
-  }
+    addOutput('Compilation disabled block.', 'info');
 }
 
 // JavaScript execution
@@ -365,17 +474,7 @@ function executeCSS(code) {
 
 // C++ simulation
 function executeCPPSimulation(code) {
-  // Simple C++ simulation - look for cout statements
-  const coutMatches = code.match(/cout\s*<<\s*[^;]+/g);
-  
-  if (coutMatches) {
-    coutMatches.forEach(match => {
-      const content = match.replace(/cout\s*<<\s*/, '').trim();
-      addOutput('C++: ' + content, 'success');
-    });
-  } else {
-    addOutput('C++ code executed successfully', 'success');
-  }
+  addOutput('C++ code analyzed successfully.', 'success');
 }
 
 // Add output to console
@@ -451,20 +550,8 @@ function loadSavedCode() {
   }
 }
 
-// Load user data
+// Load user data dynamically from PHP backend later instead of mock
 function loadUserData() {
-  const userData = {
-    name: 'John Doe',
-    email: 'john@example.com',
-    learningStyle: 'Visual',
-    profilePicture: 'https://via.placeholder.com/50'
-  };
-
-  const userNameEl = document.getElementById('user-name');
-  const userAvatarEl = document.getElementById('userAvatar');
-
-  if (userNameEl) userNameEl.textContent = userData.name;
-  if (userAvatarEl) userAvatarEl.src = userData.profilePicture;
-
-  sessionStorage.setItem('userData', JSON.stringify(userData));
+  // The header UI data is actually populated by PHP now directly in coding.php
+  // This mock isn't needed anymore as PHP handles session UI rendering.
 }

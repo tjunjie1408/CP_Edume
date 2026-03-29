@@ -46,52 +46,18 @@ async function loadAdminData() {
   }
 }
 
-// Fetch Admin Dashboard Data from Backend
+// Fetch Admin Dashboard Data from Backend API
 async function fetchAdminDashboardData() {
-  // TODO: Replace with actual API endpoint
-  // Example: const response = await fetch('/api/admin/dashboard');
-  
-  // For now, return mock data structure
-  return {
-    statistics: {
-      totalUsers: 1250,
-      totalCourses: 12,
-      totalEnrollments: 3847,
-      completionRate: 68.5,
-      usersChange: '+12%',
-      coursesChange: '+3',
-      enrollmentsChange: '+156',
-      completionRateChange: '+2.3%'
-    },
-    varkDistribution: {
-      visual: 320,
-      aural: 280,
-      reading: 350,
-      kinesthetic: 300
-    },
-    userActivity: {
-      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      data: [45, 52, 48, 61, 55, 40, 35]
-    },
-    topCourses: [
-      { id: 1, name: 'Python Basics', enrollments: 450, rating: 4.8 },
-      { id: 2, name: 'Web Development', enrollments: 380, rating: 4.6 },
-      { id: 3, name: 'JavaScript Mastery', enrollments: 320, rating: 4.7 },
-      { id: 4, name: 'Data Science 101', enrollments: 290, rating: 4.5 }
-    ],
-    recentUsers: [
-      { id: 1, name: 'Sarah Johnson', email: 'sarah@example.com', joinDate: '2024-02-20' },
-      { id: 2, name: 'Mike Chen', email: 'mike@example.com', joinDate: '2024-02-19' },
-      { id: 3, name: 'Emma Davis', email: 'emma@example.com', joinDate: '2024-02-18' },
-      { id: 4, name: 'John Smith', email: 'john@example.com', joinDate: '2024-02-17' }
-    ],
-    systemHealth: {
-      server: { status: 'online', uptime: '99.9%' },
-      database: { status: 'online', load: '45%' },
-      api: { status: 'online', responseTime: '125ms' },
-      storage: { status: 'online', usage: '65%' }
-    }
-  };
+  const response = await fetch(window.AppConfig?.baseUrl
+    ? window.AppConfig.baseUrl + '/admin/dashboard/admin_dashboard_api.php'
+    : 'admin_dashboard_api.php');
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(err.error || 'Failed to fetch dashboard data');
+  }
+
+  return await response.json();
 }
 
 // Update Statistics Cards
@@ -287,16 +253,22 @@ function updateTopCourses(courses) {
   }
 
   courses.forEach((course, index) => {
+    const enrollText = course.enrollments > 0
+      ? `<strong>${course.enrollments}</strong> enrollment${course.enrollments > 1 ? 's' : ''}`
+      : '<em style="color: var(--text-light);">No enrollments yet</em>';
+    const chapterText = course.chapterCount != null
+      ? ` • ${course.chapterCount} chapter${course.chapterCount !== 1 ? 's' : ''}`
+      : '';
+
     const courseElement = document.createElement('div');
     courseElement.className = 'course-item';
     courseElement.innerHTML = `
       <div class="course-item-header">
         <span class="course-item-name">${index + 1}. ${course.name}</span>
-        <span class="course-item-badge">#${course.id}</span>
+        <span class="course-item-badge">#${index + 1}</span>
       </div>
       <div class="course-item-stats">
-        <span><strong>${course.enrollments}</strong> enrollments</span>
-        <span>⭐ ${course.rating}/5</span>
+        <span>${enrollText}${chapterText}</span>
       </div>
     `;
     coursesList.appendChild(courseElement);
@@ -319,7 +291,7 @@ function updateRecentUsers(users) {
     const userElement = document.createElement('div');
     userElement.className = 'user-item';
     userElement.innerHTML = `
-      <img src="https://via.placeholder.com/40?text=${user.name[0]}" alt="${user.name}" class="user-avatar-small">
+      <img src="${user.avatar}" alt="${user.name}" class="user-avatar-small">
       <div class="user-info-content">
         <span class="user-name">${user.name}</span>
         <span class="user-email">${user.email}</span>
@@ -389,16 +361,26 @@ function formatNumber(num) {
 }
 
 function formatDate(dateString) {
-  const date = new Date(dateString);
+  const safeDateString = dateString.replace(/-/g, '/');
+  const date = new Date(safeDateString);
   const today = new Date();
-  const diffTime = Math.abs(today - date);
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Yesterday';
-  if (diffDays < 7) return `${diffDays}d ago`;
   
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const dateStr = date.toDateString();
+  const todayStr = today.toDateString();
+  
+  if (dateStr === todayStr) return 'Today';
+  
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (dateStr === yesterday.toDateString()) return 'Yesterday';
+  
+  const diffTime = Math.abs(today - date);
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+  
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 function showLoadingState() {

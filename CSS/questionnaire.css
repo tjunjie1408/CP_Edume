@@ -44,7 +44,7 @@ body {
   background: linear-gradient(135deg, var(--light-bg) 0%, #e8eef9 100%);
 }
 
-/* ============== HEADER ============== */
+/*HEADER */
 header {
   display: flex;
   align-items: center;
@@ -112,7 +112,7 @@ header {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* ============== MAIN CONTENT ============== */
+/* MAIN CONTENT */
 .questionnaire-container {
   flex: 1;
   display: flex;
@@ -153,7 +153,7 @@ header {
   }
 }
 
-/* ============== START SCREEN ============== */
+/* START SCREEN */
 #start-screen {
   padding: 20px;
 }
@@ -174,7 +174,7 @@ header {
   margin-right: auto;
 }
 
-/* ============== QUESTION SCREEN ============== */
+/* QUESTION SCREEN */
 #question-screen {
   padding: 10px;
 }
@@ -280,7 +280,7 @@ header {
   opacity: 0.6;
 }
 
-/* ============== RESULT SCREEN ============== */
+/* RESULT SCREEN */
 #result-screen {
   padding: 20px;
   animation: fadeIn 0.6s ease-out;
@@ -367,7 +367,7 @@ header {
   margin-top: 8px;
 }
 
-/* ============== BUTTONS ============== */
+/* BUTTONS */
 .action-btn {
   width: 100%;
   max-width: 500px;
@@ -419,7 +419,7 @@ header {
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
 }
 
-/* ============== TEXT STYLES ============== */
+/* TEXT STYLES */
 .gradient-text {
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
   background-clip: text;
@@ -438,12 +438,12 @@ p {
   padding: 0;
 }
 
-/* ============== UTILITY ============== */
+/* UTILITY */
 .hide {
   display: none !important;
 }
 
-/* ============== RESPONSIVE ============== */
+/* RESPONSIVE */
 @media (max-width: 768px) {
   header {
     padding: 1rem 15px;

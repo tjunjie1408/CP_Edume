@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
   setActiveNav();
   setupSharedEventListeners();
   
+  
   // Only run if progress bars exist (Dashboard only)
   if (document.querySelector('.progress-fill')) {
     animateProgressBars();
@@ -11,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   setupSidebarToggle();
   setupMobileMenu();
+  initDarkMode();
 });
 
 // Set Active Navigation Link
@@ -30,23 +32,11 @@ function setActiveNav() {
   });
 }
 
-// Load User Data (Safe for both pages)
+// Load User Data — Names are now rendered server-side by PHP via $_SESSION.
+// This function is kept as a no-op so any callers don't break.
 function loadUserData() {
-  const userData = {
-    name: 'John Doe',
-    email: 'john@example.com',
-    learningStyle: 'Visual',
-    profilePicture: 'https://via.placeholder.com/50'
-  };
-
-  const userNameEl = document.getElementById('user-name');
-  const bannerUserNameEl = document.getElementById('banner-user-name');
-
-  // Only update if the elements exist on the current HTML page
-  if (userNameEl) userNameEl.textContent = userData.name;
-  if (bannerUserNameEl) bannerUserNameEl.textContent = userData.name;
-  
-  sessionStorage.setItem('userData', JSON.stringify(userData));
+  // PHP already injects the real username into #user-name and #banner-user-name.
+  // No client-side override needed.
 }
 
 // Setup Shared Event Listeners
@@ -85,7 +75,7 @@ function setupSidebarToggle() {
   const sidebar = document.querySelector('.sidebar');
   const toggleBtn = document.querySelector('.sidebar-toggler');
   
-  if (toggleBtn) {
+  if (toggleBtn && sidebar) {
     toggleBtn.addEventListener('click', function() {
       if (window.innerWidth > 768) {
         sidebar.classList.toggle('collapsed');
@@ -94,7 +84,7 @@ function setupSidebarToggle() {
     });
   }
 
-  if (window.innerWidth > 768 && localStorage.getItem('sidebarCollapsed') === 'true') {
+  if (sidebar && window.innerWidth > 768 && localStorage.getItem('sidebarCollapsed') === 'true') {
     sidebar.classList.add('collapsed');
   }
 }
@@ -104,7 +94,7 @@ function setupMobileMenu() {
   const menuBtn = document.querySelector('.sidebar-menu-button');
   const sidebar = document.querySelector('.sidebar');
   
-  if (menuBtn) {
+  if (menuBtn && sidebar) {
     menuBtn.addEventListener('click', function(e) {
       e.stopPropagation();
       sidebar.classList.toggle('active');
@@ -123,7 +113,7 @@ function setupMobileMenu() {
     const isClickOnSidebar = e.target.closest('.sidebar');
     const isClickOnMenuBtn = e.target.closest('.sidebar-menu-button');
     
-    if (!isClickOnSidebar && !isClickOnMenuBtn && window.innerWidth <= 768) {
+    if (sidebar && !isClickOnSidebar && !isClickOnMenuBtn && window.innerWidth <= 768) {
       sidebar.classList.remove('active');
     }
   });
@@ -232,6 +222,7 @@ function searchCourses(query) {
 // Handle window resize for responsive behavior
 window.addEventListener('resize', function() {
   const sidebar = document.querySelector('.sidebar');
+  if (!sidebar) return;
   if (window.innerWidth > 768) {
     sidebar.classList.remove('active');
     if (localStorage.getItem('sidebarCollapsed') === 'true') {
@@ -245,6 +236,7 @@ window.addEventListener('resize', function() {
 // Initial check on page load
 window.addEventListener('load', function() {
   const sidebar = document.querySelector('.sidebar');
+  if (!sidebar) return;
   if (window.innerWidth > 768) {
     if (localStorage.getItem('sidebarCollapsed') === 'true') {
       sidebar.classList.add('collapsed');
@@ -253,3 +245,71 @@ window.addEventListener('load', function() {
     sidebar.classList.remove('collapsed', 'active');
   }
 });
+
+//   VARK PERSONALIZED DASHBOARD LOGIC
+
+// Initialize CodeMirror (Kinesthetic Sandbox)
+let editor = null;
+function initCodeMirror() {
+  const textarea = document.getElementById('php-sandbox');
+  if (textarea) {
+    editor = CodeMirror.fromTextArea(textarea, {
+      lineNumbers: true,
+      mode: "python",
+      theme: "dracula",
+      matchBrackets: true,
+      indentUnit: 4,
+      indentWithTabs: true
+    });
+  }
+}
+
+// Ensure CodeMirror is initialized if the text area is present
+document.addEventListener('DOMContentLoaded', () => {
+  initCodeMirror();
+});
+
+// Mock Compiler Logic
+function runMockCompiler(editorId) {
+  if (!editor) return;
+  
+  const code = editor.getValue();
+  
+  // Extremely lenient Regex: look for 'print' followed by 'Hello World' (ignoring quotes, spacing, casing)
+  const isValid = /print\s*\(\s*['"]Hello\s+World['"]\s*\)/i.test(code);
+  
+  if (isValid) {
+    showNotification("Mission Accomplished! You successfully wrote Hello World in Python! \uD83C\uDF89", "success");
+  } else {
+    showNotification("Oops! That doesn't look quite right. Did you type 'print(\"Hello World\")'?", "error");
+  }
+}
+
+// Accordion Toggle (Visual Learner)
+function toggleAccordion(id) {
+  const el = document.getElementById(id);
+  if(el) {
+    el.classList.toggle('active');
+  }
+}
+
+// Hint Toggle (Kinesthetic Learner)
+function toggleHint(id) {
+  const el = document.getElementById(id);
+  if(el) {
+    el.classList.toggle('hide');
+  }
+}
+
+// Scroll to Sandbox helper
+function scrollToSandbox() {
+  showNotification("The full sandbox is available on the course player page!", "info");
+}
+
+// Dark Mode logic (Shared across site)
+function initDarkMode() {
+  const currentTheme = localStorage.getItem('theme');
+  if (currentTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+  }
+}

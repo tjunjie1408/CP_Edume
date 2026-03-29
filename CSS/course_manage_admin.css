@@ -1,6 +1,4 @@
-/* ============================================
-   ADMIN COURSE MANAGEMENT STYLES
-   ============================================ */
+/* ADMIN COURSE MANAGEMENT STYLES*/
 
 /* Main Content Area */
 .admin-course-content {
@@ -36,9 +34,7 @@
   to { opacity: 1; }
 }
 
-/* ============================================
-   LEVEL 1: COURSES LIST VIEW
-   ============================================ */
+/* COURSES LIST VIEW*/
 
 .view-header {
   display: flex;
@@ -154,9 +150,7 @@
   color: white;
 }
 
-/* ============================================
-   LEVEL 2: COURSE EDITOR VIEW
-   ============================================ */
+/* COURSE EDITOR VIEW*/
 
 /* Breadcrumb */
 .breadcrumb {
@@ -441,9 +435,7 @@
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-/* ============================================
-   RESOURCES AND QUIZ TABS
-   ============================================ */
+/*RESOURCES AND QUIZ TABS*/
 
 .resource-quiz-tabs {
   margin-top: 2rem;
@@ -604,9 +596,7 @@
   border-top: 2px solid var(--border-color);
 }
 
-/* ============================================
-   IMAGE UPLOAD STYLES
-   ============================================ */
+/* IMAGE UPLOAD STYLES*/
 
 .image-upload-container {
   display: flex;
@@ -677,9 +667,7 @@
   display: none;
 }
 
-/* ============================================
-   MODALS
-   ============================================ */
+/* MODALS*/
 
 .modal {
   display: none;
@@ -875,9 +863,7 @@
   display: none !important;
 }
 
-/* ============================================
-   RESPONSIVE DESIGN
-   ============================================ */
+/* RESPONSIVE DESIGN*/
 
 @media (max-width: 1200px) {
   .course-editor-container {

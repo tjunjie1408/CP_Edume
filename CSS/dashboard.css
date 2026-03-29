@@ -292,6 +292,15 @@ body {
   margin-left: var(--sidebar-collapsed-width);
 }
 
+/* Section Spacing */
+.section {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 1.5rem 2rem;
+  margin-bottom: 1.5rem;
+}
+
 /* Welcome Banner */
 .welcome-banner {
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
@@ -866,4 +875,97 @@ body {
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
   }
+}
+
+/* ============================================
+   DARK MODE
+   ============================================ */
+body.dark-mode {
+  --dark-bg: #0f0f1a;
+  --light-bg: #1a1a2e;
+  --card-bg: #16213e;
+  --text-dark: #e2e8f0;
+  --text-light: #94a3b8;
+  --border-color: #2a2a4a;
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%) !important;
+  color: var(--text-dark);
+}
+
+/* Sidebar & Header in Dark Mode */
+body.dark-mode .sidebar {
+  background: #0f172a;
+  border-right: 1px solid var(--border-color);
+}
+
+body.dark-mode .top-header {
+  background: #0f172a;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Cards & Sections in Dark Mode */
+body.dark-mode .card,
+body.dark-mode .section,
+body.dark-mode .profile-section,
+body.dark-mode .admin-section {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+}
+
+/* Input/Select/Textarea in Dark Mode */
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+  background: #1e293b;
+  color: var(--text-dark);
+  border-color: var(--border-color);
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+  color: var(--text-light);
+}
+
+/* Feed items & list items */
+body.dark-mode .feed-item,
+body.dark-mode .course-card,
+body.dark-mode .resume-course-card {
+  background: #1e293b;
+  border-color: var(--border-color);
+}
+
+/* Chapter sidebar panels */
+body.dark-mode .chapter-item,
+body.dark-mode .subject-card,
+body.dark-mode .topic-card {
+  background: #1e293b;
+  border-color: var(--border-color);
+  color: var(--text-dark);
+}
+
+/* Progress bars */
+body.dark-mode .progress-bar {
+  background: #2a2a4a;
+}
+
+/* Scrollbar */
+body.dark-mode ::-webkit-scrollbar-track {
+  background: var(--dark-bg);
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+  background: #3a3a5a;
+}
+
+/* Links */
+body.dark-mode a {
+  color: var(--primary-color);
+}
+
+/* Modal overlays */
+body.dark-mode .modal-content,
+body.dark-mode .modal-body {
+  background: var(--card-bg);
+  color: var(--text-dark);
 }

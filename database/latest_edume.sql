@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- 主机： 127.0.0.1
--- 生成日期： 2026-03-22 13:23:52
--- 服务器版本： 10.4.32-MariaDB
--- PHP 版本： 8.2.12
+-- Host: 127.0.0.1
+-- Generation Time: Mar 29, 2026 at 11:31 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- 数据库： `edume`
+-- Database: `edume`
 --
 
 -- --------------------------------------------------------
 
 --
--- 表的结构 `achievements`
+-- Table structure for table `achievements`
 --
 
 CREATE TABLE `achievements` (
@@ -37,7 +37,7 @@ CREATE TABLE `achievements` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- 转存表中的数据 `achievements`
+-- Dumping data for table `achievements`
 --
 
 INSERT INTO `achievements` (`id`, `name`, `description`, `badge_icon`, `criteria_type`, `criteria_value`) VALUES
@@ -53,7 +53,7 @@ INSERT INTO `achievements` (`id`, `name`, `description`, `badge_icon`, `criteria
 -- --------------------------------------------------------
 
 --
--- 表的结构 `chapters`
+-- Table structure for table `chapters`
 --
 
 CREATE TABLE `chapters` (
@@ -66,7 +66,7 @@ CREATE TABLE `chapters` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- 转存表中的数据 `chapters`
+-- Dumping data for table `chapters`
 --
 
 INSERT INTO `chapters` (`id`, `course_id`, `title`, `overview`, `order_num`, `xp_reward`) VALUES
@@ -81,12 +81,13 @@ INSERT INTO `chapters` (`id`, `course_id`, `title`, `overview`, `order_num`, `xp
 (9, 4, 'Operators and Expressions', NULL, 3, 75),
 (10, 4, 'Control Flow', NULL, 4, 100),
 (11, 4, 'Loops', NULL, 5, 100),
-(12, 4, 'Functions', NULL, 6, 125);
+(12, 4, 'Functions', NULL, 6, 125),
+(13, 5, 'Chapter 1: Introduction & Variable', 'Get started with Go syntax, variables, and basic I/O operations', 1, 10);
 
 -- --------------------------------------------------------
 
 --
--- 表的结构 `chapter_objectives`
+-- Table structure for table `chapter_objectives`
 --
 
 CREATE TABLE `chapter_objectives` (
@@ -98,7 +99,7 @@ CREATE TABLE `chapter_objectives` (
 -- --------------------------------------------------------
 
 --
--- 表的结构 `content_materials`
+-- Table structure for table `content_materials`
 --
 
 CREATE TABLE `content_materials` (
@@ -115,7 +116,7 @@ CREATE TABLE `content_materials` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- 转存表中的数据 `content_materials`
+-- Dumping data for table `content_materials`
 --
 
 INSERT INTO `content_materials` (`id`, `chapter_id`, `content_type`, `title`, `youtube_url`, `text_content`, `practice_problem`, `practice_solution`, `practice_language`, `vark_tag`) VALUES
@@ -154,12 +155,15 @@ INSERT INTO `content_materials` (`id`, `chapter_id`, `content_type`, `title`, `y
 (33, 11, 'practice', 'For Loop Challenge', NULL, NULL, 'Write a for loop that:\n1. Initialization: let i = 1\n2. Condition: i <= 5\n3. Increment: i++\n4. Prints each number', 'for,console.log', 'javascript', 'kinesthetic'),
 (34, 12, 'video', 'Functions & Arrow Functions', 'https://www.youtube.com/embed/N8ap4k_1QEQ?start=0&end=180', NULL, NULL, NULL, 'javascript', 'visual'),
 (35, 12, 'text', 'JS Functions', NULL, '<h2>Arrow Functions</h2><p>Modern JS relies heavily on arrow functions.</p><pre><code>const add = (a, b) => a + b;\nconsole.log(add(2, 3));</code></pre>', NULL, NULL, 'javascript', 'read'),
-(36, 12, 'practice', 'Arrow Function Challenge', NULL, NULL, 'Create an arrow function called \"multiply\" that:\n1. Takes two parameters\n2. Returns their product\n3. Call the function and print the result', 'const,return,console.log', 'javascript', 'kinesthetic');
+(36, 12, 'practice', 'Arrow Function Challenge', NULL, NULL, 'Create an arrow function called \"multiply\" that:\n1. Takes two parameters\n2. Returns their product\n3. Call the function and print the result', 'const,return,console.log', 'javascript', 'kinesthetic'),
+(37, 13, 'video', 'Go Crash Course - First Steps', 'https://www.youtube.com/embed/un6ZyFkqFKo?start=0&end=900', NULL, NULL, NULL, 'golang', 'visual'),
+(38, 13, 'practice', 'Practice: Print Your First Message', NULL, NULL, 'Write a Go program that prints exactly \"Welcome to EduMe!\" to the console. Make sure you include \'package main\' and import the \'fmt\' package.', NULL, 'golang', 'kinesthetic'),
+(39, 13, 'text', 'Go Syntax & Variables Guide', NULL, '<h3>Hello World in Go</h3>\n<p>In Go, every program is part of a package. An executable program must use <code>package main</code>.</p>\n<pre><code>package main\n\nimport \"fmt\"\n\nfunc main() {\n    fmt.Println(\"Hello, Go!\")\n}</code></pre>\n\n<h3>Variables & Types</h3>\n<p>You can declare variables using the <code>var</code> keyword or the short assignment <code>:=</code>.</p>\n<ul>\n  <li><code>var name string = \"EduMe\"</code></li>\n  <li><code>age := 20</code> (type dynamically inferred as int)</li>\n</ul>', NULL, NULL, 'golang', 'read');
 
 -- --------------------------------------------------------
 
 --
--- 表的结构 `courses`
+-- Table structure for table `courses`
 --
 
 CREATE TABLE `courses` (
@@ -178,19 +182,20 @@ CREATE TABLE `courses` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- 转存表中的数据 `courses`
+-- Dumping data for table `courses`
 --
 
 INSERT INTO `courses` (`id`, `title`, `description`, `category`, `difficulty`, `cover_image`, `has_visual`, `has_read`, `has_kinesthetic`, `has_aural`, `is_published`, `created_at`) VALUES
-(1, 'Python Basics', 'Learn Python programming from scratch. Perfect for beginners who want to start their coding journey with one of the most popular and versatile programming languages.', 'Python', 'beginner', '/image/1.png', 1, 1, 1, 0, 1, '2026-03-20 21:37:03'),
-(2, 'Web Development Fundamentals', 'Master HTML, CSS, and JavaScript to build beautiful websites. Coming soon!', 'Web Development', 'beginner', '/image/2.png', 1, 1, 1, 0, 0, '2026-03-20 21:37:03'),
-(3, 'Data Science Essentials', 'Explore data analysis, visualization, and machine learning basics. Coming soon!', 'Data Science', 'intermediate', '/image/3.webp', 1, 1, 1, 0, 0, '2026-03-20 21:37:03'),
-(4, 'JavaScript Fundamentals', 'Master JavaScript from basic syntax to advanced concepts. The essential language for modern web development.', 'JavaScript', 'beginner', '/image/12.png', 1, 1, 1, 0, 1, '2026-03-20 22:09:18');
+(1, 'Python Basics', 'Learn Python programming from scratch. Perfect for beginners who want to start their coding journey with one of the most popular and versatile programming languages.', 'Python', 'beginner', '/image/1.png', 1, 1, 1, 0, 1, '2026-03-21 05:37:03'),
+(2, 'Web Development Fundamentals', 'Master HTML, CSS, and JavaScript to build beautiful websites. Coming soon!', 'Web Development', 'beginner', '/image/2.png', 1, 1, 1, 0, 0, '2026-03-21 05:37:03'),
+(3, 'Data Science Essentials', 'Explore data analysis, visualization, and machine learning basics. Coming soon!', 'Data Science', 'intermediate', '/image/3.webp', 1, 1, 1, 0, 0, '2026-03-21 05:37:03'),
+(4, 'JavaScript Fundamentals', 'Master JavaScript from basic syntax to advanced concepts. The essential language for modern web development.', 'JavaScript', 'beginner', '/image/12.png', 1, 1, 1, 0, 1, '2026-03-21 06:09:18'),
+(5, 'Foundation of Golang', 'The bacis of language go', 'Golang', 'beginner', 'data:image/jpeg;base64,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', 0, 0, 0, 0, 1, '2026-03-24 17:22:27');
 
 -- --------------------------------------------------------
 
 --
--- 表的结构 `quizzes`
+-- Table structure for table `quizzes`
 --
 
 CREATE TABLE `quizzes` (
@@ -201,7 +206,7 @@ CREATE TABLE `quizzes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- 转存表中的数据 `quizzes`
+-- Dumping data for table `quizzes`
 --
 
 INSERT INTO `quizzes` (`id`, `chapter_id`, `title`, `passing_score`) VALUES
@@ -216,12 +221,13 @@ INSERT INTO `quizzes` (`id`, `chapter_id`, `title`, `passing_score`) VALUES
 (9, 9, 'Operators Quiz', 60),
 (10, 10, 'Control Flow Quiz', 60),
 (11, 11, 'Loops Quiz', 60),
-(12, 12, 'Functions Quiz', 60);
+(12, 12, 'Functions Quiz', 60),
+(13, 13, 'Chapter Quiz', 60);
 
 -- --------------------------------------------------------
 
 --
--- 表的结构 `quiz_attempts`
+-- Table structure for table `quiz_attempts`
 --
 
 CREATE TABLE `quiz_attempts` (
@@ -235,7 +241,7 @@ CREATE TABLE `quiz_attempts` (
 -- --------------------------------------------------------
 
 --
--- 表的结构 `quiz_questions`
+-- Table structure for table `quiz_questions`
 --
 
 CREATE TABLE `quiz_questions` (
@@ -251,7 +257,7 @@ CREATE TABLE `quiz_questions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- 转存表中的数据 `quiz_questions`
+-- Dumping data for table `quiz_questions`
 --
 
 INSERT INTO `quiz_questions` (`id`, `quiz_id`, `question_text`, `option_a`, `option_b`, `option_c`, `option_d`, `correct_option`, `explanation`) VALUES
@@ -290,12 +296,15 @@ INSERT INTO `quiz_questions` (`id`, `quiz_id`, `question_text`, `option_a`, `opt
 (33, 11, 'What statement breaks out of a loop?', 'stop', 'break', 'exit', 'return', 'B', 'The break statement jumps out of a loop.'),
 (34, 12, 'How do you create an arrow function?', 'function => {}', '() => {}', '=> function()', 'arrow() {}', 'B', '() => {} is the syntax for an arrow function.'),
 (35, 12, 'Inside which HTML element do we put JavaScript?', '<scripting>', '<javascript>', '<js>', '<script>', 'D', 'JavaScript code is placed inside <script> tags.'),
-(36, 12, 'What does the return statement do?', 'Prints to console', 'Stops function and returns a value', 'Declares a variable', 'Loops code', 'B', 'return ends function execution and specifies a value to be returned.');
+(36, 12, 'What does the return statement do?', 'Prints to console', 'Stops function and returns a value', 'Declares a variable', 'Loops code', 'B', 'return ends function execution and specifies a value to be returned.'),
+(37, 13, 'Which keyword or operator is used to declare a variable in Go with automatic type inference?', 'var', ':=', 'let', 'def', 'B', 'The := syntax is used in Go for short variable declarations with implicit type inference.'),
+(38, 13, 'What is the correct way to print output to the console in Go?', 'console.log(\"Hello\")', 'print(\"Hello\")', 'System.out.println(\"Hello\")', 'fmt.Println(\"Hello\")', 'D', 'You must import the \'fmt\' package and call fmt.Println to print to standard output in Go.'),
+(39, 13, 'Which of the following describes the difference between var and := in Go?', 'var is used for constants, := is used for variables', ':= can only be used inside functions, while var can be used anywhere', 'var requires a type declaration, := does not', 'There is no difference between them', 'B', 'The short declaration operator := can only be used inside function bodies, whereas var can be used at the package level as well.');
 
 -- --------------------------------------------------------
 
 --
--- 表的结构 `reports`
+-- Table structure for table `reports`
 --
 
 CREATE TABLE `reports` (
@@ -309,10 +318,17 @@ CREATE TABLE `reports` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `reports`
+--
+
+INSERT INTO `reports` (`id`, `user_id`, `course_id`, `report_type`, `content`, `status`, `admin_notes`, `created_at`) VALUES
+(1, 2, 5, 'feedback', 'Material quality no bad', 'resolved', '', '2026-03-24 20:25:18');
+
 -- --------------------------------------------------------
 
 --
--- 表的结构 `users`
+-- Table structure for table `users`
 --
 
 CREATE TABLE `users` (
@@ -333,18 +349,18 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- 转存表中的数据 `users`
+-- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password_hash`, `role`, `primary_vark_style`, `experience_level`, `bio`, `profile_avatar_url`, `created_at`, `updated_at`, `current_streak`, `last_login_date`, `email_notifications_enabled`) VALUES
-(1, 'admin', 'admin@edume.com', '$2y$10$QafSPPEwtpHY1.wPPli3OeLpTSxpldE7vOtzZ4xN7kOm4O82X9s7a', 'admin', 'visual', 'Beginner', NULL, NULL, '2026-03-20 21:37:03', '2026-03-22 20:20:42', 1, '2026-03-22', 1),
-(2, 'student', 'student@gmail.com', '$2y$10$0JXMO3ZueQrTAuPnPmzyp.r0ggZT6O2J4fJIVZkAiASh7w4/2.VB.', 'student', 'read', 'Beginner', NULL, NULL, '2026-03-20 21:38:53', '2026-03-22 20:14:27', 1, '2026-03-22', 1),
-(4, 'Jason', 'jasonteo1408@gmail.com', '$2y$10$2zSdzl1h1RkdIj2gCizXkucI2mqiB3I9jRw2nXA4a6oc1yBWDNYjK', 'student', 'kinesthetic', 'Beginner', NULL, NULL, '2026-03-22 20:20:04', '2026-03-22 20:22:12', 1, '2026-03-22', 1);
+(1, 'admin', 'admin@edume.com', '$2y$10$QafSPPEwtpHY1.wPPli3OeLpTSxpldE7vOtzZ4xN7kOm4O82X9s7a', 'admin', 'visual', 'Beginner', NULL, NULL, '2026-03-21 05:37:03', '2026-03-26 13:10:43', 5, '2026-03-26', 1),
+(2, 'student', 'student@gmail.com', '$2y$10$sfrMG8XADHDOZ47QPDPjuOQ6ejXuMCVPK/cgWJlaWYDKV88bKtZge', 'student', 'read', 'Beginner', NULL, NULL, '2026-03-21 05:38:53', '2026-03-29 17:29:42', 1, '2026-03-29', 1),
+(5, 'vera', 'vera@gmail.com', '$2y$10$hh2Axaz4oQYUG2XT7Djf6uhb00RH1TUIUWfxqw2HdWVH1wIA5JaPy', 'student', NULL, 'Beginner', NULL, NULL, '2026-03-23 05:42:56', '2026-03-23 21:31:07', 1, '2026-03-22', 1);
 
 -- --------------------------------------------------------
 
 --
--- 表的结构 `user_achievements`
+-- Table structure for table `user_achievements`
 --
 
 CREATE TABLE `user_achievements` (
@@ -357,7 +373,7 @@ CREATE TABLE `user_achievements` (
 -- --------------------------------------------------------
 
 --
--- 表的结构 `user_progress`
+-- Table structure for table `user_progress`
 --
 
 CREATE TABLE `user_progress` (
@@ -369,10 +385,19 @@ CREATE TABLE `user_progress` (
   `xp_earned` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `user_progress`
+--
+
+INSERT INTO `user_progress` (`id`, `user_id`, `chapter_id`, `is_completed`, `completed_at`, `xp_earned`) VALUES
+(1, 2, 1, 1, '2026-03-24 17:08:53', 0),
+(6, 2, 13, 1, '2026-03-24 20:44:00', 0),
+(29, 2, 7, 0, NULL, 0);
+
 -- --------------------------------------------------------
 
 --
--- 表的结构 `user_skills`
+-- Table structure for table `user_skills`
 --
 
 CREATE TABLE `user_skills` (
@@ -384,7 +409,7 @@ CREATE TABLE `user_skills` (
 -- --------------------------------------------------------
 
 --
--- 表的结构 `user_vark_results`
+-- Table structure for table `user_vark_results`
 --
 
 CREATE TABLE `user_vark_results` (
@@ -400,7 +425,7 @@ CREATE TABLE `user_vark_results` (
 -- --------------------------------------------------------
 
 --
--- 表的结构 `vark_options`
+-- Table structure for table `vark_options`
 --
 
 CREATE TABLE `vark_options` (
@@ -411,7 +436,7 @@ CREATE TABLE `vark_options` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- 转存表中的数据 `vark_options`
+-- Dumping data for table `vark_options`
 --
 
 INSERT INTO `vark_options` (`id`, `question_id`, `option_text`, `vark_type`) VALUES
@@ -449,7 +474,7 @@ INSERT INTO `vark_options` (`id`, `question_id`, `option_text`, `vark_type`) VAL
 -- --------------------------------------------------------
 
 --
--- 表的结构 `vark_questions`
+-- Table structure for table `vark_questions`
 --
 
 CREATE TABLE `vark_questions` (
@@ -460,7 +485,7 @@ CREATE TABLE `vark_questions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- 转存表中的数据 `vark_questions`
+-- Dumping data for table `vark_questions`
 --
 
 INSERT INTO `vark_questions` (`id`, `question_text`, `order_num`, `is_active`) VALUES
@@ -476,17 +501,17 @@ INSERT INTO `vark_questions` (`id`, `question_text`, `order_num`, `is_active`) V
 (10, 'To remember a phone number, I would:', 10, 1);
 
 --
--- 转储表的索引
+-- Indexes for dumped tables
 --
 
 --
--- 表的索引 `achievements`
+-- Indexes for table `achievements`
 --
 ALTER TABLE `achievements`
   ADD PRIMARY KEY (`id`);
 
 --
--- 表的索引 `chapters`
+-- Indexes for table `chapters`
 --
 ALTER TABLE `chapters`
   ADD PRIMARY KEY (`id`),
@@ -494,14 +519,14 @@ ALTER TABLE `chapters`
   ADD KEY `idx_order` (`order_num`);
 
 --
--- 表的索引 `chapter_objectives`
+-- Indexes for table `chapter_objectives`
 --
 ALTER TABLE `chapter_objectives`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_chapter_obj` (`chapter_id`);
 
 --
--- 表的索引 `content_materials`
+-- Indexes for table `content_materials`
 --
 ALTER TABLE `content_materials`
   ADD PRIMARY KEY (`id`),
@@ -509,7 +534,7 @@ ALTER TABLE `content_materials`
   ADD KEY `idx_type` (`content_type`);
 
 --
--- 表的索引 `courses`
+-- Indexes for table `courses`
 --
 ALTER TABLE `courses`
   ADD PRIMARY KEY (`id`),
@@ -518,14 +543,14 @@ ALTER TABLE `courses`
   ADD KEY `idx_published` (`is_published`);
 
 --
--- 表的索引 `quizzes`
+-- Indexes for table `quizzes`
 --
 ALTER TABLE `quizzes`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_chapter_quiz` (`chapter_id`);
 
 --
--- 表的索引 `quiz_attempts`
+-- Indexes for table `quiz_attempts`
 --
 ALTER TABLE `quiz_attempts`
   ADD PRIMARY KEY (`id`),
@@ -533,14 +558,14 @@ ALTER TABLE `quiz_attempts`
   ADD KEY `idx_quiz_attempt` (`quiz_id`);
 
 --
--- 表的索引 `quiz_questions`
+-- Indexes for table `quiz_questions`
 --
 ALTER TABLE `quiz_questions`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_quiz_question` (`quiz_id`);
 
 --
--- 表的索引 `reports`
+-- Indexes for table `reports`
 --
 ALTER TABLE `reports`
   ADD PRIMARY KEY (`id`),
@@ -548,7 +573,7 @@ ALTER TABLE `reports`
   ADD KEY `course_id` (`course_id`);
 
 --
--- 表的索引 `users`
+-- Indexes for table `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
@@ -558,7 +583,7 @@ ALTER TABLE `users`
   ADD KEY `idx_role` (`role`);
 
 --
--- 表的索引 `user_achievements`
+-- Indexes for table `user_achievements`
 --
 ALTER TABLE `user_achievements`
   ADD PRIMARY KEY (`id`),
@@ -567,7 +592,7 @@ ALTER TABLE `user_achievements`
   ADD KEY `idx_user_ach` (`user_id`);
 
 --
--- 表的索引 `user_progress`
+-- Indexes for table `user_progress`
 --
 ALTER TABLE `user_progress`
   ADD PRIMARY KEY (`id`),
@@ -576,28 +601,28 @@ ALTER TABLE `user_progress`
   ADD KEY `idx_chapter_prog` (`chapter_id`);
 
 --
--- 表的索引 `user_skills`
+-- Indexes for table `user_skills`
 --
 ALTER TABLE `user_skills`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_user_skills` (`user_id`);
 
 --
--- 表的索引 `user_vark_results`
+-- Indexes for table `user_vark_results`
 --
 ALTER TABLE `user_vark_results`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_user_vark_res` (`user_id`);
 
 --
--- 表的索引 `vark_options`
+-- Indexes for table `vark_options`
 --
 ALTER TABLE `vark_options`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_question_vark` (`question_id`);
 
 --
--- 表的索引 `vark_questions`
+-- Indexes for table `vark_questions`
 --
 ALTER TABLE `vark_questions`
   ADD PRIMARY KEY (`id`),
@@ -605,181 +630,181 @@ ALTER TABLE `vark_questions`
   ADD KEY `idx_active_vark` (`is_active`);
 
 --
--- 在导出的表使用AUTO_INCREMENT
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- 使用表AUTO_INCREMENT `achievements`
+-- AUTO_INCREMENT for table `achievements`
 --
 ALTER TABLE `achievements`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- 使用表AUTO_INCREMENT `chapters`
+-- AUTO_INCREMENT for table `chapters`
 --
 ALTER TABLE `chapters`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
--- 使用表AUTO_INCREMENT `chapter_objectives`
+-- AUTO_INCREMENT for table `chapter_objectives`
 --
 ALTER TABLE `chapter_objectives`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- 使用表AUTO_INCREMENT `content_materials`
+-- AUTO_INCREMENT for table `content_materials`
 --
 ALTER TABLE `content_materials`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
--- 使用表AUTO_INCREMENT `courses`
+-- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- 使用表AUTO_INCREMENT `quizzes`
+-- AUTO_INCREMENT for table `quizzes`
 --
 ALTER TABLE `quizzes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
--- 使用表AUTO_INCREMENT `quiz_attempts`
+-- AUTO_INCREMENT for table `quiz_attempts`
 --
 ALTER TABLE `quiz_attempts`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- 使用表AUTO_INCREMENT `quiz_questions`
+-- AUTO_INCREMENT for table `quiz_questions`
 --
 ALTER TABLE `quiz_questions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
--- 使用表AUTO_INCREMENT `reports`
+-- AUTO_INCREMENT for table `reports`
 --
 ALTER TABLE `reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- 使用表AUTO_INCREMENT `users`
+-- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- 使用表AUTO_INCREMENT `user_achievements`
+-- AUTO_INCREMENT for table `user_achievements`
 --
 ALTER TABLE `user_achievements`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- 使用表AUTO_INCREMENT `user_progress`
+-- AUTO_INCREMENT for table `user_progress`
 --
 ALTER TABLE `user_progress`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
--- 使用表AUTO_INCREMENT `user_skills`
+-- AUTO_INCREMENT for table `user_skills`
 --
 ALTER TABLE `user_skills`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- 使用表AUTO_INCREMENT `user_vark_results`
+-- AUTO_INCREMENT for table `user_vark_results`
 --
 ALTER TABLE `user_vark_results`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- 使用表AUTO_INCREMENT `vark_options`
+-- AUTO_INCREMENT for table `vark_options`
 --
 ALTER TABLE `vark_options`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
--- 使用表AUTO_INCREMENT `vark_questions`
+-- AUTO_INCREMENT for table `vark_questions`
 --
 ALTER TABLE `vark_questions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- 限制导出的表
+-- Constraints for dumped tables
 --
 
 --
--- 限制表 `chapters`
+-- Constraints for table `chapters`
 --
 ALTER TABLE `chapters`
   ADD CONSTRAINT `chapters_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE;
 
 --
--- 限制表 `chapter_objectives`
+-- Constraints for table `chapter_objectives`
 --
 ALTER TABLE `chapter_objectives`
   ADD CONSTRAINT `fk_chapter_obj` FOREIGN KEY (`chapter_id`) REFERENCES `chapters` (`id`) ON DELETE CASCADE;
 
 --
--- 限制表 `content_materials`
+-- Constraints for table `content_materials`
 --
 ALTER TABLE `content_materials`
   ADD CONSTRAINT `content_materials_ibfk_1` FOREIGN KEY (`chapter_id`) REFERENCES `chapters` (`id`) ON DELETE CASCADE;
 
 --
--- 限制表 `quizzes`
+-- Constraints for table `quizzes`
 --
 ALTER TABLE `quizzes`
   ADD CONSTRAINT `quizzes_ibfk_1` FOREIGN KEY (`chapter_id`) REFERENCES `chapters` (`id`) ON DELETE CASCADE;
 
 --
--- 限制表 `quiz_attempts`
+-- Constraints for table `quiz_attempts`
 --
 ALTER TABLE `quiz_attempts`
   ADD CONSTRAINT `quiz_attempts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `quiz_attempts_ibfk_2` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`) ON DELETE CASCADE;
 
 --
--- 限制表 `quiz_questions`
+-- Constraints for table `quiz_questions`
 --
 ALTER TABLE `quiz_questions`
   ADD CONSTRAINT `quiz_questions_ibfk_1` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`) ON DELETE CASCADE;
 
 --
--- 限制表 `reports`
+-- Constraints for table `reports`
 --
 ALTER TABLE `reports`
   ADD CONSTRAINT `reports_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `reports_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE SET NULL;
 
 --
--- 限制表 `user_achievements`
+-- Constraints for table `user_achievements`
 --
 ALTER TABLE `user_achievements`
   ADD CONSTRAINT `user_achievements_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `user_achievements_ibfk_2` FOREIGN KEY (`achievement_id`) REFERENCES `achievements` (`id`) ON DELETE CASCADE;
 
 --
--- 限制表 `user_progress`
+-- Constraints for table `user_progress`
 --
 ALTER TABLE `user_progress`
   ADD CONSTRAINT `user_progress_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `user_progress_ibfk_2` FOREIGN KEY (`chapter_id`) REFERENCES `chapters` (`id`) ON DELETE CASCADE;
 
 --
--- 限制表 `user_skills`
+-- Constraints for table `user_skills`
 --
 ALTER TABLE `user_skills`
   ADD CONSTRAINT `fk_user_skills` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- 限制表 `user_vark_results`
+-- Constraints for table `user_vark_results`
 --
 ALTER TABLE `user_vark_results`
   ADD CONSTRAINT `user_vark_results_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- 限制表 `vark_options`
+-- Constraints for table `vark_options`
 --
 ALTER TABLE `vark_options`
   ADD CONSTRAINT `vark_options_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `vark_questions` (`id`) ON DELETE CASCADE;

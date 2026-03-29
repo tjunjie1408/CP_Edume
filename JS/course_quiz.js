@@ -96,9 +96,11 @@ class CourseQuizManager {
             
             const isChecked = this.userAnswers[q.id] === opt.id ? 'checked' : '';
             
+            const escapedText = opt.text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+            
             div.innerHTML = `
                 <input type="radio" id="opt_${opt.id}" name="quiz_answer" value="${opt.id}" ${isChecked}>
-                <label for="opt_${opt.id}">${opt.id}. ${opt.text}</label>
+                <label for="opt_${opt.id}">${opt.id}. ${escapedText}</label>
             `;
             
             div.addEventListener('click', () => {
